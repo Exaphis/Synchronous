@@ -1,0 +1,10 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 1 (Summary)
+2/25/17 30 mins  5385bed Set up main Django app
+2/26/17 3 hrs    8fa9a54 Create initial workspace handling
+
+Week # (Plan)
+<Date> <Hours> <Task description> (<Comments>)
+<Date> <Hours> <Task description> (<Comments>)
