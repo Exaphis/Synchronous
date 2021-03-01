@@ -2,8 +2,9 @@
 Name: Kevin Wu
 
 Week 1 (Summary)
-2/25/17 30 mins  5385bed Set up main Django app
-2/26/17 3 hrs    8fa9a54 Create initial workspace handling
+2/25/21 30 mins  5385bed Set up main Django app
+2/26/21 3 hrs    8fa9a54 Create initial workspace handling
+2/27/21 2 hrs    9a05fb1 Help with merging frontend and backend code
 
 Week # (Plan)
 <Date> <Hours> <Task description> (<Comments>)

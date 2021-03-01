@@ -1,9 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.core import serializers
+from rest_framework import generics
 
 from .models import Workspace
 from .forms import CreateWorkspaceForm
+from .serializers import WorkspaceSerializer
+
+
+class WorkspaceCreateView(generics.CreateAPIView):
+    queryset = Workspace.objects.all()
+    serializer_class = WorkspaceSerializer
+
+
+class WorkspaceRetrieveView(generics.RetrieveAPIView):
+    queryset = Workspace.objects.all()
+    serializer_class = WorkspaceSerializer
+    lookup_field = 'unique_id'
 
 
 def main(request):
