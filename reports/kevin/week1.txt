@@ -2,9 +2,13 @@
 Name: Kevin Wu
 
 Week 1 (Summary)
-2/25/17 30 mins  5385bed Set up main Django app
-2/26/17 3 hrs    8fa9a54 Create initial workspace handling
+2/25/21 30 mins  5385bed Set up main Django app
+2/26/21 3 hrs    8fa9a54 Create initial workspace handling
+2/27/21 2 hrs    9a05fb1 Help with merging frontend and backend code
+2/28/21 4 hrs    63c4645 Go through Django REST Framework tutorial, set up generic views
 
-Week # (Plan)
-<Date> <Hours> <Task description> (<Comments>)
-<Date> <Hours> <Task description> (<Comments>)
+Week 2 (Plan)
+3/03/21 3 hrs    Implement password protection and workspace login
+3/04/21 5 hrs    Try to join workspace API with frontend
+3/06/21 30 mins  Brainstorm workspace ID generation
+3/07/21 2 hrs    Start work on user list
