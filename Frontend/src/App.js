@@ -29,30 +29,27 @@ import Container from '@material-ui/core/Container';
 
 
 export default function App() {
-  return (
-      <Router>
-        <div>
-
-
-          <Switch>
-            <Route path="/Create">
-              <Create />
-            </Route>
-            <Route path="/Reopen">
-              <Reopen />
-            </Route>
-            <Route path="/Reupload">
-              <Reupload />
-            </Route>
-            <Route exact path="/">
-              <SignIn />
-            </Route>
-          </Switch>
-        </div>
-      </Router>
-  );
+    return (
+        <Router>
+          <div>
+            <Switch>
+              <Route exact path="/Create/">
+                <Create/>
+              </Route>
+              <Route exact path="/Open/">
+                <Open/>
+              </Route>
+              <Route exact path="/Upload">
+                <Upload/>
+              </Route>
+              <Route exact path="/">
+                <SignIn/>
+              </Route>
+            </Switch>
+          </div>
+        </Router>
+    );
 }
-
 
 function SignIn() {
   const classes = useStyles();
@@ -67,35 +64,37 @@ function SignIn() {
               <div>
                 <Button
                     component={ Link }
-                    to={"/Create"}
+                    to={"/Create/"}
                     type="submit"
                     fullWidth
                     variant="contained"
                     color="primary"
                     className={classes.submit}
-                    //onClick={refresh}
+                    onClick={ refresh }
                 >
                   Start a new workspace
                 </Button>
                 <Button
                     component={ Link }
-                    to={"/Reopen"}
+                    to={"/Open/"}
                     type="submit"
                     fullWidth
                     variant="contained"
                     color="primary"
                     className={classes.submit}
+                    onClick={ refresh }
                 >
                   Reopen an existing workspace
                 </Button>
                 <Button
                     component={ Link }
-                    to={"/Reupload"}
+                    to={"/Upload"}
                     type="submit"
                     fullWidth
                     variant="contained"
                     color="primary"
                     className={classes.submit}
+                    onClick={ refresh }
                 >
                   Upload a workspace
                 </Button>
@@ -124,43 +123,28 @@ function Copyright() {
   );
 }
 
-function refresh() {
-  //window.location.reload(false);
-  return (
-      <Router>
-        <div>
-
-
-          <Switch>
-            <Route path="/Create">
-              <Create />
-            </Route>
-            <Route path="/Reopen">
-              <Reopen />
-            </Route>
-            <Route path="/Reupload">
-              <Reupload />
-            </Route>
-            <Route exact path="/">
-              <SignIn />
-            </Route>
-          </Switch>
-        </div>
-      </Router>
-  );
-}
 
 function Create() {
   return <h2>Create: TODO</h2>
 }
 
-function Reopen() {
-  return <h2>Reopen: TODO</h2>
+function Open() {
+  return <h2>Open: TODO</h2>
 }
 
-function Reupload() {
-  return <h2>Reupload: TODO</h2>
+function Upload() {
+  return <h2>Upload: TODO</h2>
 }
+
+const sleep = (milliseconds) => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
+function refresh() {
+  sleep(500).then(() => {
+    window.location.reload(false);
+  })
+}
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
