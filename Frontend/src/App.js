@@ -1,31 +1,31 @@
 import logo from './logo.png';
 import './App.css';
-import ReactDOM from 'react-dom'
-import React from 'react'
+import * as React from 'react'
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Link,
-  useRouteMatch,
-  useParams,
-  withRouter
 } from "react-router-dom";
+
+import ReactDOM from 'react-dom'
 //import { MemoryRouter as Router } from 'react-router';
+import TextareaAutosize from 'react-textarea-autosize';
+
+
+
+
 
 
 
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
 
 
 export default function App() {
@@ -124,9 +124,26 @@ function Copyright() {
 }
 
 
+
 function Create() {
-  return <h2>Create: TODO</h2>
+  
+
+  return(
+    ReactDOM.render(
+    <div>
+      <TextareaAutosize />
+    </div>,
+    document.getElementById("root"))
+  );
+  
+
 }
+
+  
+
+
+
+
 
 function Open() {
   return <h2>Open: TODO</h2>
@@ -167,4 +184,6 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1, 0, 2),
   },
 }));
+
+
 
