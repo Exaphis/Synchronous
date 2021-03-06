@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import ReactDOM from 'react-dom'
+import rnd, { Rnd } from 'react-rnd'
 //import { MemoryRouter as Router } from 'react-router';
 import TextareaAutosize from 'react-textarea-autosize';
 
@@ -130,9 +131,16 @@ function Create() {
 
   return(
     ReactDOM.render(
-    <div>
-      <TextareaAutosize />
-    </div>,
+      <Rnd
+  default={{
+    x: 0,
+    y: 0,
+    width: 320,
+    height: 200,
+  }}
+>
+  <div><TextareaAutosize /></div>
+</Rnd>,
     document.getElementById("root"))
   );
   
