@@ -34,10 +34,10 @@ export default function App() {
         <Router>
           <div>
             <Switch>
-              <Route exact path="/Create/">
+              <Route exact path="/Create">
                 <Create/>
               </Route>
-              <Route exact path="/Open/">
+              <Route exact path="/Open">
                 <Open/>
               </Route>
               <Route exact path="/Upload">
@@ -45,6 +45,9 @@ export default function App() {
               </Route>
               <Route exact path="/">
                 <SignIn/>
+              </Route>
+              <Route exact path="/Test">
+                <Test/>
               </Route>
             </Switch>
           </div>
@@ -65,7 +68,7 @@ function SignIn() {
               <div>
                 <Button
                     component={ Link }
-                    to={"/Create/"}
+                    to={"/Create"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -77,7 +80,7 @@ function SignIn() {
                 </Button>
                 <Button
                     component={ Link }
-                    to={"/Open/"}
+                    to={"/Open"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -99,11 +102,23 @@ function SignIn() {
                 >
                   Upload a workspace
                 </Button>
+                <Button
+                    component={ Link }
+                    to={"/Test"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    //color="primary"
+                    className={classes.submit}
+                    onClick={ refresh }
+                >
+                  Test Workspace
+                </Button>
               </div>
             </Router>
           </form>
         </div>
-        <Box mt={10}>
+        <Box mt={8}>
           <Copyright />
         </Box>
       </Container>
@@ -124,33 +139,28 @@ function Copyright() {
   );
 }
 
-
+function Test() {
+  return(
+      ReactDOM.render(
+          <Rnd
+              default={{
+                x: 0,
+                y: 0,
+                width: 320,
+                height: 200,
+              }}
+          >
+            <div><TextareaAutosize /></div>
+          </Rnd>,
+          document.getElementById("root"))
+  );
+}
 
 function Create() {
-  
-
-  return(
-    ReactDOM.render(
-      <Rnd
-  default={{
-    x: 0,
-    y: 0,
-    width: 320,
-    height: 200,
-  }}
->
-  <div><TextareaAutosize /></div>
-</Rnd>,
-    document.getElementById("root"))
-  );
-  
-
+  return <h2>Create: TODO</h2>
 }
 
   
-
-
-
 
 
 function Open() {
@@ -161,11 +171,13 @@ function Upload() {
   return <h2>Upload: TODO</h2>
 }
 
+
+
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 function refresh() {
-  sleep(500).then(() => {
+  sleep(250).then(() => {
     window.location.reload(false);
   })
 }
