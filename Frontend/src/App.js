@@ -216,7 +216,58 @@ function Create() {
 
 
 function Open() {
-  return <h2>Open: TODO</h2>
+  const classes = useStyles();
+
+  return (
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar  alt="s" src={s} className={classes.sizeAvatar} />
+          <Box mt={4}>
+          </Box>
+          <Typography component="h2" variant="h5">
+            Open Existing Workspace
+          </Typography>
+          <form className={classes.form} noValidate>
+            <TextField
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                id="email"
+                label="Workspace Name"
+                name="workspace"
+                autoComplete="workspace"
+                autoFocus
+            />
+            <Box mt={2}>
+            </Box>
+            <Button
+                size="large"
+                component={ Link }
+                to={"/Test"}
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                onClick={ refresh }
+            >
+              Open
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link to="/Create">
+                  Need a new workspace?
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+        </div>
+        <Box mt={16}>
+          <Copyright />
+        </Box>
+      </Container>
+  );
 }
 
 function Upload() {
