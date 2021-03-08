@@ -15,6 +15,9 @@ import {
 import ReactDOM from 'react-dom'
 import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
+import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
+
+
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -140,22 +143,19 @@ function Copyright() {
     );
 }
 
+
+
+
 function Test() {
-  return(
-      ReactDOM.render(
-          <Rnd
-              default={{
-                x: 0,
-                y: 0,
-                width: 320,
-                height: 200,
-              }}
-          >
-            <div><TextareaAutosize /></div>
-          </Rnd>,
-          document.getElementById("root"))
-  );
+  return (
+    ReactDOM.render(
+     <Draggable>
+       <div> <TextareaAutosize/></div>
+     </Draggable>, document.getElementById('root')
+  )
+  )
 }
+  
 
 function Create() {
   const classes = useStyles();
