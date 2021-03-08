@@ -53,6 +53,9 @@ export default function App() {
               <Route exact path="/Test">
                 <Test/>
               </Route>
+              <Route exact path="/Email">
+                <Email/>
+              </Route>
             </Switch>
           </div>
         </Router>
@@ -117,6 +120,18 @@ function SignIn() {
                     onClick={ refresh }
                 >
                   Test Workspace
+                </Button>
+                <Button
+                    component={ Link }
+                    to={"/Email"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    //color="primary"
+                    className={classes.submit}
+                    onClick={ refresh }
+                >
+                  Test Email
                 </Button>
               </div>
             </Router>
@@ -212,7 +227,7 @@ function Create() {
   );
 }
 
-  
+
 
 
 function Open() {
@@ -272,6 +287,10 @@ function Open() {
 
 function Upload() {
   return <h2>Upload: TODO</h2>
+}
+
+function Email() {
+  return <h2>Email: TODO</h2>
 }
 
 
