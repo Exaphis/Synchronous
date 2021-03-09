@@ -279,8 +279,9 @@ function Create() {
                   ) ? "" : work.setValid(false)}*/
                   onClick={() => HandleCreate(document.getElementById('name'),
                       document.getElementById('password'),
-                      history
-                  ) ? work.setValid(false) : work.setValid(false)}
+                      history,
+                      work
+                  ) ? "" : work.setValid(false)}
               >
                 Create Workspace
               </Button>
@@ -346,7 +347,8 @@ function Create() {
                 onClick={() => HandleCreate(
                     document.getElementById('name'),
                     document.getElementById('password'),
-                    history)}
+                    history,
+                    work)}
                 error
                 helperText={"Workspace name is invalid/taken"}
             >
@@ -369,7 +371,7 @@ function Create() {
 
 }
 
-async function HandleCreate(name, password, history) {
+async function HandleCreate(name, password, history, work) {
   let resp = await fetchAPI('POST', 'workspace/',
       {
           nickname: name.value,
@@ -380,6 +382,7 @@ async function HandleCreate(name, password, history) {
   if (resp.error) {
       alert('error!');
       alert(JSON.stringify(resp.details));
+      work.setValid(false)
       return false
   }
   else {
@@ -412,6 +415,17 @@ function Open() {
                 name="workspace"
                 autoComplete="workspace"
                 autoFocus
+                required
+            />
+            <TextField
+                variant="outlined"
+                margin="normal"
+                fullWidth
+                id="password"
+                label="Password (if applicable)"
+                name="workspace"
+                type="password"
+                autoComplete="workspace"
             />
             <Box mt={2}>
             </Box>
@@ -441,6 +455,28 @@ function Open() {
         </Box>
       </Container>
   );
+}
+
+async function HandleOpen(name, password, history, work) {
+    let resp = await fetchAPI('POST', 'workspace/',
+        {
+            nickname: name.value,
+            anonymous_readable: true,
+            password: password.value
+        });
+
+    if (resp.error) {
+        alert('error!');
+        alert(JSON.stringify(resp.details));
+        work.setValid(false)
+        return false
+    }
+    else {
+        alert('success!')
+        alert(JSON.stringify(resp));
+
+        await history.push('/Workspace/' + resp.unique_id);
+    }
 }
 
 function Upload() {
