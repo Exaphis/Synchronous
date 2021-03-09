@@ -3,7 +3,7 @@ from celery.task import periodic_task
 from django.utils import timezone
 from django.core.mail import EmailMessage
 
-@periodic_task(run_every=crontab(minute='*/5'))
+@periodic_task(run_every=crontab(minute='*/1'))
 def delete_old_workspace():
     # Query all the workspace in our database
     workspaces = workspace.objects.all()
@@ -16,13 +16,13 @@ def delete_old_workspace():
             w.delete()
             # log deletion
     
-        email = EmailMessage(
-        'Workspace ' + w.unique_id + 'was deleted',
-        'Your 24 hours for your workspace were up! hope you saved your progress :)',
-        'synchronous307@gmail.com',
-        ['sakshamj23@gmail.com'],
-        reply_to=['synchronous307@gmail.com'],
-        headers={'Message-ID': 'Synchronous'},
-)
+        #email = EmailMessage(
+        #'Workspace ' + w.unique_id + 'was deleted',
+        #'Your 24 hours for your workspace were up! hope you saved your progress :)',
+        #'synchronous307@gmail.com',
+        #['sakshamj23@gmail.com'],
+        #reply_to=['synchronous307@gmail.com'],
+        #headers={'Message-ID': 'Synchronous'},
+#)
 
     return "completed deleting workspaces at {}".format(timezone.now())

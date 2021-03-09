@@ -5,6 +5,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
+import datetime
+
 
 
 class WorkspaceManager(models.Manager):
@@ -14,7 +17,7 @@ class WorkspaceManager(models.Manager):
 
         If the given password is blank, then a password is not required for editing.
         """
-        workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable)
+        workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable, expiration_date=timezone.now()+datetime.timedelta(minutes=2))
         workspace.save()
 
         if password:
@@ -31,7 +34,7 @@ class Workspace(models.Model):
     nickname = models.CharField(max_length=150, unique=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     anonymous_readable = models.BooleanField(default=False)  # only matters if user is not None
-
+    expiration_date = models.DateTimeField()
     # user field for workspace authentication in order to use default Django auth methods
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 
