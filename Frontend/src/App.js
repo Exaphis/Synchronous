@@ -33,32 +33,39 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import {useContext, useState, useCallback, useEffect} from 'react'
 
 
+const workspaceContext = React.createContext(true)
 
 export default function App() {
+  const [valid, setValid] = useState(true)
+
   return (
-      <Router>
-        <div>
-          <Switch>
-            <Route exact path="/Create">
-              <Create/>
-            </Route>
-            <Route exact path="/Open">
-              <Open/>
-            </Route>
-            <Route exact path="/Upload">
-              <Upload/>
-            </Route>
-            <Route exact path="/">
-              <SignIn/>
-            </Route>
-            <Route exact path="/Test">
-              <Test/>
-            </Route>
-          </Switch>
-        </div>
-      </Router>
+      <workspaceContext.Provider value={{valid, setValid}}>
+          <Router>
+            <div>
+              <Switch>
+                <Route exact path="/Create">
+                    <Create/>
+                </Route>
+                <Route exact path="/Open">
+                  <Open/>
+                </Route>
+                <Route exact path="/Upload">
+                  <Upload/>
+                </Route>
+                <Route exact path="/">
+                  <SignIn/>
+                </Route>
+                <Route exact path="/Test">
+                  <Test/>
+                </Route>
+              </Switch>
+            </div>
+          </Router>
+      </workspaceContext.Provider>
+
   );
 }
 
@@ -143,8 +150,6 @@ function Copyright() {
 }
 
 
-
-
 function Test() {
   return (
       ReactDOM.render(
@@ -157,10 +162,11 @@ function Test() {
 
 
 function Create() {
-  let valid = true
-  const classes = useStyles();
 
-  if (valid) {
+  const classes = useStyles();
+  const work = useContext(workspaceContext)
+
+  if (work.valid) {
     return (
         <Container component="main" maxWidth="xs">
           <CssBaseline/>
@@ -171,7 +177,6 @@ function Create() {
             <Typography component="h2" variant="h5">
               Create a Workspace
             </Typography>
-            <form className={classes.form} noValidate>
               <TextField
                   variant="outlined"
                   margin="normal"
@@ -204,9 +209,7 @@ function Create() {
                   variant="contained"
                   color="primary"
                   className={classes.submit}
-                  onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
-
-                  //onClick={ refresh }
+                  onClick={() => HandleCreate(document.getElementById('name'), document.getElementById('password')) ? "" : work.setValid(false)}
               >
                 Create Workspace
               </Button>
@@ -217,25 +220,24 @@ function Create() {
                   </Link>
                 </Grid>
               </Grid>
-            </form>
           </div>
           <Box mt={16}>
             <Copyright/>
           </Box>
         </Container>
     );
-  }
+  } else {
 
-  return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline/>
-        <div className={classes.paper}>
-          <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
-          <Box mt={4}>
-          </Box>
-          <Typography component="h2" variant="h5">
-            Create a Workspace
-          </Typography>
+    return (
+        <Container component="main" maxWidth="xs">
+          <CssBaseline/>
+          <div className={classes.paper}>
+            <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
+            <Box mt={4}>
+            </Box>
+            <Typography component="h2" variant="h5">
+              Create a Workspace
+            </Typography>
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -246,6 +248,8 @@ function Create() {
                 autoComplete="workspace"
                 autoFocus
                 required
+                error
+                helperText="Workspace name is invalid/taken"
             />
             <TextField
                 variant="outlined"
@@ -268,9 +272,7 @@ function Create() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
-                error={!valid}
-                helperText={valid ? "" : "Workspace name is invalid/taken"}
+                onClick={() => HandleCreate(document.getElementById('name'), document.getElementById('password'))}
                 //onClick={ refresh }
             >
               Create Workspace
@@ -282,28 +284,18 @@ function Create() {
                 </Link>
               </Grid>
             </Grid>
-        </div>
-        <Box mt={16}>
-          <Copyright/>
-        </Box>
-      </Container>
-  );
+          </div>
+          <Box mt={16}>
+            <Copyright/>
+          </Box>
+        </Container>
+    );
+  }
 
 }
 
-function handleCreate(name, password) {
-  console.log("Workspace name is: ");
-  console.log(name.value);
-  alert(name.value)
-  console.log("\nWorkspace password is: ");
-  //console.log(password)
-  alert(password.value)
+function HandleCreate(name, password) {
 
-  let valid = false
-
-  if (valid) {
-    return <Test/>
-  }
 
 }
 
