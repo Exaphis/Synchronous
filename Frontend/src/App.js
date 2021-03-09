@@ -13,7 +13,7 @@ import {
 } from "react-router-dom";
 
 import ReactDOM from 'react-dom'
-import rnd, { Rnd } from 'react-rnd'
+//import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 
@@ -23,13 +23,13 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import {Link as uiLink} from '@material-ui/core/Link';
+//import FormControlLabel from '@material-ui/core/FormControlLabel';
+//import Checkbox from '@material-ui/core/Checkbox';
+//import {Link as uiLink} from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import AddIcon from '@material-ui/icons/Add'
+//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+//import AddIcon from '@material-ui/icons/Add'
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
@@ -175,7 +175,7 @@ function Create() {
                 variant="outlined"
                 margin="normal"
                 fullWidth
-                id="email"
+                id="name"
                 label="Workspace Name"
                 name="workspace"
                 autoComplete="workspace"
@@ -196,14 +196,16 @@ function Create() {
             </Box>
             <Button
                 size="large"
-                component={ Link }
-                to={"/Test"}
+                //component={ Link }
+                //to={"/Test"}
                 type="submit"
                 fullWidth
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                onClick={ refresh }
+                onClick={ () => handleCreate(document.getElementById('name'), document.getElementById('password')) }
+
+                //onClick={ refresh }
             >
               Create Workspace
             </Button>
@@ -222,6 +224,18 @@ function Create() {
       </Container>
   );
 }
+
+function handleCreate(name, password) {
+  console.log("Workspace name is: ");
+  console.log(name.value);
+  alert(name.value)
+  console.log("\nWorkspace password is: ");
+  //console.log(password)
+  alert(password.value)
+
+  return <TextField id="name" label="Erro" />
+}
+
 
 
 
