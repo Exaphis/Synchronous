@@ -157,20 +157,88 @@ function Test() {
 }
 
 
-function Create() {
+function Create(valid) {
   const classes = useStyles();
+  if (valid == null) {
+    valid = true
+  }
+
+  if (valid) {
+    return (
+        <Container component="main" maxWidth="xs">
+          <CssBaseline/>
+          <div className={classes.paper}>
+            <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
+            <Box mt={4}>
+            </Box>
+            <Typography component="h2" variant="h5">
+              Create a Workspace
+            </Typography>
+            <form className={classes.form} noValidate>
+              <TextField
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  id="name"
+                  label="Workspace Name"
+                  name="workspace"
+                  autoComplete="workspace"
+                  autoFocus
+                  required
+              />
+              <TextField
+                  variant="outlined"
+                  margin="normal"
+                  fullWidth
+                  id="password"
+                  label="Password (Optional)"
+                  name="workspace"
+                  type="password"
+                  autoComplete="workspace"
+              />
+              <Box mt={2}>
+              </Box>
+              <Button
+                  size="large"
+                  //component={ Link }
+                  //to={"/Test"}
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  className={classes.submit}
+                  onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
+
+                  //onClick={ refresh }
+              >
+                Create Workspace
+              </Button>
+              <Grid container>
+                <Grid item xs>
+                  <Link to="/Open">
+                    Existing Workspace?
+                  </Link>
+                </Grid>
+              </Grid>
+            </form>
+          </div>
+          <Box mt={16}>
+            <Copyright/>
+          </Box>
+        </Container>
+    );
+  }
 
   return (
       <Container component="main" maxWidth="xs">
-        <CssBaseline />
+        <CssBaseline/>
         <div className={classes.paper}>
-          <Avatar  alt="s" src={s} className={classes.sizeAvatar} />
+          <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
           <Box mt={4}>
           </Box>
           <Typography component="h2" variant="h5">
             Create a Workspace
           </Typography>
-          <form className={classes.form} noValidate>
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -203,8 +271,9 @@ function Create() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                onClick={ () => handleCreate(document.getElementById('name'), document.getElementById('password')) }
-
+                onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
+                error={!valid}
+                helperText={valid ? "" : "Workspace name is invalid/taken"}
                 //onClick={ refresh }
             >
               Create Workspace
@@ -216,13 +285,13 @@ function Create() {
                 </Link>
               </Grid>
             </Grid>
-          </form>
         </div>
         <Box mt={16}>
-          <Copyright />
+          <Copyright/>
         </Box>
       </Container>
   );
+
 }
 
 function handleCreate(name, password) {
@@ -233,7 +302,13 @@ function handleCreate(name, password) {
   //console.log(password)
   alert(password.value)
 
-  return <TextField id="name" label="Erro" />
+  let valid = false
+
+  if (valid) {
+    return <Test/>
+  }
+
+  Create(false)
 }
 
 
