@@ -6,10 +6,10 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
-  useRouteMatch,
-  useParams,
-  withRouter
+  Link
+  //useRouteMatch,
+  //useParams,
+  //withRouter
 } from "react-router-dom";
 
 import ReactDOM from 'react-dom'
@@ -69,7 +69,7 @@ function SignIn() {
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
-          <img src={logo} width="400" height="400"/>
+          <img alt="" src={logo} width="400" height="400"/>
           <form className={classes.form} noValidate>
             <Router>
               <div>
@@ -157,11 +157,9 @@ function Test() {
 }
 
 
-function Create(valid) {
+function Create() {
+  let valid = true
   const classes = useStyles();
-  if (valid == null) {
-    valid = true
-  }
 
   if (valid) {
     return (
@@ -308,11 +306,7 @@ function handleCreate(name, password) {
     return <Test/>
   }
 
-  Create(false)
 }
-
-
-
 
 
 function Open() {
