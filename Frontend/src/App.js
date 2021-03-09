@@ -7,9 +7,9 @@ import {
   Switch,
   Route,
   Link,
-  useHistory
+  useHistory,
+  useParams
   //useRouteMatch,
-  //useParams,
   //withRouter
 } from "react-router-dom";
 
@@ -56,43 +56,56 @@ export default function App() {
             <Route exact path="/Test">
               <Test/>
             </Route>
+            <Route exact path="/Workspace/:uniqueId">
+              <Workspace/>
+            </Route>
           </Switch>
         </div>
       </Router>
   );
 }
 
-function fetchAPI(methodType, endpoint, data={}) {
-    const requestOptions = {
+function fetchAPI(methodType, endpoint, data=null) {
+    let requestOptions = {
         method: methodType,
         headers: {
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-  };
+        }
+    };
 
-  return fetch('http://localhost:8000/' + endpoint, requestOptions)
-  .then(async response => {
-      let data;
+    if (data !== null) {
+        requestOptions.body = JSON.stringify(data);
+    }
 
-      try {
-          data = await response.json()
-      } catch (e) {
-          return Promise.reject(response.status);
-      }
+    return fetch('http://localhost:8000/' + endpoint, requestOptions)
+    .then(async response => {
+        let data;
 
-      if (!response.ok) {
-          return Promise.reject(JSON.stringify(data));
-      }
+        try {
+            data = await response.json()
+        } catch (e) {
+            throw response.status;
+        }
 
-      return data;
-  })
-  .catch(error => {
-      return {
-          error: true,
-          details: error
-      }
-  });
+        if (!response.ok) {
+            throw JSON.stringify(data);
+        }
+
+        return data;
+    })
+    .catch(error => {
+        if (error instanceof Error) {
+            return {
+                error: true,
+                details: error.message
+            }
+        }
+
+        return {
+            error: true,
+            details: error
+        }
+    });
 
 }
 
@@ -176,9 +189,6 @@ function Copyright() {
     );
 }
 
-
-
-
 function Test() {
   return (
       ReactDOM.render(
@@ -187,6 +197,26 @@ function Test() {
           </Draggable>, document.getElementById('root')
       )
   )
+}
+
+function Workspace() {
+    const { uniqueId } = useParams();  // destructuring assignment
+    const [ workspace, setWorkspace ] = React.useState(null);
+
+    // see https://stackoverflow.com/a/57856876 for async data retrieval
+    const getWorkspace = async () => {
+        let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
+        setWorkspace(resp);
+    };
+
+    React.useEffect(() => {
+        if (workspace === null) {
+            getWorkspace().then();
+        }
+    });
+
+    let out = JSON.stringify(workspace);
+    return <h1>{out}</h1>
 }
 
 
@@ -329,9 +359,6 @@ function Create() {
 }
 
 async function HandleCreate(name, password, history) {
-  // await history.push('/Test');
-  alert('in handlecreate');
-
   let resp = await fetchAPI('POST', 'workspace/',
       {
           nickname: name.value,
@@ -347,10 +374,9 @@ async function HandleCreate(name, password, history) {
       alert('success!')
       alert(JSON.stringify(resp));
 
-      await history.push('/Test');
+      await history.push('/Workspace/' + resp.unique_id);
   }
 }
-
 
 function Open() {
   const classes = useStyles();

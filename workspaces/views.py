@@ -22,7 +22,7 @@ class WorkspaceRetrieveView(generics.RetrieveAPIView):
     serializer_class = WorkspaceSerializer
     lookup_field = 'unique_id'
 
-
+# TODO: allow nickname change
 class WorkspaceNicknameRetrieveView(WorkspaceRetrieveView):
     lookup_field = 'nickname'
 
