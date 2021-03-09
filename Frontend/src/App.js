@@ -6,7 +6,8 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useHistory
   //useRouteMatch,
   //useParams,
   //withRouter
@@ -35,7 +36,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 
-
 export default function App() {
   return (
       <Router>
@@ -60,6 +60,40 @@ export default function App() {
         </div>
       </Router>
   );
+}
+
+function fetchAPI(methodType, endpoint, data={}) {
+    const requestOptions = {
+        method: methodType,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+  };
+
+  return fetch('http://localhost:8000/' + endpoint, requestOptions)
+  .then(async response => {
+      let data;
+
+      try {
+          data = await response.json()
+      } catch (e) {
+          return Promise.reject(response.status);
+      }
+
+      if (!response.ok) {
+          return Promise.reject(JSON.stringify(data));
+      }
+
+      return data;
+  })
+  .catch(error => {
+      return {
+          error: true,
+          details: error
+      }
+  });
+
 }
 
 function SignIn() {
@@ -160,6 +194,8 @@ function Create() {
   let valid = true
   const classes = useStyles();
 
+  const history = useHistory();
+
   if (valid) {
     return (
         <Container component="main" maxWidth="xs">
@@ -171,7 +207,6 @@ function Create() {
             <Typography component="h2" variant="h5">
               Create a Workspace
             </Typography>
-            <form className={classes.form} noValidate>
               <TextField
                   variant="outlined"
                   margin="normal"
@@ -204,7 +239,10 @@ function Create() {
                   variant="contained"
                   color="primary"
                   className={classes.submit}
-                  onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
+                  onClick={() => HandleCreate(document.getElementById('name'),
+                      document.getElementById('password'),
+                      history
+                  )}
 
                   //onClick={ refresh }
               >
@@ -217,7 +255,6 @@ function Create() {
                   </Link>
                 </Grid>
               </Grid>
-            </form>
           </div>
           <Box mt={16}>
             <Copyright/>
@@ -268,7 +305,7 @@ function Create() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                onClick={() => handleCreate(document.getElementById('name'), document.getElementById('password'))}
+                onClick={() => HandleCreate(document.getElementById('name'), document.getElementById('password'))}
                 error={!valid}
                 helperText={valid ? "" : "Workspace name is invalid/taken"}
                 //onClick={ refresh }
@@ -291,20 +328,27 @@ function Create() {
 
 }
 
-function handleCreate(name, password) {
-  console.log("Workspace name is: ");
-  console.log(name.value);
-  alert(name.value)
-  console.log("\nWorkspace password is: ");
-  //console.log(password)
-  alert(password.value)
+async function HandleCreate(name, password, history) {
+  // await history.push('/Test');
+  alert('in handlecreate');
 
-  let valid = false
+  let resp = await fetchAPI('POST', 'workspace/',
+      {
+          nickname: name.value,
+          anonymous_readable: true,
+          password: password.value
+      });
 
-  if (valid) {
-    return <Test/>
+  if (resp.error) {
+      alert('error!');
+      alert(JSON.stringify(resp.details));
   }
+  else {
+      alert('success!')
+      alert(JSON.stringify(resp));
 
+      await history.push('/Test');
+  }
 }
 
 
@@ -321,7 +365,6 @@ function Open() {
           <Typography component="h2" variant="h5">
             Open Existing Workspace
           </Typography>
-          <form className={classes.form} noValidate>
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -354,7 +397,6 @@ function Open() {
                 </Link>
               </Grid>
             </Grid>
-          </form>
         </div>
         <Box mt={16}>
           <Copyright />

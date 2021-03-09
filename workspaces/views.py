@@ -23,6 +23,10 @@ class WorkspaceRetrieveView(generics.RetrieveAPIView):
     lookup_field = 'unique_id'
 
 
+class WorkspaceNicknameRetrieveView(WorkspaceRetrieveView):
+    lookup_field = 'nickname'
+
+
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         data = request.data
