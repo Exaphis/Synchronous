@@ -1,10 +1,11 @@
 from django.urls import path
-from .views import main, get_workspace, create_workspace, WorkspaceCreateView, WorkspaceRetrieveView
+from . import views
 
 urlpatterns = [
-    path('', main, name='main'),
-    path('workspace_test/', WorkspaceCreateView.as_view()),
-    path('workspace_test/<uuid:unique_id>/', WorkspaceRetrieveView.as_view()),
-    path('workspace/', create_workspace, name='create-workspace'),
-    path('workspace/<uuid:unique_id>/', get_workspace, name='get-workspace'),
+    path('workspace/', views.WorkspaceCreateView.as_view()),
+    path('workspace/<uuid:unique_id>/', views.WorkspaceRetrieveView.as_view()),
+    path('api-token-auth/', views.CustomAuthToken.as_view())
 ]
+
+# POST api-token-auth with unique_id and password data to get token
+# GET workspace with header 'Authorization: Token xxxx' to get workspace data
