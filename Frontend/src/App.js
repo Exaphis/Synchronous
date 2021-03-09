@@ -62,6 +62,9 @@ export default function App() {
                 <Route exact path="/Test">
                   <Test/>
                 </Route>
+                <Route exact path="/Workspace/:uniqueId">
+                    <Workspace/>
+                </Route>
               </Switch>
             </div>
           </Router>
