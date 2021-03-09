@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('workspace/', views.WorkspaceCreateView.as_view()),
     path('workspace/<uuid:unique_id>/', views.WorkspaceRetrieveView.as_view()),
+    path('workspace/<str:nickname>/', views.WorkspaceNicknameRetrieveView.as_view()),
     path('api-token-auth/', views.CustomAuthToken.as_view())
 ]
 

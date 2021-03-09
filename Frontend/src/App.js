@@ -6,9 +6,10 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useHistory,
+  useParams
   //useRouteMatch,
-  //useParams,
   //withRouter
 } from "react-router-dom";
 
@@ -65,8 +66,51 @@ export default function App() {
             </div>
           </Router>
       </workspaceContext.Provider>
-
   );
+}
+
+function fetchAPI(methodType, endpoint, data=null) {
+    let requestOptions = {
+        method: methodType,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
+
+    if (data !== null) {
+        requestOptions.body = JSON.stringify(data);
+    }
+
+    return fetch('http://localhost:8000/' + endpoint, requestOptions)
+    .then(async response => {
+        let data;
+
+        try {
+            data = await response.json()
+        } catch (e) {
+            throw response.status;
+        }
+
+        if (!response.ok) {
+            throw JSON.stringify(data);
+        }
+
+        return data;
+    })
+    .catch(error => {
+        if (error instanceof Error) {
+            return {
+                error: true,
+                details: error.message
+            }
+        }
+
+        return {
+            error: true,
+            details: error
+        }
+    });
+
 }
 
 function SignIn() {
@@ -149,7 +193,6 @@ function Copyright() {
     );
 }
 
-
 function Test() {
   return (
       ReactDOM.render(
@@ -160,11 +203,32 @@ function Test() {
   )
 }
 
+function Workspace() {
+    const { uniqueId } = useParams();  // destructuring assignment
+    const [ workspace, setWorkspace ] = React.useState(null);
+
+    // see https://stackoverflow.com/a/57856876 for async data retrieval
+    const getWorkspace = async () => {
+        let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
+        setWorkspace(resp);
+    };
+
+    React.useEffect(() => {
+        if (workspace === null) {
+            getWorkspace().then();
+        }
+    });
+
+    let out = JSON.stringify(workspace);
+    return <h1>{out}</h1>
+}
+
 
 function Create() {
 
   const classes = useStyles();
   const work = useContext(workspaceContext)
+  const history = useHistory();
 
   if (work.valid) {
     return (
@@ -209,7 +273,14 @@ function Create() {
                   variant="contained"
                   color="primary"
                   className={classes.submit}
-                  onClick={() => HandleCreate(document.getElementById('name'), document.getElementById('password')) ? "" : work.setValid(false)}
+                  /*onClick={() => HandleCreate(document.getElementById('name'),
+                      document.getElementById('password'),
+                      history
+                  ) ? "" : work.setValid(false)}*/
+                  onClick={() => HandleCreate(document.getElementById('name'),
+                      document.getElementById('password'),
+                      history
+                  ) ? work.setValid(false) : work.setValid(false)}
               >
                 Create Workspace
               </Button>
@@ -272,8 +343,12 @@ function Create() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                onClick={() => HandleCreate(document.getElementById('name'), document.getElementById('password'))}
-                //onClick={ refresh }
+                onClick={() => HandleCreate(
+                    document.getElementById('name'),
+                    document.getElementById('password'),
+                    history)}
+                error
+                helperText={"Workspace name is invalid/taken"}
             >
               Create Workspace
             </Button>
@@ -294,11 +369,26 @@ function Create() {
 
 }
 
-function HandleCreate(name, password) {
+async function HandleCreate(name, password, history) {
+  let resp = await fetchAPI('POST', 'workspace/',
+      {
+          nickname: name.value,
+          anonymous_readable: true,
+          password: password.value
+      });
 
+  if (resp.error) {
+      alert('error!');
+      alert(JSON.stringify(resp.details));
+      return false
+  }
+  else {
+      alert('success!')
+      alert(JSON.stringify(resp));
 
+      await history.push('/Workspace/' + resp.unique_id);
+  }
 }
-
 
 function Open() {
   const classes = useStyles();
@@ -313,7 +403,6 @@ function Open() {
           <Typography component="h2" variant="h5">
             Open Existing Workspace
           </Typography>
-          <form className={classes.form} noValidate>
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -346,7 +435,6 @@ function Open() {
                 </Link>
               </Grid>
             </Grid>
-          </form>
         </div>
         <Box mt={16}>
           <Copyright />
