@@ -37,35 +37,38 @@ import Container from '@material-ui/core/Container';
 import {useContext, useState, useCallback, useEffect} from 'react'
 
 
-const workspaceContext = React.createContext(true)
+const CreateWorkspaceContext = React.createContext(true)
+const OpenWorkspaceContext = React.createContext(true)
 
 export default function App() {
   const [valid, setValid] = useState(true)
 
   return (
-      <workspaceContext.Provider value={{valid, setValid}}>
-          <Router>
-            <div>
-              <Switch>
-                <Route exact path="/Create">
-                    <Create/>
-                </Route>
-                <Route exact path="/Open">
-                  <Open/>
-                </Route>
-                <Route exact path="/Upload">
-                  <Upload/>
-                </Route>
-                <Route exact path="/">
-                  <SignIn/>
-                </Route>
-                <Route exact path="/Test">
-                  <Test/>
-                </Route>
-              </Switch>
-            </div>
-          </Router>
-      </workspaceContext.Provider>
+      <OpenWorkspaceContext.Provider value={{valid, setValid}}>
+          <CreateWorkspaceContext.Provider value={{valid, setValid}}>
+              <Router>
+                <div>
+                  <Switch>
+                    <Route exact path="/Create">
+                        <Create/>
+                    </Route>
+                    <Route exact path="/Open">
+                      <Open/>
+                    </Route>
+                    <Route exact path="/Upload">
+                      <Upload/>
+                    </Route>
+                    <Route exact path="/">
+                      <SignIn/>
+                    </Route>
+                    <Route exact path="/Test">
+                      <Test/>
+                    </Route>
+                  </Switch>
+                </div>
+              </Router>
+          </CreateWorkspaceContext.Provider>
+      </OpenWorkspaceContext.Provider>
   );
 }
 
@@ -227,8 +230,10 @@ function Workspace() {
 function Create() {
 
   const classes = useStyles();
-  const work = useContext(workspaceContext)
+  const work = useContext(CreateWorkspaceContext)
+  //const open = useContext(OpenWorkspaceContext)
   const history = useHistory();
+  //open.setValid(true)
 
   if (work.valid) {
     return (
@@ -246,11 +251,10 @@ function Create() {
                   margin="normal"
                   fullWidth
                   id="name"
-                  label="Workspace Name"
+                  label="Workspace Name (Optional)"
                   name="workspace"
                   autoComplete="workspace"
                   autoFocus
-                  required
               />
               <TextField
                   variant="outlined"
@@ -287,7 +291,10 @@ function Create() {
               </Button>
               <Grid container>
                 <Grid item xs>
-                  <Link to="/Open">
+                  <Link
+                      to="/Open"
+                      onClick={() => work.setValid(true)}
+                  >
                     Existing Workspace?
                   </Link>
                 </Grid>
@@ -315,13 +322,12 @@ function Create() {
                 margin="normal"
                 fullWidth
                 id="name"
-                label="Workspace Name"
+                label="Workspace Name (Optional)"
                 name="workspace"
                 autoComplete="workspace"
                 autoFocus
-                required
                 error
-                helperText="Workspace name is invalid/taken"
+                helperText="Workspace Name is invalid/taken"
             />
             <TextField
                 variant="outlined"
@@ -356,9 +362,12 @@ function Create() {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link to="/Open">
-                  Existing Workspace?
-                </Link>
+                  <Link
+                      to="/Open"
+                      onClick={() => work.setValid(true)}
+                  >
+                      Existing Workspace?
+                  </Link>
               </Grid>
             </Grid>
           </div>
@@ -395,66 +404,148 @@ async function HandleCreate(name, password, history, work) {
 
 function Open() {
   const classes = useStyles();
+  const work = useContext(CreateWorkspaceContext)
+  const history = useHistory();
 
-  return (
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar  alt="s" src={s} className={classes.sizeAvatar} />
-          <Box mt={4}>
-          </Box>
-          <Typography component="h2" variant="h5">
-            Open Existing Workspace
-          </Typography>
-            <TextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="name"
-                label="Workspace Name"
-                name="workspace"
-                autoComplete="workspace"
-                autoFocus
-                required
-            />
-            <TextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="password"
-                label="Password (if applicable)"
-                name="workspace"
-                type="password"
-                autoComplete="workspace"
-            />
-            <Box mt={2}>
+  if (work.valid) {
+      return (
+          <Container component="main" maxWidth="xs">
+              <CssBaseline/>
+              <div className={classes.paper}>
+                  <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
+                  <Box mt={4}>
+                  </Box>
+                  <Typography component="h2" variant="h5">
+                      Open Existing Workspace
+                  </Typography>
+                  <TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      id="name"
+                      label="Workspace Name/ID"
+                      name="workspace"
+                      autoComplete="workspace"
+                      autoFocus
+                      required
+                  />
+                  <TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      id="password"
+                      label="Password (if applicable)"
+                      name="workspace"
+                      type="password"
+                      autoComplete="workspace"
+                  />
+                  <Box mt={2}>
+                  </Box>
+                  <Button
+                      size="large"
+                      //component={ Link }
+                      //to={"/Test"}
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      className={classes.submit}
+                      onClick={() => HandleCreate(document.getElementById('name'),
+                          document.getElementById('password'),
+                          history,
+                          work
+                      ) ? "" : work.setValid(false)}
+                  >
+                      Open
+                  </Button>
+                  <Grid container>
+                      <Grid item xs>
+                          <Link
+                              to="/Create"
+                              onClick={() => work.setValid(true)}
+                          >
+                              Need a new workspace?
+                          </Link>
+                      </Grid>
+                  </Grid>
+              </div>
+              <Box mt={16}>
+                  <Copyright/>
+              </Box>
+          </Container>
+      );
+  }
+
+    return (
+        <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <div className={classes.paper}>
+                <Avatar  alt="s" src={s} className={classes.sizeAvatar} />
+                <Box mt={4}>
+                </Box>
+                <Typography component="h2" variant="h5">
+                    Open Existing Workspace
+                </Typography>
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    id="name"
+                    label="Workspace Name/ID"
+                    name="workspace"
+                    autoComplete="workspace"
+                    autoFocus
+                    required
+                    error
+                    helperText={"No Workspace with given credentials"}
+                />
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    id="password"
+                    label="Password (if applicable)"
+                    name="workspace"
+                    type="password"
+                    autoComplete="workspace"
+                />
+                <Box mt={2}>
+                </Box>
+                <Button
+                    size="large"
+                    //component={ Link }
+                    //to={"/Test"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                    onClick={() => HandleCreate(document.getElementById('name'),
+                        document.getElementById('password'),
+                        history,
+                        work
+                    ) ? "" : work.setValid(false)}
+                >
+                    Open
+                </Button>
+                <Grid container>
+                    <Grid item xs>
+                        <Link
+                            to="/Create"
+                            onClick={() => work.setValid(true)}
+                        >
+                            Need a new workspace?
+                        </Link>
+                    </Grid>
+                </Grid>
+            </div>
+            <Box mt={16}>
+                <Copyright />
             </Box>
-            <Button
-                size="large"
-                component={ Link }
-                to={"/Test"}
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                onClick={ refresh }
-            >
-              Open
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link to="/Create">
-                  Need a new workspace?
-                </Link>
-              </Grid>
-            </Grid>
-        </div>
-        <Box mt={16}>
-          <Copyright />
-        </Box>
-      </Container>
-  );
+        </Container>
+        )
+
+
 }
 
 async function HandleOpen(name, password, history, work) {
