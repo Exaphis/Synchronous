@@ -407,7 +407,7 @@ function Open() {
   const work = useContext(workspaceContext)
   const history = useHistory();
 
-  const [checked, setChecked] = React.useState(true);
+  const [checked, setChecked] = React.useState(false);
     const handleChange = (event) => {
         setChecked(event.target.checked);
     };
@@ -575,6 +575,7 @@ async function HandleOpen(name, password, history, work, usedID) {
     let resp = await fetchAPI('POST', 'workspace/',
         {
             nickname: name.value,
+
             anonymous_readable: true,
             password: password.value
         });
