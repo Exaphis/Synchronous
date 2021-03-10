@@ -3,8 +3,10 @@ Name: Kevin Wu
 
 Week 2 (Summary)
 3/06/21 5 hrs    5e810cf Implement workspace login using token authorization
+3/07/21 3 hrs    57601c1 Experiment with Django channels tutorial, implement
+                         preliminary user model
 
 Week 3 (Plan)
 3/09/21 3 hrs    Try to join workspace API with frontend
 3/10/21 5 hrs    Create user list using Django Channels
-3/11/21 2 hrs    Show user list in frontend
+3/11/21 2 hrs    Help to show user list in frontend
