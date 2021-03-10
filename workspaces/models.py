@@ -17,7 +17,8 @@ class WorkspaceManager(models.Manager):
 
         If the given password is blank, then a password is not required for editing.
         """
-        workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable, expiration_date=timezone.now()+datetime.timedelta(minutes=2))
+        workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable)
+        workspace.expiration_date=timezone.now()+datetime.timedelta(minutes=2)
         workspace.save()
 
         if password:
