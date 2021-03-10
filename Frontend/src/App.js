@@ -24,8 +24,8 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-//import FormControlLabel from '@material-ui/core/FormControlLabel';
-//import Checkbox from '@material-ui/core/Checkbox';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 //import {Link as uiLink} from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -407,6 +407,11 @@ function Open() {
   const work = useContext(workspaceContext)
   const history = useHistory();
 
+  const [checked, setChecked] = React.useState(true);
+    const handleChange = (event) => {
+        setChecked(event.target.checked);
+    };
+
   if (work.valid) {
       return (
           <Container component="main" maxWidth="xs">
@@ -418,17 +423,25 @@ function Open() {
                   <Typography component="h2" variant="h5">
                       Open Existing Workspace
                   </Typography>
+                  <Grid container >
                   <TextField
                       variant="outlined"
                       margin="normal"
                       fullWidth
                       id="name"
-                      label="Workspace Name/ID"
+                      label={checked ? "Workspace ID" : "Workspace Name"}
                       name="workspace"
                       autoComplete="workspace"
                       autoFocus
                       required
                   />
+                  <FormControlLabel
+                      control={<Checkbox color="primary" />}
+                      id="check"
+                      label="Use ID?"
+                      onChange={handleChange}
+                  />
+                  </Grid>
                   <TextField
                       variant="outlined"
                       margin="normal"
@@ -486,19 +499,27 @@ function Open() {
                 <Typography component="h2" variant="h5">
                     Open Existing Workspace
                 </Typography>
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    id="name"
-                    label="Workspace Name/ID"
-                    name="workspace"
-                    autoComplete="workspace"
-                    autoFocus
-                    required
-                    error
-                    helperText={"No Workspace with given credentials"}
-                />
+                <Grid container >
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        fullWidth
+                        id="name"
+                        label={checked ? "Workspace ID" : "Workspace Name"}
+                        name="workspace"
+                        autoComplete="workspace"
+                        autoFocus
+                        required
+                        error
+                        helperText={"No Workspace with given credentials"}
+                    />
+                    <FormControlLabel
+                        control={<Checkbox color="primary" />}
+                        id="check"
+                        label="Use ID?"
+                        onChange={handleChange}
+                    />
+                </Grid>
                 <TextField
                     variant="outlined"
                     margin="normal"
