@@ -25,7 +25,6 @@ class WorkspaceManager(models.Manager):
         return workspace
 
 
-# TODO: use validator to ensure nickname does not overlap with any unique ids
 class Workspace(models.Model):
     objects = WorkspaceManager()
 

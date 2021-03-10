@@ -4,7 +4,7 @@ from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, ParseError
 from rest_framework.response import Response
 
 from .models import Workspace
@@ -26,7 +26,11 @@ class WorkspaceDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 @api_view(['GET'])
-def nickname_to_unique_id(request, nickname):
+def nickname_to_unique_id(request):
+    if 'nickname' not in request.query_params:
+        raise ParseError('nickname parameter must be set.')
+
+    nickname = request.query_params['nickname']
     workspace = get_object_or_404(Workspace, nickname=nickname)
     return Response({'unique_id': workspace.unique_id})
 
