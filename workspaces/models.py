@@ -36,10 +36,6 @@ class Workspace(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     anonymous_readable = models.BooleanField(default=False)  # only matters if user is not None
     expiration_date = models.DateTimeField()
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     # user field for workspace authentication in order to use default Django auth methods
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
 

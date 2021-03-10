@@ -138,3 +138,19 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+# Celery settings
+# https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html
+BROKER_URL = 'pyamqp://admin:admin@localhost:5672/synchronous'
+CELERY_RESULT_BACKEND = 'rpc://admin:admin@localhost:5672/synchronous'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+
+CELERYBEAT_SCHEDULE = {
+    'delete-every-30-secs': {
+        'task': 'delete_old_workspace',
+        'schedule': 1
+    },
+}
