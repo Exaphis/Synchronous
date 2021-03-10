@@ -4,7 +4,6 @@ import './App.css';
 import * as React from 'react'
 import {useRef} from 'react'
 
-
 import {
   BrowserRouter as Router,
   Switch,
@@ -24,8 +23,6 @@ import TextareaAutosize from 'react-textarea-autosize';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import reactMinimize from 'react-minimize'
 
-
-
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -41,7 +38,6 @@ import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import {useContext, useState } from 'react'
-
 
 const WorkspaceContext = React.createContext(true)
 const ElementContext = React.createContext(true)
