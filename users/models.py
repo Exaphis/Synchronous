@@ -60,6 +60,8 @@ class WorkspaceUser(models.Model):
     nickname = models.CharField(max_length=150)
     color = ColorField(default=get_random_color)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+    went_inactive_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.nickname

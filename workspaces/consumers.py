@@ -1,3 +1,4 @@
+from django.utils import timezone
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
@@ -6,6 +7,7 @@ from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
 
 
+# TODO: ensure that non-authed users cannot connect to the websocket
 class UserListConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         self.workspace_group_name = None
@@ -29,10 +31,12 @@ class UserListConsumer(JsonWebsocketConsumer):
             self.channel_name
         )
 
-        num_users = WorkspaceUser.objects.filter(workspace=self.workspace).count()
-        new_user_num = num_users + 1
-        self.user = WorkspaceUser.objects.create(nickname=f'User #{new_user_num}',
+        # num_users = WorkspaceUser.objects.filter(workspace=self.workspace).count()
+        # new_user_num = num_users + 1
+        self.user = WorkspaceUser.objects.create(nickname='User #',
                                                  workspace=self.workspace)
+        self.user.save()
+        self.user.nickname += str(self.user.id)
         self.user.save()
 
         self.accept()
@@ -56,13 +60,26 @@ class UserListConsumer(JsonWebsocketConsumer):
             self.workspace_group_name,
             self.channel_name
         )
-        
-        self.user.delete()
-        self.send_user_list()
+
+        # handles invalid workspace id leading to no user being created
+        if self.user is not None:
+            self.user.delete()
+            self.send_user_list()
 
     def user_list_changed(self, event):
         user_list = event['user_list']
         self.send_json(user_list)
 
+    # TODO: show inactive timestamp
     def receive_json(self, content, **kwargs):
-        pass
+        if content['type'] == 'activity':
+            new_active = content['isActive']
+            if new_active != self.user.active:
+                self.user.active = new_active
+
+                if not self.user.active:
+                    self.user.went_inactive_at = timezone.now()
+
+                self.user.save()
+
+                self.send_user_list()

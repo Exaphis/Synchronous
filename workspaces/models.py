@@ -4,7 +4,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
-from django.core.validators import RegexValidator
 from rest_framework.authtoken.models import Token
 
 
@@ -32,7 +31,7 @@ class Workspace(models.Model):
     objects = WorkspaceManager()
 
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
-    nickname = models.CharField(max_length=150, unique=True, blank=True, null=True)
+    nickname = models.CharField(max_length=150, unique=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     anonymous_readable = models.BooleanField(default=False)  # only matters if user is not None
 

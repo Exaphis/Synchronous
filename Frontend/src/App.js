@@ -14,6 +14,7 @@ import {
 } from "react-router-dom";
 
 import ReactDOM from 'react-dom'
+import { useIdleTimer } from 'react-idle-timer'
 //import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
@@ -72,6 +73,10 @@ export default function App() {
   );
 }
 
+function getUrlFromEndpoint(protocol, endpoint) {
+    return protocol + '://localhost:8000/' + endpoint;
+}
+
 function fetchAPI(methodType, endpoint, data=null) {
     let requestOptions = {
         method: methodType,
@@ -84,7 +89,7 @@ function fetchAPI(methodType, endpoint, data=null) {
         requestOptions.body = JSON.stringify(data);
     }
 
-    return fetch('http://localhost:8000/' + endpoint, requestOptions)
+    return fetch(getUrlFromEndpoint('http', endpoint), requestOptions)
     .then(async response => {
         let data;
 
@@ -209,21 +214,65 @@ function Test() {
 function Workspace() {
     const { uniqueId } = useParams();  // destructuring assignment
     const [ workspace, setWorkspace ] = React.useState(null);
+    const [ userListWs, setUserListWs ] = React.useState(null);
+    const [ userList, setUserList ] = React.useState({});
+    console.log(JSON.stringify(userList));
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
         let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
+        // TODO: handle response errors
         setWorkspace(resp);
     };
+
+    // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
+    // why does it sometimes not refresh the user list when joining an already joined workspace?
+    const userListConnect = () => {
+        let ws = new WebSocket(
+            getUrlFromEndpoint('ws', 'ws/' + uniqueId + '/user-list/')
+        );
+
+        ws.onmessage = (event) => {
+            setUserList(JSON.parse(event.data));
+        };
+
+        setUserListWs(ws);
+    }
+
+    const sendActivityMessage = (active) => {
+        if (userListWs !== null) {
+            userListWs.send(JSON.stringify(
+                {
+                    'type': 'activity',
+                    'isActive': active
+                }
+            ));
+        }
+    }
+
+    useIdleTimer({
+        timeout: 1000 * 5,  // in milliseconds
+        onIdle: () => sendActivityMessage(false),
+        onActive: () => sendActivityMessage(true)
+    });
 
     React.useEffect(() => {
         if (workspace === null) {
             getWorkspace().then();
         }
+        else if (userListWs === null) {
+            userListConnect()
+        }
     });
 
     let out = JSON.stringify(workspace);
-    return <h1>{out}</h1>
+    let out2 = JSON.stringify(userList);
+    return (
+        <Container component="main">
+            <h1>{out}</h1>
+            <p>{out2}</p>
+        </Container>
+    )
 }
 
 
