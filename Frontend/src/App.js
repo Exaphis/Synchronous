@@ -2,6 +2,9 @@ import logo from './logo.png';
 import s from './s.png';
 import './App.css';
 import * as React from 'react'
+import {useRef} from 'react'
+
+ 
 import {
   BrowserRouter as Router,
   Switch,
@@ -13,10 +16,11 @@ import {
   //withRouter
 } from "react-router-dom";
 
-import ReactDOM from 'react-dom'
+import ReactDOM, { render } from 'react-dom'
 //import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
+import reactMinimize from 'react-minimize'
 
 
 
@@ -37,13 +41,14 @@ import Container from '@material-ui/core/Container';
 import {useContext, useState, useCallback, useEffect} from 'react'
 
 
-const CreateWorkspaceContext = React.createContext(true)
+const WorkspaceContext = React.createContext(true)
+const ElementContext = React.createContext(true)
 
 export default function App() {
   const [valid, setValid] = useState(true)
 
   return (
-      <workspaceContext.Provider value={{valid, setValid}}>
+      <WorkspaceContext.Provider value={{valid, setValid}}>
           <Router>
             <div>
               <Switch>
@@ -68,7 +73,7 @@ export default function App() {
               </Switch>
             </div>
           </Router>
-      </workspaceContext.Provider>
+      </WorkspaceContext.Provider>
   );
 }
 
@@ -196,15 +201,79 @@ function Copyright() {
     );
 }
 
+
+
+// const Search = () => {
+//   const [showResults, setShowResults] = React.useState(false)
+//   const onClick = () => setShowResults(true)
+//   return (
+//     <div>
+//       <input type="submit" value="Search" onClick={onClick} />
+//       { showResults ? <Results /> : null }
+//     </div>
+//   )
+// }
+
+// const Results = () => (
+//   <div id="results" className="search-results">
+//     Some Results
+//   </div>
+// )
+
+// ReactDOM.render(<Search />, document.querySelector("#container"))
+
 function Test() {
+  const R = () => {
+    const [situation, setsituation] = useState(true)
+    const [val, setval] = useState('')
+    const hideClick = () => setsituation(false)
+    const showClick = () => setsituation(true)
+    const onChange = (e) => setval(e.target.value)
+
+
+
+    
+
+
+    return (
+      <Draggable>
+      <div>
+        {situation ?
+        <Button variant="contained" onClick ={hideClick}>Minimize</Button> 
+        :
+        <Button variant="contained" onClick ={showClick}>Maximize</Button> 
+        }
+        
+        {situation ? 
+           <TextareaAutosize 
+            value={val}
+            onChange={onChange}
+            />
+            :
+            null
+          }
+      </div>
+      </Draggable>
+      
+    )
+  }
+
+
+
+  
+
   return (
-      ReactDOM.render(
-          <Draggable>
-            <div> <TextareaAutosize/></div>
-          </Draggable>, document.getElementById('root')
-      )
+    ReactDOM.render(      
+      <R/> , document.getElementById('root')
+    )
   )
+
 }
+  
+  
+
+  
+
 
 function Workspace() {
     const { uniqueId } = useParams();  // destructuring assignment
@@ -230,7 +299,7 @@ function Workspace() {
 function Create() {
 
   const classes = useStyles();
-  const work = useContext(CreateWorkspaceContext)
+  const work = useContext(WorkspaceContext)
   //const open = useContext(OpenWorkspaceContext)
   const history = useHistory();
   //open.setValid(true)
@@ -404,7 +473,7 @@ async function HandleCreate(name, password, history, work) {
 
 function Open() {
   const classes = useStyles();
-  const work = useContext(CreateWorkspaceContext)
+  const work = useContext(WorkspaceContext)
   const history = useHistory();
 
   if (work.valid) {

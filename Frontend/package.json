@@ -16,6 +16,7 @@
     "react-dom": "^17.0.1",
     "react-draggable": "^4.4.3",
     "react-interactable": "^0.6.4",
+    "react-minimize": "^0.16.3",
     "react-panresponder-web": "^1.0.2",
     "react-rnd": "^10.2.4",
     "react-router": "^5.2.0",
