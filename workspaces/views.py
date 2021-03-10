@@ -18,14 +18,13 @@ class WorkspaceCreateView(generics.CreateAPIView):
 
 
 # TODO: if readable but not authed, then return read-only links to the workspace apps
-class WorkspaceRetrieveView(generics.RetrieveAPIView):
+class WorkspaceDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReadableOrAuthenticated]
     queryset = Workspace.objects.all()
     serializer_class = WorkspaceSerializer
     lookup_field = 'unique_id'
 
 
-# TODO: allow nickname change
 @api_view(['GET'])
 def nickname_to_unique_id(request, nickname):
     workspace = get_object_or_404(Workspace, nickname=nickname)
