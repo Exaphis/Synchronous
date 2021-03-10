@@ -1,5 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
+from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
@@ -22,9 +24,12 @@ class WorkspaceRetrieveView(generics.RetrieveAPIView):
     serializer_class = WorkspaceSerializer
     lookup_field = 'unique_id'
 
+
 # TODO: allow nickname change
-class WorkspaceNicknameRetrieveView(WorkspaceRetrieveView):
-    lookup_field = 'nickname'
+@api_view(['GET'])
+def nickname_to_unique_id(request, nickname):
+    workspace = get_object_or_404(Workspace, nickname=nickname)
+    return Response({'unique_id': workspace.unique_id})
 
 
 class CustomAuthToken(ObtainAuthToken):
