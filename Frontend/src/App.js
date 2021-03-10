@@ -397,6 +397,7 @@ async function HandleCreate(name, password, history, work) {
   else {
       alert('success!')
       alert(JSON.stringify(resp));
+      alert(resp.unique_id)
 
       await history.push('/Workspace/' + resp.unique_id);
   }
@@ -572,13 +573,23 @@ function Open() {
 }
 
 async function HandleOpen(name, password, history, work, usedID) {
-    let resp = await fetchAPI('POST', 'workspace/',
-        {
-            nickname: name.value,
+    let resp;
+    if (usedID === false) {
+        let unique = await fetchAPI('GET', 'workspace/nickname/?nickname=' + name.value);
+        if (unique.error) {
+            alert('error!');
+            alert(JSON.stringify(unique.details));
+            work.setValid(false)
+            return false
+        }
 
-            anonymous_readable: true,
-            password: password.value
-        });
+        let length = JSON.stringify(unique).length
+        unique = JSON.stringify(unique).substring(14, length-2)
+        alert('workspace/' + unique + '/')
+        resp = await fetchAPI('GET', 'workspace/' + unique + '/');
+    } else {
+        resp = await fetchAPI('GET', 'workspace/' + name.value);
+    }
 
     if (resp.error) {
         alert('error!');
