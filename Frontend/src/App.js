@@ -466,7 +466,8 @@ function Open() {
                       onClick={() => HandleOpen(document.getElementById('name'),
                           document.getElementById('password'),
                           history,
-                          work
+                          work,
+                          checked
                       ) ? "" : work.setValid(false)}
                   >
                       Open
@@ -544,7 +545,8 @@ function Open() {
                     onClick={() => HandleOpen(document.getElementById('name'),
                         document.getElementById('password'),
                         history,
-                        work
+                        work,
+                        checked
                     ) ? "" : work.setValid(false)}
                 >
                     Open
@@ -569,7 +571,7 @@ function Open() {
 
 }
 
-async function HandleOpen(name, password, history, work) {
+async function HandleOpen(name, password, history, work, usedID) {
     let resp = await fetchAPI('POST', 'workspace/',
         {
             nickname: name.value,
