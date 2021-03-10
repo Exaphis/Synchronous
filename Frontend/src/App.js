@@ -34,10 +34,10 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import {useContext, useState, useCallback, useEffect} from 'react'
+import {useContext, useState } from 'react'
 
 
-const CreateWorkspaceContext = React.createContext(true)
+const workspaceContext = React.createContext(true)
 
 export default function App() {
   const [valid, setValid] = useState(true)
@@ -230,7 +230,7 @@ function Workspace() {
 function Create() {
 
   const classes = useStyles();
-  const work = useContext(CreateWorkspaceContext)
+  const work = useContext(workspaceContext)
   //const open = useContext(OpenWorkspaceContext)
   const history = useHistory();
   //open.setValid(true)
@@ -404,7 +404,7 @@ async function HandleCreate(name, password, history, work) {
 
 function Open() {
   const classes = useStyles();
-  const work = useContext(CreateWorkspaceContext)
+  const work = useContext(workspaceContext)
   const history = useHistory();
 
   if (work.valid) {
@@ -450,7 +450,7 @@ function Open() {
                       variant="contained"
                       color="primary"
                       className={classes.submit}
-                      onClick={() => HandleCreate(document.getElementById('name'),
+                      onClick={() => HandleOpen(document.getElementById('name'),
                           document.getElementById('password'),
                           history,
                           work
@@ -520,7 +520,7 @@ function Open() {
                     variant="contained"
                     color="primary"
                     className={classes.submit}
-                    onClick={() => HandleCreate(document.getElementById('name'),
+                    onClick={() => HandleOpen(document.getElementById('name'),
                         document.getElementById('password'),
                         history,
                         work
