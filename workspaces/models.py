@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
+from django.core.validators import RegexValidator
 from rest_framework.authtoken.models import Token
 
 
@@ -24,6 +25,7 @@ class WorkspaceManager(models.Manager):
         return workspace
 
 
+# TODO: use validator to ensure nickname does not overlap with any unique ids
 class Workspace(models.Model):
     objects = WorkspaceManager()
 
@@ -34,6 +36,9 @@ class Workspace(models.Model):
 
     # user field for workspace authentication in order to use default Django auth methods
     user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return str(self.unique_id)
 
 
 # catch post-save signal for user to generate its token
