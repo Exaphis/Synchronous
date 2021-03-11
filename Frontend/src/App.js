@@ -690,7 +690,6 @@ async function HandleOpen(name, password, history, work, usedID) {
 
         let length = JSON.stringify(unique).length
         unique = JSON.stringify(unique).substring(14, length-2)
-        alert('workspace/' + unique + '/')
         resp = await fetchAPI('GET', 'workspace/' + unique + '/');
     } else {
         resp = await fetchAPI('GET', 'workspace/' + name.value);
