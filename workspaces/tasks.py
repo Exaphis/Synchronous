@@ -21,7 +21,7 @@ def delete_old_workspace():
         if w.expiration_date < timezone.now():
             w.delete()
             # log deletion
-        else if w.expiration_date > timezone.now and w.expiration_date < timezone.now + timezone.timedelta(hours=1)
+        else if w.expiration_date > timezone.now and w.expiration_date < timezone.now + timezone.timedelta(hours=1) and w.emailed_expires == False
             # email = EmailMessage(
             # 'Workspace ' + w.unique_id + 'will be deleted in an hour',
             # 'Your 24 hours for your workspace are about to be up! Save your progress! :)',
@@ -32,6 +32,7 @@ def delete_old_workspace():
             subject= 'Workspace ' + w.unique_id + 'will be deleted in an hour'
             message= 'The 24 hours for your workspace are about to be up! Save your progress! :)'
             receiver= 'sakshamj23l@gmail.com'
+            w.emailed_expires = True;
             send_mail_to(subject,message,receivers)
 
     return "completed deleting workspaces at {}".format(timezone.now())
