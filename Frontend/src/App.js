@@ -98,12 +98,17 @@ function getUrlFromEndpoint(protocol, endpoint) {
     return protocol + '://localhost:8000/' + endpoint;
 }
 
-function fetchAPI(methodType, endpoint, data=null) {
+function fetchAPI(methodType, endpoint, data=null, token=null) {
+    let headers = {
+        'Content-Type': 'application/json'
+    }
+    if (token !== null) {
+        headers['Authorization'] = 'Token ' + token.toString()
+    }
+
     let requestOptions = {
         method: methodType,
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        headers: headers
     };
 
     if (data !== null) {
@@ -337,7 +342,8 @@ function Workspace() {
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
-        let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
+        let token = localStorage.getItem(uniqueId);
+        let resp = await fetchAPI('GET', 'workspace/' + uniqueId, null, token);
         // TODO: handle response errors
         setWorkspace(resp);
     };
@@ -362,8 +368,9 @@ function Workspace() {
     // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
     // why does it sometimes not refresh the user list when joining an already joined workspace?
     const userListConnect = () => {
+        let wsUri = workspace['user_list_ws'];
         let ws = new WebSocket(
-            getUrlFromEndpoint('ws', 'ws/' + uniqueId + '/user-list/')
+            getUrlFromEndpoint('ws', wsUri)
         );
 
         ws.onmessage = (event) => {

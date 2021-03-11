@@ -45,6 +45,9 @@ class Workspace(models.Model):
     def __str__(self):
         return str(self.unique_id)
 
+    def get_user_list_endpoint(self):
+        return f'ws/{self.unique_id}/user-list/'
+
 
 # catch post-save signal for user to generate its token
 @receiver(post_save, sender=User)
