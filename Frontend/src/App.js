@@ -292,9 +292,9 @@ function Workspace() {
     const [ received, setReceived ] = React.useState(false);
     console.log(JSON.stringify(userList));
 
-    /*if (!received && localStorage.getItem(uniqueId) === null) {
+    if (!received && localStorage.getItem(uniqueId) === null) {
         checkForPassword(uniqueId, received, setReceived)
-    }*/
+    }
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -391,10 +391,8 @@ function Workspace() {
         }
     }
 
-    let out = JSON.stringify(workspace);
-    let out2 = JSON.stringify(userList);
 
-/*    if (localStorage.getItem(uniqueId) === null) {
+    if (localStorage.getItem(uniqueId) === null) {
         return (
             <Container component="main" maxWidth="xs">
                 <CssBaseline/>
@@ -428,7 +426,7 @@ function Workspace() {
                 </Box>
             </Container>
         )
-    }*/
+    }
 
     return (
         <Container component="main" maxWidth="xl">
@@ -861,12 +859,12 @@ async function HandleOpen(name, password, history, work, usedID) {
         let length = JSON.stringify(unique).length
         unique = JSON.stringify(unique).substring(14, length-2);
         if (password.value === "") {
-            if (await checkPass(unique)) {
+            //if (await checkPass(unique)) {
                 resp = await fetchAPI('GET', 'workspace/' + unique + "/");
                 openWithout(unique, resp, work, history)
-            } else {
-                work.setValid(false)
-            }
+            //} else {
+                //work.setValid(false)
+            //}
 
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
@@ -878,12 +876,12 @@ async function HandleOpen(name, password, history, work, usedID) {
         }
     } else {
         if (password.value === "") {
-            if (await checkPass(name.value)) {
+            //if (await checkPass(name.value)) {
                 resp = await fetchAPI('GET', 'workspace/' + name.value);
-                openWithout(name.value, resp, work, history)
-            } else {
-                work.setValid(false)
-            }
+            //    openWithout(name.value, resp, work, history)
+            //} else {
+            //    work.setValid(false)
+            //}
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
                 {
@@ -897,7 +895,7 @@ async function HandleOpen(name, password, history, work, usedID) {
 
 }
 
-async function checkPass(uniqueID) {
+/*async function checkPass(uniqueID) {
     let resp = await fetchAPI('POST', 'api-token-auth/',
         {
             unique_id: uniqueID,
@@ -916,7 +914,7 @@ async function checkPass(uniqueID) {
         alert(resp.unique_id)
     }
     return false
-}
+}*/
 
 async function openWith(uniqueID, resp, work, history) {
     if (resp.error) {
