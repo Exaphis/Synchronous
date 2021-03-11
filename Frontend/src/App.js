@@ -476,6 +476,10 @@ function Create() {
   const classes = useStyles();
   const work = useContext(WorkspaceContext)
   const history = useHistory();
+  const [checked, setChecked] = React.useState(false);
+  const handleChange = (event) => {
+      setChecked(event.target.checked);
+  };
 
   if (work.valid) {
     return (
@@ -488,16 +492,24 @@ function Create() {
             <Typography component="h2" variant="h5">
               Create a Workspace
             </Typography>
-              <TextField
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  id="name"
-                  label="Workspace Name (Optional)"
-                  name="workspace"
-                  autoComplete="workspace"
-                  autoFocus
-              />
+              <Grid container >
+                  <TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      id="name"
+                      label="Workspace Name (Optional)"
+                      name="workspace"
+                      autoComplete="workspace"
+                      autoFocus
+                  />
+                  <FormControlLabel
+                      control={<Checkbox color="primary" />}
+                      id="check"
+                      label="Allow View Only?"
+                      onChange={handleChange}
+                  />
+              </Grid>
               <TextField
                   variant="outlined"
                   margin="normal"
@@ -520,7 +532,8 @@ function Create() {
                   onClick={() => HandleCreate(document.getElementById('name'),
                       document.getElementById('password'),
                       history,
-                      work
+                      work,
+                      checked
                   ) ? "" : work.setValid(false)}
               >
                 Create Workspace
@@ -553,18 +566,26 @@ function Create() {
             <Typography component="h2" variant="h5">
               Create a Workspace
             </Typography>
-            <TextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="name"
-                label="Workspace Name (Optional)"
-                name="workspace"
-                autoComplete="workspace"
-                autoFocus
-                error
-                helperText="Workspace Name is invalid/taken"
-            />
+            <Grid container >
+                <TextField
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    id="name"
+                    label="Workspace Name (Optional)"
+                    name="workspace"
+                    autoComplete="workspace"
+                    autoFocus
+                    error
+                    helperText="Workspace Name is invalid/taken"
+                />
+                <FormControlLabel
+                    control={<Checkbox color="primary" />}
+                    id="check"
+                    label="Allow View Only?"
+                    onChange={handleChange}
+                />
+            </Grid>
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -588,7 +609,8 @@ function Create() {
                     document.getElementById('name'),
                     document.getElementById('password'),
                     history,
-                    work)}
+                    work,
+                    checked)}
                 error
                 helperText={"Workspace name is invalid/taken"}
             >
@@ -614,11 +636,11 @@ function Create() {
 
 }
 
-async function HandleCreate(name, password, history, work) {
+async function HandleCreate(name, password, history, work, checked) {
   let resp = await fetchAPI('POST', 'workspace/',
       {
           nickname: name.value,
-          anonymous_readable: true,
+          anonymous_readable: checked,
           password: password.value
       });
 
