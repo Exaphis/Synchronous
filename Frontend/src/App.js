@@ -331,9 +331,9 @@ function Workspace() {
     const [ received, setReceived ] = React.useState(false);
     console.log(JSON.stringify(userList));
 
-    if (!received && localStorage.getItem(uniqueId) === null) {
+    /*if (!received && localStorage.getItem(uniqueId) === null) {
         checkForPassword(uniqueId, received, setReceived)
-    }
+    }*/
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -433,7 +433,7 @@ function Workspace() {
     let out = JSON.stringify(workspace);
     let out2 = JSON.stringify(userList);
 
-    if (localStorage.getItem(uniqueId) === null) {
+/*    if (localStorage.getItem(uniqueId) === null) {
         return (
             <Container component="main" maxWidth="xs">
                 <CssBaseline/>
@@ -467,7 +467,7 @@ function Workspace() {
                 </Box>
             </Container>
         )
-    }
+    }*/
 
     return (
         <Container component="main" maxWidth="xl">
@@ -525,6 +525,10 @@ function Create() {
   const classes = useStyles();
   const work = useContext(WorkspaceContext)
   const history = useHistory();
+  const [checked, setChecked] = React.useState(false);
+  const handleChange = (event) => {
+      setChecked(event.target.checked);
+  };
 
   if (work.valid) {
     return (
@@ -537,26 +541,34 @@ function Create() {
             <Typography component="h2" variant="h5">
               Create a Workspace
             </Typography>
-              <TextField
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  id="name"
-                  label="Workspace Name (Optional)"
-                  name="workspace"
-                  autoComplete="workspace"
-                  autoFocus
-              />
-              <TextField
-                  variant="outlined"
-                  margin="normal"
-                  fullWidth
-                  id="password"
-                  label="Password (Optional)"
-                  name="workspace"
-                  type="password"
-                  autoComplete="workspace"
-              />
+                  <TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      id="name"
+                      label="Workspace Name (Optional)"
+                      name="workspace"
+                      autoComplete="workspace"
+                      autoFocus
+                  />
+              <Grid container >
+                  <TextField
+                      variant="outlined"
+                      margin="normal"
+                      fullWidth
+                      id="password"
+                      label="Password (Optional)"
+                      name="workspace"
+                      type="password"
+                      autoComplete="workspace"
+                  />
+                  <FormControlLabel
+                      control={<Checkbox color="primary" />}
+                      id="check"
+                      label="Allow View Only?"
+                      onChange={handleChange}
+                  />
+              </Grid>
               <Box mt={2}>
               </Box>
               <Button
@@ -569,7 +581,8 @@ function Create() {
                   onClick={() => HandleCreate(document.getElementById('name'),
                       document.getElementById('password'),
                       history,
-                      work
+                      work,
+                      checked
                   ) ? "" : work.setValid(false)}
               >
                 Create Workspace
@@ -614,6 +627,7 @@ function Create() {
                 error
                 helperText="Workspace Name is invalid/taken"
             />
+            <Grid container >
             <TextField
                 variant="outlined"
                 margin="normal"
@@ -624,6 +638,13 @@ function Create() {
                 type="password"
                 autoComplete="workspace"
             />
+              <FormControlLabel
+                  control={<Checkbox color="primary" />}
+                  id="check"
+                  label="Allow View Only?"
+                  onChange={handleChange}
+              />
+            </Grid>
             <Box mt={2}>
             </Box>
             <Button
@@ -637,7 +658,8 @@ function Create() {
                     document.getElementById('name'),
                     document.getElementById('password'),
                     history,
-                    work)}
+                    work,
+                    checked)}
                 error
                 helperText={"Workspace name is invalid/taken"}
             >
@@ -663,11 +685,11 @@ function Create() {
 
 }
 
-async function HandleCreate(name, password, history, work) {
+async function HandleCreate(name, password, history, work, checked) {
   let resp = await fetchAPI('POST', 'workspace/',
       {
           nickname: name.value,
-          anonymous_readable: true,
+          anonymous_readable: checked,
           password: password.value
       });
 
@@ -681,6 +703,7 @@ async function HandleCreate(name, password, history, work) {
       alert('success!')
       alert(JSON.stringify(resp));
       alert(resp.unique_id)
+      work.setValid(true)
       if (password.value !== "") {
           //alert("password: " + password.value)
           let auth = await fetchAPI('POST', 'api-token-auth/',
