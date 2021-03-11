@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from .models import Workspace
 from .serializers import WorkspaceSerializer
 from .permissions import IsReadableOrAuthenticated
+from .inform_using_mail import send_mail_to
 
 
 class WorkspaceCreateView(generics.CreateAPIView):
@@ -69,3 +70,21 @@ class CustomAuthToken(ObtainAuthToken):
             'token': token.key,
             'unique_id': user.workspace.unique_id
         })
+
+
+@api_view(['POST'])
+def send_message(request):
+    if 'email' not in request.data:
+        raise ParseError('email parameter must be set.')
+    if 'subject' not in request.data:
+        raise ParseError('message parameter must be set.')
+    if 'message' not in request.data:
+        raise ParseError('message parameter must be set.')
+
+    email = request.data['email']
+    subject = request.data['subject']
+    message = request.data['message']
+
+    send_mail_to(subject, message, [email])
+
+    return Response(status=status.HTTP_200_OK)
