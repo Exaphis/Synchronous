@@ -242,10 +242,6 @@ function Test() {
     const onChange = (e) => setval(e.target.value)
 
 
-
-
-
-
     return (
       <Draggable>
       <div>
@@ -277,11 +273,18 @@ function Test() {
 }
 
 function Workspace() {
+    const classes = useStyles()
     const { uniqueId } = useParams();  // destructuring assignment
     const [ workspace, setWorkspace ] = React.useState(null);
     const [ userListWs, setUserListWs ] = React.useState(null);
     const [ userList, setUserList ] = React.useState({});
     const userIdRef = React.useRef(null);
+    const [ received, setReceived ] = React.useState(false);
+    console.log(JSON.stringify(userList));
+
+    if (!received && localStorage.getItem(uniqueId) === null) {
+        checkForPassword(uniqueId, received, setReceived)
+    }
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -355,14 +358,12 @@ function Workspace() {
     React.useEffect(() => {
         if (workspace === null) {
             getWorkspace().then();
-        }
-        else if (userListWs === null) {
+        } else if (userListWs === null) {
             userListConnect()
         }
         //
         console.log('in effect');
     });
-
     // console.log('end: ' + JSON.stringify(userList));
 
     function NicknameCell(props) {
@@ -378,6 +379,45 @@ function Workspace() {
                 {user.nickname}
             </TableCell>
         }
+    }
+
+    let out = JSON.stringify(workspace);
+    let out2 = JSON.stringify(userList);
+
+    if (localStorage.getItem(uniqueId) === null) {
+        return (
+            <Container component="main" maxWidth="xs">
+                <CssBaseline/>
+                <Box mt={4}>
+                </Box>
+                <div className={classes.paper}>
+                    <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
+                    <Box mt={4}>
+                    </Box>
+                    <Typography component="h2" variant="h5">
+                        You do not have access to this workspace
+                    </Typography>
+                    <Box mt={2}>
+                    </Box>
+                    <Button
+                        component={ Link }
+                        to={"/Open"}
+                        size="large"
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        className={classes.submit}
+                        onClick={ refresh }
+                    >
+                        Return to open workspace
+                    </Button>
+                </div>
+                <Box mt={4}>
+                    <Copyright/>
+                </Box>
+            </Container>
+        )
     }
 
     return (
@@ -406,15 +446,36 @@ function Workspace() {
             </Table>
         </Container>
     )
+
+}
+
+async function checkForPassword(uniqueID, received, setReceived) {
+    setReceived(true)
+    let resp = await fetchAPI('POST', 'api-token-auth/',
+        {
+            unique_id: uniqueID,
+            password: 'TEST'
+        });
+
+    if (resp.error) {
+        if (JSON.stringify(resp.details).includes("Workspace is globally editable")) {
+            localStorage.setItem(uniqueID, "")
+        }
+        alert('error!');
+        alert(JSON.stringify(resp.details))
+    } else {
+        alert('success!')
+        alert(JSON.stringify(resp));
+        alert(resp.unique_id)
+        setReceived(false)
+    }
 }
 
 function Create() {
 
   const classes = useStyles();
   const work = useContext(WorkspaceContext)
-  //const open = useContext(OpenWorkspaceContext)
   const history = useHistory();
-  //open.setValid(true)
 
   if (work.valid) {
     return (
@@ -451,17 +512,11 @@ function Create() {
               </Box>
               <Button
                   size="large"
-                  //component={ Link }
-                  //to={"/Test"}
                   type="submit"
                   fullWidth
                   variant="contained"
                   color="primary"
                   className={classes.submit}
-                  /*onClick={() => HandleCreate(document.getElementById('name'),
-                      document.getElementById('password'),
-                      history
-                  ) ? "" : work.setValid(false)}*/
                   onClick={() => HandleCreate(document.getElementById('name'),
                       document.getElementById('password'),
                       history,
@@ -524,8 +579,6 @@ function Create() {
             </Box>
             <Button
                 size="large"
-                //component={ Link }
-                //to={"/Test"}
                 type="submit"
                 fullWidth
                 variant="contained"
@@ -579,6 +632,19 @@ async function HandleCreate(name, password, history, work) {
       alert('success!')
       alert(JSON.stringify(resp));
       alert(resp.unique_id)
+      if (password.value !== "") {
+          //alert("password: " + password.value)
+          let auth = await fetchAPI('POST', 'api-token-auth/',
+              {
+                  unique_id: resp.unique_id,
+                  password: password.value
+              });
+          //alert(JSON.stringify(auth))
+          localStorage.setItem(resp.unique_id, auth.token)
+
+      } else {
+          localStorage.setItem(resp.unique_id, "")
+      }
 
       await history.push('/Workspace/' + resp.unique_id);
   }
@@ -638,8 +704,6 @@ function Open() {
                   </Box>
                   <Button
                       size="large"
-                      //component={ Link }
-                      //to={"/Test"}
                       type="submit"
                       fullWidth
                       variant="contained"
@@ -717,8 +781,6 @@ function Open() {
                 </Box>
                 <Button
                     size="large"
-                    //component={ Link }
-                    //to={"/Test"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -761,25 +823,95 @@ async function HandleOpen(name, password, history, work, usedID) {
             alert('error!');
             alert(JSON.stringify(unique.details));
             work.setValid(false)
-            return false
         }
 
         let length = JSON.stringify(unique).length
-        unique = JSON.stringify(unique).substring(14, length-2)
-        resp = await fetchAPI('GET', 'workspace/' + unique + '/');
+        unique = JSON.stringify(unique).substring(14, length-2);
+        if (password.value === "") {
+            if (await checkPass(unique)) {
+                resp = await fetchAPI('GET', 'workspace/' + unique + "/");
+                openWithout(unique, resp, work, history)
+            } else {
+                work.setValid(false)
+            }
+
+        } else {
+            resp = await fetchAPI('POST', 'api-token-auth/',
+                {
+                    unique_id: unique,
+                    password: password.value
+                });
+            openWith(unique, resp, work, history)
+        }
     } else {
-        resp = await fetchAPI('GET', 'workspace/' + name.value);
+        if (password.value === "") {
+            if (await checkPass(name.value)) {
+                resp = await fetchAPI('GET', 'workspace/' + name.value);
+                openWithout(name.value, resp, work, history)
+            } else {
+                work.setValid(false)
+            }
+        } else {
+            resp = await fetchAPI('POST', 'api-token-auth/',
+                {
+                    unique_id: name.value,
+                    password: password.value
+                });
+            openWith(name.value, resp, work, history)
+        }
     }
 
+
+}
+
+async function checkPass(uniqueID) {
+    let resp = await fetchAPI('POST', 'api-token-auth/',
+        {
+            unique_id: uniqueID,
+            password: 'TEST'
+        });
+
+    if (resp.error) {
+        if (JSON.stringify(resp.details).includes("Workspace is globally editable")) {
+            return true
+        }
+        alert('error!');
+        alert(JSON.stringify(resp.details))
+    } else {
+        alert('success!')
+        alert(JSON.stringify(resp));
+        alert(resp.unique_id)
+    }
+    return false
+}
+
+async function openWith(uniqueID, resp, work, history) {
     if (resp.error) {
         alert('error!');
         alert(JSON.stringify(resp.details));
         work.setValid(false)
-        return false
     }
     else {
         alert('success!')
         alert(JSON.stringify(resp));
+        work.setValid(true)
+        localStorage.setItem(uniqueID, resp.token)
+
+        await history.push('/Workspace/' + resp.unique_id);
+    }
+}
+
+async function openWithout(uniqueID, resp, work, history) {
+    if (resp.error) {
+        alert('error!');
+        alert(JSON.stringify(resp.details));
+        work.setValid(false)
+    }
+    else {
+        alert('success!')
+        alert(JSON.stringify(resp));
+        work.setValid(true)
+        localStorage.setItem(uniqueID, "")
 
         await history.push('/Workspace/' + resp.unique_id);
     }
