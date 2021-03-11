@@ -244,45 +244,84 @@ function Copyright() {
 // ReactDOM.render(<Search />, document.querySelector("#container"))
 
 function Test() {
-  const R = () => {
-    const [situation, setsituation] = useState(true)
-    const [val, setval] = useState('')
-    const hideClick = () => setsituation(false)
-    const showClick = () => setsituation(true)
-    const onChange = (e) => setval(e.target.value)
+    const [apps, setApps] = useState({});
+    const newAppIdRef = useRef(0);
 
+    const [refresh, setRefresh] = useState(false);
+    const addApp = () => {
+        setApps((apps) => {
+            let newAppId = newAppIdRef.current;
+
+            let newApp = {
+                id: newAppId,
+                _minimized: false,
+                _val: newAppId.toString(),
+                get minimized() {
+                    return this._minimized;
+                },
+                set minimized(isMinimized) {
+                    this._minimized = isMinimized;
+                    setRefresh(e => !e);
+                },
+                get val() {
+                    return this._val;
+                },
+                set val(newVal) {
+                    this._val = newVal;
+                    setRefresh(e => !e);
+                },
+                deleteApp: function () {
+                    console.log('delete ' + this.id);
+                    delete apps[this.id];
+                    console.log(JSON.stringify(apps));
+                    setRefresh(e => !e);
+                }
+            };
+
+            newApp.deleteApp = newApp.deleteApp.bind(newApp);
+            apps[newAppId] = newApp;
+            newAppIdRef.current++;
+
+            return apps;
+        });
+
+        setRefresh(e => !e);
+    };
 
     return (
-      <Draggable>
       <div>
-        {situation ?
-        <Button variant="contained" onClick ={hideClick}>Minimize</Button>
-        :
-        <Button variant="contained" onClick ={showClick}>Maximize</Button>
-        }
+          <Button variant="contained" onClick={addApp}>Add app</Button>
 
-        {situation ?
-           <TextareaAutosize
-            value={val}
-            onChange={onChange}
-            />
-            :
-            null
-          }
+          {Object.values(apps).map((app) => {
+              let appContents;
+              console.log(app.minimized);
+              if (!app.minimized) {
+                  appContents = <div>
+                      <Button variant="contained" onClick={app.deleteApp}>Delete</Button>
+                      <Button variant="contained" onClick={() => app.minimized = true}>Minimize</Button>
+                      <TextareaAutosize value={app.val}
+                                        onChange={(e) => app.val = e.target.value} />
+                  </div>;
+              } else {
+                  appContents = <div>
+                      <Button variant="contained" onClick={app.deleteApp}>Delete</Button>
+                      <Button variant="contained" onClick={() => app.minimized = false}>Maximize</Button>
+                  </div>;
+              }
+
+              return (
+                  <Draggable>
+                      {appContents}
+                  </Draggable>
+              );
+          })}
       </div>
-      </Draggable>
-
     )
-  }
-
-  return (
-    ReactDOM.render(
-      <R/> , document.getElementById('root')
-    )
-  )
 }
 
 function Workspace() {
+    // TODO: show time since creation
+    // TODO: allow modify nickname
     const classes = useStyles()
     const { uniqueId } = useParams();  // destructuring assignment
     const [ workspace, setWorkspace ] = React.useState(null);
