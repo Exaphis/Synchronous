@@ -336,9 +336,9 @@ function Workspace() {
     const [ received, setReceived ] = React.useState(false);
     console.log(JSON.stringify(userList));
 
-    if (!received && localStorage.getItem(uniqueId) === null) {
+    /*if (!received && localStorage.getItem(uniqueId) === null) {
         checkForPassword(uniqueId, received, setReceived)
-    }
+    }*/
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -438,7 +438,7 @@ function Workspace() {
     }
 
 
-    if (localStorage.getItem(uniqueId) === null) {
+    if (workspace !== null && workspace.error) {
         return (
             <Container component="main" maxWidth="xs">
                 <CssBaseline/>
@@ -719,8 +719,6 @@ async function HandleCreate(name, password, history, work, checked) {
           //alert(JSON.stringify(auth))
           localStorage.setItem(resp.unique_id, auth.token)
 
-      } else {
-          localStorage.setItem(resp.unique_id, "")
       }
 
       await history.push('/Workspace/' + resp.unique_id);
@@ -988,7 +986,6 @@ async function openWithout(uniqueID, resp, work, history) {
         alert('success!')
         alert(JSON.stringify(resp));
         work.setValid(true)
-        localStorage.setItem(uniqueID, "")
 
         await history.push('/Workspace/' + resp.unique_id);
     }
