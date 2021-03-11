@@ -3,3 +3,4 @@ djangorestframework~=3.12.2
 django-cors-headers
 channels
 django-colorfield
+coolname

@@ -1,5 +1,6 @@
 import random
 
+import coolname
 from django.db import models
 from colorfield.fields import ColorField
 from workspaces.models import Workspace
@@ -56,8 +57,12 @@ def get_random_color():
     return random.choice(list(colors.values()))
 
 
+def get_random_nickname():
+    return ''.join(word.capitalize() for word in coolname.generate(2))
+
+
 class WorkspaceUser(models.Model):
-    nickname = models.CharField(max_length=150)
+    nickname = models.CharField(max_length=150, default=get_random_nickname)
     color = ColorField(default=get_random_color)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)

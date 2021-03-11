@@ -8,6 +8,7 @@
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.7.3",
+    "@use-it/interval": "^1.0.0",
     "animated": "^0.2.2",
     "beautiful-react-hooks": "^0.31.0",
     "formik": "^2.2.6",

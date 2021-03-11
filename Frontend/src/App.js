@@ -3,6 +3,7 @@ import s from './s.png';
 import './App.css';
 import * as React from 'react'
 import {useRef} from 'react'
+import useInterval from '@use-it/interval';
 
 import {
   BrowserRouter as Router,
@@ -29,6 +30,14 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import {
+    Table,
+    TableRow,
+    TableCell,
+    TableBody,
+    TableHead
+} from '@material-ui/core';
+
 //import {Link as uiLink} from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -272,13 +281,30 @@ function Workspace() {
     const [ workspace, setWorkspace ] = React.useState(null);
     const [ userListWs, setUserListWs ] = React.useState(null);
     const [ userList, setUserList ] = React.useState({});
-    console.log(JSON.stringify(userList));
+    const userIdRef = React.useRef(null);
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
         let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
         // TODO: handle response errors
         setWorkspace(resp);
+    };
+
+    const updateInactivityText = (newUserList) => {
+        Object.keys(newUserList).forEach((userId) => {
+            let user = newUserList[userId];
+            if (user.active) {
+                user.activity_text = 'Active';
+            }
+            else {
+                const inactive_since = new Date(user.went_inactive_at);
+                const now = Date.now();
+                const secs_inactive = Math.round(parseInt(now - inactive_since) / 1000);
+                newUserList[userId].activity_text = `Inactive for ${secs_inactive} sec`;
+            }
+        })
+
+        return newUserList;
     };
 
     // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
@@ -289,7 +315,13 @@ function Workspace() {
         );
 
         ws.onmessage = (event) => {
-            setUserList(JSON.parse(event.data));
+            let data = JSON.parse(event.data);
+            if (data.type === 'user_list') {
+                setUserList(updateInactivityText(data['user_list']));
+            }
+            else if (data.type === 'current_user') {
+                userIdRef.current = data['user_id']
+            }
         };
 
         setUserListWs(ws);
@@ -307,10 +339,18 @@ function Workspace() {
     }
 
     useIdleTimer({
-        timeout: 1000 * 5,  // in milliseconds
+        timeout: 1000 * 3,  // in milliseconds
         onIdle: () => sendActivityMessage(false),
         onActive: () => sendActivityMessage(true)
     });
+
+    // wtf why does this work
+    // hack to allow inactivity text to re-render everything every second
+    const [refresh, setRefresh] = useState(false);
+    useInterval(() => {
+        setUserList((ul) => updateInactivityText(ul));
+        setRefresh((refresh) => !refresh);  // if this isn't here it doesn't work
+    }, 1000);
 
     React.useEffect(() => {
         if (workspace === null) {
@@ -319,18 +359,54 @@ function Workspace() {
         else if (userListWs === null) {
             userListConnect()
         }
+        //
+        console.log('in effect');
     });
 
-    let out = JSON.stringify(workspace);
-    let out2 = JSON.stringify(userList);
+    // console.log('end: ' + JSON.stringify(userList));
+
+    function NicknameCell(props) {
+        let user = props.user;
+        console.log(userIdRef.current === user.id);
+        if (user.id === userIdRef.current) {
+            return <TableCell>
+                <Typography fontWeight={900}>{user.nickname}</Typography>
+            </TableCell>
+        }
+        else {
+            return <TableCell>
+                {user.nickname}
+            </TableCell>
+        }
+    }
+
     return (
-        <Container component="main">
-            <h1>{out}</h1>
-            <p>{out2}</p>
+        <Container component="main" maxWidth="xl">
+            <h1>{JSON.stringify(workspace)}</h1>
+            <p>{JSON.stringify(userList)}</p>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Nickname</TableCell>
+                        <TableCell>Activity</TableCell>
+                        <TableCell>Color</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    { Object.values(userList).map(user => (
+                        <TableRow key={user.id}>
+                            <NicknameCell user={user}/>
+                            <TableCell> {user.activity_text} </TableCell>
+                            <TableCell>
+                                <section style={{height: "50px", 'backgroundColor': user.color}} />
+                            </TableCell>
+                        </TableRow>
+                    )) }
+                </TableBody>
+            </Table>
         </Container>
     )
 }
-
 
 function Create() {
 

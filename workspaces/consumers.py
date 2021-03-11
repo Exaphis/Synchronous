@@ -33,19 +33,21 @@ class UserListConsumer(JsonWebsocketConsumer):
 
         # num_users = WorkspaceUser.objects.filter(workspace=self.workspace).count()
         # new_user_num = num_users + 1
-        self.user = WorkspaceUser.objects.create(nickname='User #',
-                                                 workspace=self.workspace)
-        self.user.save()
-        self.user.nickname += str(self.user.id)
+        self.user = WorkspaceUser.objects.create(workspace=self.workspace)
         self.user.save()
 
         self.accept()
+        self.send_json({
+            'type': 'current_user',
+            'user_id': self.user.id
+        })
         self.send_user_list()
 
     def send_user_list(self):
-        users = []
+        users = {}
         for user in WorkspaceUser.objects.filter(workspace=self.workspace):
-            users.append(WorkspaceUserSerializer(user).data)
+            user_data = WorkspaceUserSerializer(user).data
+            users[user_data['id']] = user_data
 
         async_to_sync(self.channel_layer.group_send)(
             self.workspace_group_name,
@@ -68,7 +70,10 @@ class UserListConsumer(JsonWebsocketConsumer):
 
     def user_list_changed(self, event):
         user_list = event['user_list']
-        self.send_json(user_list)
+        self.send_json({
+            'type': 'user_list',
+            'user_list': user_list
+        })
 
     # TODO: show inactive timestamp
     def receive_json(self, content, **kwargs):
