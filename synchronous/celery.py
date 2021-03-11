@@ -11,4 +11,4 @@ app.config_from_object('django.conf:settings')
 app.autodiscover_tasks()
 
 # make sure to run `celery -A synchronous worker -B -l info`
-# as well as set up rabbitmq
+# as well as set up rabbitmq (rabbitmq-server)
