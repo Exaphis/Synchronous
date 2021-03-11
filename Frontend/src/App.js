@@ -48,8 +48,18 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import {useContext, useState } from 'react'
 
-const WorkspaceContext = React.createContext(true)
-const ElementContext = React.createContext(true)
+import LogRocket from 'logrocket';
+import setupLogRocketReact from 'logrocket-react';
+
+LogRocket.init('a1vl8a/synchronous');
+
+setupLogRocketReact(LogRocket);
+/*LogRocket.getSessionURL(function (sessionURL) {
+  drift.track('LogRocket', { sessionURL: sessionURL });
+});*/
+
+const WorkspaceContext = React.createContext(true);
+const ElementContext = React.createContext(true);
 
 export default function App() {
   const [valid, setValid] = useState(true)

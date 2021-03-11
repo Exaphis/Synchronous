@@ -153,3 +153,26 @@ CHANNEL_LAYERS = {
         # },
     },
 }
+
+# Celery settings
+# https://docs.celeryproject.org/en/stable/getting-started/first-steps-with-celery.html
+BROKER_URL = 'pyamqp://admin:admin@localhost:5672/synchronous'
+CELERY_RESULT_BACKEND = 'rpc://admin:admin@localhost:5672/synchronous'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERYBEAT_SCHEDULE = {
+    'delete-every-30-secs': {
+        'task': 'delete_old_workspace',
+        'schedule': 1
+    },
+}
+
+# Email settings for auto delete
+MAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'synchronous307@gmail.com'
+EMAIL_HOST_PASSWORD = 'Teslasucks'
