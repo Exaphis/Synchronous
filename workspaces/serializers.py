@@ -14,6 +14,10 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         allow_blank=True
     )
 
+    nickname = serializers.CharField(
+        allow_blank=True
+    )
+
     expiration_date = serializers.DateTimeField(
         read_only=True
     )
