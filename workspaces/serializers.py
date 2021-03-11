@@ -14,9 +14,13 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         allow_blank=True
     )
 
+    expiration_date = serializers.DateTimeField(
+        read_only=True
+    )
+
     class Meta:
         model = Workspace
-        fields = ('id', 'unique_id', 'nickname', 'created_at', 'anonymous_readable', 'password')
+        fields = ('id', 'unique_id', 'nickname', 'created_at', 'anonymous_readable', 'password', 'expiration_date')
 
     def create(self, validated_data):
         # override default create method to use custom workspace manager create
