@@ -1,9 +1,17 @@
 from rest_framework.permissions import BasePermission
 
 
+class IsAuthenticated(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if obj.user is None:
+            return True
+
+        return obj.user == request.user
+
+
 class IsReadableOrAuthenticated(BasePermission):
     """
-    A
+    Allows access if the user has the correct token.
     Also allows access if the object is viewable without password.
 
     For each case of workspace object:

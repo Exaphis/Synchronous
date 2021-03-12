@@ -337,7 +337,6 @@ function Test() {
 }
 
 function Workspace() {
-    // TODO: show time since creation
     // TODO: allow modify nickname
     const classes = useStyles()
     const { uniqueId } = useParams();  // destructuring assignment
@@ -464,7 +463,27 @@ function Workspace() {
             alert('Nickname failed to set, no response.');
         } else if ('error' in resp) {
             alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
-        }else {
+        } else {
+            await getWorkspace();
+        }
+    }
+
+    async function changePassword(new_password) {
+        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/password/',
+            {
+                'password': new_password
+            },
+            tokenRef.current
+        );
+        if (resp === null) {
+            alert('Password failed to set, no response.');
+        } else if ('error' in resp) {
+            alert('Password failed to set, error: ' + JSON.stringify(resp));
+        } else {
+            if (new_password === '') {
+                tokenRef.current = null;
+                localStorage.removeItem(uniqueId);
+            }
             await getWorkspace();
         }
     }
@@ -542,8 +561,6 @@ function Workspace() {
 
     let time = getTimeRemaining(workspace)
 
-
-
     return (
         <Container component="main" maxWidth="xl">
             <AppBar position="absolute" className={clsx(classes.appBar)}>
@@ -554,10 +571,11 @@ function Workspace() {
                                 "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
                                 "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
                             ""}
-
-
                     </Typography>
-                    <Typography variant="h6" className={classes.title}>&nbsp;&nbsp;&nbsp; Time Remaining: {time}</Typography>
+                    {/*<Typography variant="h6" className={classes.title}>&nbsp;&nbsp;&nbsp; Time Remaining: {time}</Typography>*/}
+                    <Typography variant="h6" className={classes.title}>
+                        &nbsp;&nbsp;&nbsp; Duration: {workspace !== null ? <Moment date={workspace.created_at} format="hh:mm:ss" durationFromNow /> : null }
+                    </Typography>
 
                     {auth && (
                         <div>
@@ -565,6 +583,13 @@ function Workspace() {
                             onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
                         Change nickname
                     </Button>
+                    {workspace !== null && workspace.is_password_protected
+                    && tokenRef.current !== null && (
+                        <Button color="secondary" variant="contained" edge="end"
+                                onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
+                        Change password
+                        </Button>
+                    )}
                     <IconButton color="inherit" edge="end" onClick={handleMenu}>
                         <EmailIcon />
                     </IconButton>
@@ -664,7 +689,6 @@ function getTimeRemaining(created) {
 
     let date = new Date().toISOString()
 
-
     let now  = date.substring(7, 9) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4) + " " +
         date.substring(11, 19)
     date = created.created_at
@@ -673,8 +697,6 @@ function getTimeRemaining(created) {
         date.substring(11, 19)
 
     let mom = moment.utc(moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"))).format("HH:mm:ss")
-    //alert(mom)
-
 
     let from = moment("24:00:00", "hh:mm:ss")
     let sub = from.subtract(mom)
@@ -686,13 +708,6 @@ function getTimeRemaining(created) {
         time = time + (format + "").substring(2)
         return time
     }
-
-    alert(mom + " " + format)
-
-
-    //alert(create)
-
-    //date = date.substring(date.indexOf(':') - 1, date.indexOf('.'))
 
     return format
 }

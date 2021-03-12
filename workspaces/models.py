@@ -1,7 +1,7 @@
 import uuid
 
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
@@ -43,7 +43,7 @@ class Workspace(models.Model):
     expiration_date = models.DateTimeField()
     emailed_expires = models.BooleanField(default=False)  # have we emailed the user already
     # user field for workspace authentication in order to use default Django auth methods
-    user = models.OneToOneField(User, null=True, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return str(self.unique_id)
@@ -53,6 +53,14 @@ class Workspace(models.Model):
 
     def is_password_protected(self):
         return self.user is not None
+
+
+# catch pre-save signal for workspace to ensure anonymous_readable is set to false when
+# user is none
+@receiver(pre_save, sender=Workspace)
+def workspace_save_hook(sender, instance=None, **kwargs):
+    if instance is not None and instance.user is None:
+        instance.anonymous_readable = False
 
 
 # catch post-save signal for user to generate its token

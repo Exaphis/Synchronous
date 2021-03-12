@@ -1,3 +1,5 @@
+from abc import ABC, ABCMeta
+
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
@@ -27,3 +29,14 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         # override default create method to use custom workspace manager create
         workspace = Workspace.objects.create_workspace(**validated_data)
         return workspace
+
+
+class WorkspacePasswordChangeSerializer(serializers.Serializer):
+    model = Workspace
+    password = serializers.CharField(required=True, allow_blank=True, max_length=150)
+
+    def create(self, validated_data):
+        pass
+
+    def update(self, instance, validated_data):
+        pass

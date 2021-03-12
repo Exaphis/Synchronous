@@ -8,12 +8,47 @@ from rest_framework.exceptions import ValidationError, ParseError
 from rest_framework.response import Response
 
 from .models import Workspace
-from .serializers import WorkspaceSerializer
-from .permissions import IsReadableOrAuthenticated
+from .serializers import WorkspaceSerializer, WorkspacePasswordChangeSerializer
+from .permissions import IsReadableOrAuthenticated, IsAuthenticated
 from .inform_using_mail import send_mail_to
 
-# TODO: change password view
+
 # https://stackoverflow.com/questions/38845051/how-to-update-user-password-in-django-rest-framework
+class ChangePasswordView(generics.UpdateAPIView):
+    serializer_class = WorkspacePasswordChangeSerializer
+    model = Workspace
+    permission_classes = [IsAuthenticated]
+
+    def update(self, request, *args, unique_id=None, **kwargs):
+        if unique_id is None:
+            return Response({"error": True, "detail": "No unique ID."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        workspace = get_object_or_404(self.model, unique_id=unique_id)
+        if workspace.user is None:
+            return Response({"error": True, "detail": "Workspace has no password."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            new_password = serializer.data['password']
+            if not new_password:
+                workspace.user.delete()
+            else:
+                workspace.user.set_password(new_password)
+                workspace.user.save()
+
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'message': 'Password updated successfully',
+                'data': []
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkspaceCreateView(generics.CreateAPIView):
