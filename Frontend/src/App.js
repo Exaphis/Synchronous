@@ -46,6 +46,15 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import EmailIcon from '@material-ui/icons/Email';
+import IconButton from '@material-ui/core/IconButton';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import clsx from 'clsx';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
+
 import {useContext, useState } from 'react'
 
 import LogRocket from 'logrocket';
@@ -333,12 +342,32 @@ function Workspace() {
     const [ userListWs, setUserListWs ] = React.useState(null);
     const [ userList, setUserList ] = React.useState({});
     const userIdRef = React.useRef(null);
+    const [auth, setAuth] = React.useState(true);
     const [ received, setReceived ] = React.useState(false);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const [ validEmail, setValidEmail ] = React.useState(true)
     console.log(JSON.stringify(userList));
 
     /*if (!received && localStorage.getItem(uniqueId) === null) {
         checkForPassword(uniqueId, received, setReceived)
     }*/
+
+    const handleChange = (event) => {
+        setAuth(event.target.checked);
+    };
+
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+        document.getElementById('email').value = ""
+        document.getElementById('message').value = ""
+        setValidEmail(true)
+    };
+
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -476,6 +505,81 @@ function Workspace() {
 
     return (
         <Container component="main" maxWidth="xl">
+            <AppBar position="absolute" className={clsx(classes.appBar)}>
+                <Toolbar className={classes.toolbar}>
+                    <Typography variant="h6" className={classes.title}>
+                        {workspace !== null ?
+                            (workspace.nickname !== null ?
+                                "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
+                                "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
+                            ""}
+                    </Typography>
+                    {auth && (
+                        <div>
+                    <IconButton color="inherit" edge="end" onClick={handleMenu}>
+                        <EmailIcon />
+                    </IconButton>
+                    <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        open={open}
+                        onClose={handleClose}
+                    >
+                        <Container component="main" maxWidth="xs">
+                            <div className={classes.paper}>
+                            &nbsp;{"Invite Collaborators:"}
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                id="email"
+                                label="Email"
+                                error={!validEmail}
+                                helperText={validEmail ? "" : "Invalid Email"}
+                                required
+                                autoFocus
+                            >
+                            </TextField>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                id="message"
+                                label="Additonal Message?"
+                            >
+                            </TextField>
+                                <Button
+                                    size="large"
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}
+                                    onClick={() => emailHandler(document.getElementById('email'),
+                                        document.getElementById('message'),
+                                        workspace,
+                                        validEmail,
+                                        setValidEmail
+                                    )}
+                                >
+                                    Submit
+                                </Button>
+                            </div>
+                        </Container>
+                    </Menu>
+                    </div>
+                    )}
+                </Toolbar>
+            </AppBar>
+            <Box mt={10}>
+            </Box>
             <h1>{JSON.stringify(workspace)}</h1>
             <p>{JSON.stringify(userList)}</p>
             <Table>
@@ -502,6 +606,48 @@ function Workspace() {
     )
 
 }
+
+async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
+
+    let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+
+    if (regex.test(email.value)) {
+        let name = workspace.nickname !== null ? JSON.stringify(workspace.nickname) :
+            JSON.stringify(workspace.unique_id)
+        name = name.substring(1, name.length - 1)
+        let resp = await fetchAPI('POST', 'send-mail/',
+        {
+            email: email.value,
+            subject: "Workspace Invitation",
+            message: "Hello,\n\n" +
+                "You are invited to join Workspace: " + name + "\n" +
+                "http://localhost:3000/Workspace/" + workspace.unique_id + "\n\n" +
+                "Additional Notes: " + message.value + "\n\n\n" +
+                "Best wishes,\n" +
+                "Synchronous"
+        })
+
+        if (resp.error) {
+            if (JSON.stringify(resp.details).includes("200")) {
+                alert('Email Sent');
+                setValidEmail(true)
+            } else {
+                alert('error!');
+                alert(JSON.stringify(resp.details))
+                setValidEmail(false)
+            }
+        } else {
+            alert('Email Sent');
+            setValidEmail(true)
+        }
+
+    } else {
+        alert("Invalid Email")
+        setValidEmail(false)
+    }
+}
+
 
 async function checkForPassword(uniqueID, received, setReceived) {
     setReceived(true)
@@ -1006,6 +1152,8 @@ function refresh() {
   })
 }
 
+const drawerWidth = 240;
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -1029,6 +1177,24 @@ const useStyles = makeStyles((theme) => ({
     height: theme.spacing(16),
     width: theme.spacing(16),
   },
+    appBar: {
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    appBarShift: {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    title: {
+        flexGrow: 1,
+    },
 }));
 
 
