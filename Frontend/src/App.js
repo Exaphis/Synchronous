@@ -616,6 +616,8 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
         let name = workspace.nickname !== null ? JSON.stringify(workspace.nickname) :
             JSON.stringify(workspace.unique_id)
         name = name.substring(1, name.length - 1)
+        let key = localStorage.getItem(workspace.unique_id)
+        key = key !== null ? key : "N/A"
         let resp = await fetchAPI('POST', 'send-mail/',
         {
             email: email.value,
@@ -623,6 +625,7 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
             message: "Hello,\n\n" +
                 "You are invited to join Workspace: " + name + "\n" +
                 "http://localhost:3000/Workspace/" + workspace.unique_id + "\n\n" +
+                "Password: " + key + "\n\n" +
                 "Additional Notes: " + message.value + "\n\n\n" +
                 "Best wishes,\n" +
                 "Synchronous"
