@@ -342,12 +342,13 @@ function Workspace() {
     const [ userListWs, setUserListWs ] = React.useState(null);
     const [ userList, setUserList ] = React.useState({});
     const userIdRef = React.useRef(null);
+    const tokenRef = React.useRef(null);
     const [auth, setAuth] = React.useState(true);
     const [ received, setReceived ] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const [ validEmail, setValidEmail ] = React.useState(true)
-    console.log(JSON.stringify(userList));
+    //console.log(JSON.stringify(userList));
 
     /*if (!received && localStorage.getItem(uniqueId) === null) {
         checkForPassword(uniqueId, received, setReceived)
@@ -371,9 +372,10 @@ function Workspace() {
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
-        let token = localStorage.getItem(uniqueId);
-        let resp = await fetchAPI('GET', 'workspace/' + uniqueId, null, token);
+        tokenRef.current = localStorage.getItem(uniqueId);
+        let resp = await fetchAPI('GET', 'workspace/' + uniqueId, null, tokenRef.current);
         // TODO: handle response errors
+        console.log(resp);
         setWorkspace(resp);
     };
 
@@ -446,14 +448,43 @@ function Workspace() {
         } else if (userListWs === null) {
             userListConnect()
         }
-        //
-        console.log('in effect');
     });
-    // console.log('end: ' + JSON.stringify(userList));
+
+    async function updateNickname(new_nickname) {
+        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/',
+            {
+                'nickname': new_nickname
+            },
+            tokenRef.current
+        );
+        if (resp === null) {
+            alert('Nickname failed to set, no response.');
+        } else if ('error' in resp) {
+            alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
+        }else {
+            await getWorkspace();
+        }
+    }
+
+    async function updateNickname(new_nickname) {
+        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/',
+            {
+                'nickname': new_nickname
+            },
+            tokenRef.current
+        );
+        if (resp === null) {
+            alert('Nickname failed to set, no response.');
+        } else if ('error' in resp) {
+            alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
+        }else {
+            await getWorkspace();
+        }
+    }
 
     function NicknameCell(props) {
         let user = props.user;
-        console.log(userIdRef.current === user.id);
+        // console.log(userIdRef.current === user.id);
         if (user.id === userIdRef.current) {
             return <TableCell>
                 <Typography fontWeight={900}>{user.nickname}</Typography>
@@ -503,6 +534,25 @@ function Workspace() {
         )
     }
 
+    let workspace_details;
+    if (workspace === null) {
+        workspace_details = <p>Null</p>
+    } else {
+        let view_dialog = <p>Workspace editable</p>
+        if (workspace.anonymous_readable && tokenRef.current === null) {
+            view_dialog = <p>Password empty, view only</p>
+        }
+
+        workspace_details = <div>
+            <p>Workspace unique_id: {workspace.unique_id}</p>
+            <p>Workspace nickname: {workspace.nickname}</p>
+            <p>Created at: {workspace.created_at}</p>
+            <p>Password protected: {workspace.is_password_protected.toString()}</p>
+            <p>Allow view only: {workspace.anonymous_readable.toString()}</p>
+            {view_dialog}
+        </div>
+    }
+
     return (
         <Container component="main" maxWidth="xl">
             <AppBar position="absolute" className={clsx(classes.appBar)}>
@@ -516,6 +566,10 @@ function Workspace() {
                     </Typography>
                     {auth && (
                         <div>
+                    <Button color="secondary" variant="contained" edge="end"
+                            onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
+                        Change nickname
+                    </Button>
                     <IconButton color="inherit" edge="end" onClick={handleMenu}>
                         <EmailIcon />
                     </IconButton>
@@ -580,8 +634,9 @@ function Workspace() {
             </AppBar>
             <Box mt={10}>
             </Box>
-            <h1>{JSON.stringify(workspace)}</h1>
-            <p>{JSON.stringify(userList)}</p>
+            {/*<h1>{JSON.stringify(workspace)}</h1>*/}
+            {/*<p>{JSON.stringify(userList)}</p>*/}
+            {workspace_details}
             <Table>
                 <TableHead>
                     <TableRow>

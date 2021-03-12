@@ -19,8 +19,11 @@ class WorkspaceManager(models.Manager):
         if not nickname:
             nickname = None
 
+        if not password:
+            anonymous_readable = False
+
         workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable)
-        workspace.expiration_date = timezone.now()+datetime.timedelta(minutes=2)
+        workspace.expiration_date = timezone.now() + datetime.timedelta(minutes=2)
         workspace.save()
 
         if password:
@@ -47,6 +50,9 @@ class Workspace(models.Model):
 
     def get_user_list_endpoint(self):
         return f'ws/{self.unique_id}/user-list/'
+
+    def is_password_protected(self):
+        return self.user is not None
 
 
 # catch post-save signal for user to generate its token

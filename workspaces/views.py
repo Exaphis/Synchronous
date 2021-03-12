@@ -12,6 +12,9 @@ from .serializers import WorkspaceSerializer
 from .permissions import IsReadableOrAuthenticated
 from .inform_using_mail import send_mail_to
 
+# TODO: change password view
+# https://stackoverflow.com/questions/38845051/how-to-update-user-password-in-django-rest-framework
+
 
 class WorkspaceCreateView(generics.CreateAPIView):
     queryset = Workspace.objects.all()
