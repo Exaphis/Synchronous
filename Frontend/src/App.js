@@ -45,6 +45,7 @@ import moment from 'moment/min/moment-with-locales';
 
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
+import ContextMenu from "react-context-menu";
 
 LogRocket.init('a1vl8a/synchronous');
 
@@ -245,7 +246,7 @@ function Copyright() {
 // ReactDOM.render(<Search />, document.querySelector("#container"))
 
 function WorkspaceApp(props) {
-    const uuid = useRef(uuidv4());
+    const uuid = useRef(props.uuid);
     const nodeRef = useRef(null);
     const [minimized, setMinimized] = useState(false);
     const [val, setVal] = useState(props.id.toString());
@@ -256,26 +257,41 @@ function WorkspaceApp(props) {
         setRefresh(e => !e);
     }
 
+    console.log('uuid:')
+    console.log(uuid.current);
+
     let contents;
     if (!minimized) {
-        contents = <div ref={nodeRef} key={uuid}>
+        contents = <div ref={nodeRef} id={uuid.current}>
             <Button variant="contained" onClick={onDelete}>Delete</Button>
             <Button variant="contained" onClick={() => setMinimized(true)}>Minimize</Button>
             <TextareaAutosize value={val}
                               onChange={(e) => setVal(e.target.value)} />
         </div>
     } else {
-        contents = <div ref={nodeRef} key={uuid}>
+        contents = <div ref={nodeRef} id={uuid.current}>
             <Button variant="contained" onClick={onDelete}>Delete</Button>
             <Button variant="contained" onClick={() => setMinimized(false)}>Maximize</Button>
         </div>
     }
 
+    console.log('uuid:')
+    console.log(uuid.current);
+
     if (!props.isDeleted()) {
         return (
-            <Draggable key={uuid} nodeRef={nodeRef}>
+            <div>
+                <Draggable key={uuid.current} nodeRef={nodeRef}>
                 {contents}
-            </Draggable>
+                </Draggable>
+                <ContextMenu contextId={uuid.current.toString()}
+                  items={[
+                    {
+                      label: 'Delete',
+                      onClick: onDelete
+                    }
+                ]} />
+            </div>
         )
     }
 
@@ -313,7 +329,8 @@ function WorkspaceTab(props) {
             apps[newAppId] = {
                 key: key,
                 component: <WorkspaceApp id={newAppId} key={key}
-                                         isDeleted={isDeleted} onDelete={deleteApp}/>,
+                                         isDeleted={isDeleted} onDelete={deleteApp}
+                                         uuid={key}/>,
             };
             newAppIdRef.current++;
             setRefresh(e => !e);

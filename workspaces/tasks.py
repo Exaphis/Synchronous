@@ -31,7 +31,8 @@ def delete_old_workspace():
             # )
             subject = 'Workspace ' + str(w.unique_id) + 'will be deleted in an hour'
             message = 'The 24 hours for your workspace are about to be up! Save your progress! :)'
-            receiver = 'sakshamj23@gmail.com'
+            # receiver = 'sakshamj23@gmail.com'
+            receiver = 'kevin@kevinniuwu.com'
             w.emailed_expires = True
             w.save()
             send_mail_to(subject, message, [receiver])
