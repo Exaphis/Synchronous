@@ -10,7 +10,7 @@ import datetime
 
 
 class WorkspaceManager(models.Manager):
-    def create_workspace(self, nickname, password, anonymous_readable):
+    def create_workspace(self, nickname=None, password=None, anonymous_readable=False):
         """
         Creates and returns workspace with the given attributes.
 
