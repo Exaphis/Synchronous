@@ -48,6 +48,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import {useContext, useState } from 'react'
 
+import Countdown from 'react-countdown';
+
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 
@@ -408,6 +410,7 @@ function Workspace() {
     const [refresh, setRefresh] = useState(false);
     useInterval(() => {
         setUserList((ul) => updateInactivityText(ul));
+        updateTimer(workspace);
         setRefresh((refresh) => !refresh);  // if this isn't here it doesn't work
     }, 1000);
 
@@ -421,7 +424,15 @@ function Workspace() {
         console.log('in effect');
     });
     // console.log('end: ' + JSON.stringify(userList));
-
+    const updateTimer = (workspace) => {
+      
+      ReactDOM.render(
+        <Countdown date={Date.parse(workspace['expiration_date'])} />,
+        document.getElementById("root")
+      );
+  
+  };
+    
     function NicknameCell(props) {
         let user = props.user;
         console.log(userIdRef.current === user.id);
