@@ -466,22 +466,6 @@ function Workspace() {
         }
     }
 
-    async function updateNickname(new_nickname) {
-        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/',
-            {
-                'nickname': new_nickname
-            },
-            tokenRef.current
-        );
-        if (resp === null) {
-            alert('Nickname failed to set, no response.');
-        } else if ('error' in resp) {
-            alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
-        }else {
-            await getWorkspace();
-        }
-    }
-
     function NicknameCell(props) {
         let user = props.user;
         // console.log(userIdRef.current === user.id);
