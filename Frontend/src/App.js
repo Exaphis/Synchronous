@@ -54,6 +54,8 @@ import clsx from 'clsx';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
+import Moment from 'react-moment';
+import moment from 'moment/min/moment-with-locales';
 
 import {useContext, useState } from 'react'
 
@@ -69,6 +71,7 @@ setupLogRocketReact(LogRocket);
 
 const WorkspaceContext = React.createContext(true);
 const ElementContext = React.createContext(true);
+
 
 export default function App() {
   const [valid, setValid] = useState(true)
@@ -537,17 +540,25 @@ function Workspace() {
         </div>
     }
 
+    let time = getTimeRemaining(workspace)
+
+
+
     return (
         <Container component="main" maxWidth="xl">
             <AppBar position="absolute" className={clsx(classes.appBar)}>
                 <Toolbar className={classes.toolbar}>
-                    <Typography variant="h6" className={classes.title}>
+                    <Typography variant="h4" className={classes.title}>
                         {workspace !== null ?
                             (workspace.nickname !== null ?
                                 "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
                                 "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
                             ""}
+
+
                     </Typography>
+                    <Typography variant="h6" className={classes.title}>&nbsp;&nbsp;&nbsp; Time Remaining: {time}</Typography>
+
                     {auth && (
                         <div>
                     <Button color="secondary" variant="contained" edge="end"
@@ -644,6 +655,46 @@ function Workspace() {
         </Container>
     )
 
+}
+
+function getTimeRemaining(created) {
+    if (created === null) {
+        return 0
+    }
+
+    let date = new Date().toISOString()
+
+
+    let now  = date.substring(7, 9) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4) + " " +
+        date.substring(11, 19)
+    date = created.created_at
+
+    let then = date.substring(7, 9) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4) + " " +
+        date.substring(11, 19)
+
+    let mom = moment.utc(moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"))).format("HH:mm:ss")
+    //alert(mom)
+
+
+    let from = moment("24:00:00", "hh:mm:ss")
+    let sub = from.subtract(mom)
+    let format = moment(sub).format("hh:mm:ss")
+
+    if (parseInt((mom + "").substring(0,2)) < 12) {
+        let time = ""
+        time = time + (parseInt((format + "").substring(0,2)) + 12)
+        time = time + (format + "").substring(2)
+        return time
+    }
+
+    alert(mom + " " + format)
+
+
+    //alert(create)
+
+    //date = date.substring(date.indexOf(':') - 1, date.indexOf('.'))
+
+    return format
 }
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
