@@ -2,27 +2,16 @@ import logo from './logo.png';
 import s from './s.png';
 import './App.css';
 import * as React from 'react'
-import {useRef} from 'react'
+import {useContext, useRef, useState} from 'react'
 import useInterval from '@use-it/interval';
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useHistory,
-  useParams
-  //useRouteMatch,
-  //withRouter
-} from "react-router-dom";
+import {BrowserRouter as Router, Link, Route, Switch, useHistory, useParams} from "react-router-dom";
 
 // import ReactDOM from 'react-dom'
-import ReactDOM, { render } from 'react-dom'
-import { useIdleTimer } from 'react-idle-timer'
+import {useIdleTimer} from 'react-idle-timer'
 //import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
-import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
-import reactMinimize from 'react-minimize'
+import Draggable from 'react-draggable'; // Both at the same time
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -30,21 +19,19 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-import {
-    Table,
-    TableRow,
-    TableCell,
-    TableBody,
-    TableHead
-} from '@material-ui/core';
+//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+//import AddIcon from '@material-ui/icons/Add'
+import {Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs} from '@material-ui/core';
 
 //import {Link as uiLink} from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-//import AddIcon from '@material-ui/icons/Add'
+import AddIcon from '@material-ui/icons/Add';
+import {v4 as uuidv4} from 'uuid';
+
+
 import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import EmailIcon from '@material-ui/icons/Email';
 import IconButton from '@material-ui/core/IconButton';
@@ -52,12 +39,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import clsx from 'clsx';
 import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import Moment from 'react-moment';
 import moment from 'moment/min/moment-with-locales';
-
-import {useContext, useState } from 'react'
 
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
@@ -260,79 +244,149 @@ function Copyright() {
 
 // ReactDOM.render(<Search />, document.querySelector("#container"))
 
-function Test() {
-    const [apps, setApps] = useState({});
-    const newAppIdRef = useRef(0);
-
+function WorkspaceApp(props) {
+    const uuid = useRef(uuidv4());
+    const nodeRef = useRef(null);
+    const [minimized, setMinimized] = useState(false);
+    const [val, setVal] = useState(props.id.toString());
     const [refresh, setRefresh] = useState(false);
+
+    const onDelete = () => {
+        props.onDelete();
+        setRefresh(e => !e);
+    }
+
+    let contents;
+    if (!minimized) {
+        contents = <div ref={nodeRef} key={uuid}>
+            <Button variant="contained" onClick={onDelete}>Delete</Button>
+            <Button variant="contained" onClick={() => setMinimized(true)}>Minimize</Button>
+            <TextareaAutosize value={val}
+                              onChange={(e) => setVal(e.target.value)} />
+        </div>
+    } else {
+        contents = <div ref={nodeRef} key={uuid}>
+            <Button variant="contained" onClick={onDelete}>Delete</Button>
+            <Button variant="contained" onClick={() => setMinimized(false)}>Maximize</Button>
+        </div>
+    }
+
+    if (!props.isDeleted()) {
+        return (
+            <Draggable key={uuid} nodeRef={nodeRef}>
+                {contents}
+            </Draggable>
+        )
+    }
+
+    return null;
+}
+
+function WorkspaceTab(props) {
+    // console.log('props: ');
+    // console.log(props.setRefresh);
+
+    const newAppIdRef = useRef(0);
+    const [apps, setApps] = useState({});
+    const [refresh, setRefresh] = useState(false);
+
+    const deletedRef = useRef({})
+
     const addApp = () => {
         setApps((apps) => {
             let newAppId = newAppIdRef.current;
 
-            let newApp = {
-                id: newAppId,
-                _minimized: false,
-                _val: newAppId.toString(),
-                get minimized() {
-                    return this._minimized;
-                },
-                set minimized(isMinimized) {
-                    this._minimized = isMinimized;
-                    setRefresh(e => !e);
-                },
-                get val() {
-                    return this._val;
-                },
-                set val(newVal) {
-                    this._val = newVal;
-                    setRefresh(e => !e);
-                },
-                deleteApp: function () {
-                    console.log('delete ' + this.id);
-                    delete apps[this.id];
-                    console.log(JSON.stringify(apps));
-                    setRefresh(e => !e);
-                }
-            };
+            const key = uuidv4();
 
-            newApp.deleteApp = newApp.deleteApp.bind(newApp);
-            apps[newAppId] = newApp;
+            deletedRef.current[key] = false;
+            const deleteApp = function () {
+                deletedRef.current[key] = true;
+                setRefresh(e => !e);
+                props.setRefresh(e => !e);
+            }
+
+            const isDeleted = () => {
+                console.log(deletedRef.current[key]);
+                return deletedRef.current[key];
+            }
+
+            apps[newAppId] = {
+                key: key,
+                component: <WorkspaceApp id={newAppId} key={key}
+                                         isDeleted={isDeleted} onDelete={deleteApp}/>,
+            };
             newAppIdRef.current++;
+            setRefresh(e => !e);
+            props.setRefresh(e => !e);
+            console.log('addApp');
 
             return apps;
         });
-
-        setRefresh(e => !e);
     };
 
+    console.log(Object.keys(apps).length);
+    console.log(deletedRef.current);
     return (
-      <div>
-          <Button variant="contained" onClick={addApp}>Add app</Button>
+        // TODO: set invisible when tab switch
+        <div style={{visibility: props.isVisible() ? "block" : "block"}}>
+            <Button variant="contained" onClick={addApp}>Add app</Button>
+            {Object.values(apps).map((app) => app.component)}
+        </div>
+    )
+}
 
-          {Object.values(apps).map((app) => {
-              let appContents;
-              console.log(app.minimized);
-              if (!app.minimized) {
-                  appContents = <div>
-                      <Button variant="contained" onClick={app.deleteApp}>Delete</Button>
-                      <Button variant="contained" onClick={() => app.minimized = true}>Minimize</Button>
-                      <TextareaAutosize value={app.val}
-                                        onChange={(e) => app.val = e.target.value} />
-                  </div>;
-              } else {
-                  appContents = <div>
-                      <Button variant="contained" onClick={app.deleteApp}>Delete</Button>
-                      <Button variant="contained" onClick={() => app.minimized = false}>Maximize</Button>
-                  </div>;
-              }
+function Test() {
+    const [refresh, setRefresh] = useState(false);
+    const [tabs, setTabs] = useState({});
+    const [currTab, setCurrTab] = useState(-1);
+    const numTabs = useRef(0);
 
-              return (
-                  <Draggable>
-                      {appContents}
-                  </Draggable>
-              );
-          })}
-      </div>
+    const handleTabChange = (event, newValue) => {
+        setCurrTab(newValue);
+    };
+
+    function isTabVisible(tabNum) {
+        return currTab === tabNum;
+    }
+
+    const createNewTab = () => {
+        let newTabIdx = numTabs.current;
+        let uuid = uuidv4();
+        tabs[newTabIdx] = {
+            component: <WorkspaceTab key={uuid} setRefresh={setRefresh}
+                                     isVisible={() => isTabVisible(newTabIdx)} />,
+            idx: newTabIdx,
+            uuid: uuid
+        }
+        setTabs(tabs);
+
+        numTabs.current++;
+        setCurrTab(newTabIdx);
+        setRefresh(e => !e);
+    }
+
+    return (
+        <Container component="main" maxWidth="xl">
+        <AppBar position="static">
+            <Tabs value={currTab} edge="start" onChange={handleTabChange}>
+                {
+                    tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
+                        <Tab key={tab.uuid} label={"Tab " + tab.idx.toString()}/>
+                    ))
+                }
+            </Tabs>
+            <IconButton color="inherit" edge="end" onClick={createNewTab}>
+                <AddIcon />
+            </IconButton>
+        </AppBar>
+
+        {
+            tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
+                tab.component
+            ))
+        }
+
+        </Container>
     )
 }
 
