@@ -1,0 +1,16 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 3 (Summary)
+3/08/21 2 hrs    5b62a74 Join workspace API with frontend
+3/09/21 30 mins  d949bc7 Add nickname translation to allow users to access
+                         workspaces by nickname
+3/10/21 4 hrs    848c379 Create user list using Django Channels and Websockets
+3/10/21 3 hrs    d7f5016 Show user list in frontend
+3/10/21 1 hr     b9f4e92 Help merge timed workspace deletion
+3/12/21 2 hrs    d12fd23 Allow users to change workspace password
+
+Week 4 (Plan)
+3/17/21 5 hrs    Research and host various open source collaborative text editors
+3/18/21 3 hrs    Allow drag and resizing of iframes
+3/19/21 2 hrs    Add app link functionality to backend

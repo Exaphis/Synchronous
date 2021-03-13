@@ -1246,8 +1246,8 @@ async function HandleOpen(name, password, history, work, usedID) {
     } else {
         if (password.value === "") {
             //if (await checkPass(name.value)) {
-                resp = await fetchAPI('GET', 'workspace/' + name.value);
-            //    openWithout(name.value, resp, work, history)
+            resp = await fetchAPI('GET', 'workspace/' + name.value);
+            openWithout(name.value, resp, work, history)
             //} else {
             //    work.setValid(false)
             //}

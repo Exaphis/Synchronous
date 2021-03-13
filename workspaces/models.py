@@ -57,10 +57,11 @@ class Workspace(models.Model):
 
 # catch pre-save signal for workspace to ensure anonymous_readable is set to false when
 # user is none
-@receiver(pre_save, sender=Workspace)
-def workspace_save_hook(sender, instance=None, **kwargs):
-    if instance is not None and instance.user is None:
-        instance.anonymous_readable = False
+# TODO: fix this it breaks things
+# @receiver(pre_save, sender=Workspace)
+# def workspace_save_hook(sender, instance=None, **kwargs):
+#     if instance is not None and instance.user is None:
+#         instance.anonymous_readable = False
 
 
 # catch post-save signal for user to generate its token
