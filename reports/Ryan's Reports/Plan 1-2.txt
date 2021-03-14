@@ -1,0 +1,23 @@
+Weekly Individual Report (Team 10: Synchronous)
+Name: Ryan Borzello
+
+Week 0 (Summary)
+2-25 1 Hour N/A Went through the React intro Tutorial 
+2-25 1 Hour N/A Went through the React game Tutorial
+2-27 1 Hour b86017462683f03774fa7ee650f259b39c4e6be5 Set React App within Webstorm and linked with git Repository
+2-27 1 Hour a5df567a7fab8a48e227889c5c4c050e5da70dbf Implemented a simple tic-tac-toe game, and sucessfully ran it online
+2-27 2 Hour 17ffe0aa5cca17d1564864610e559c7633bd4728 Created an initial Title screen interface
+
+Week 1 (Summary)
+3-5 3 Hours 92fa5acb6af2560b1b3b1b6d613b94d92bc747b5 Added website redirection 
+3-6 1 Hour 7a16b3c8e1c338019101fe7f18e4a6328c07a43f Created "Create Workspace" UI
+3-6 1 Hour 7fa124084881ed9e868c0cdb0f6899803cbbfdab Created "Open Workspace" UI
+3-7 2 Hours 6ecff48bf13acfa9916bdf9d1688eb0b98e12852 Created email to test invities
+
+Week 2 (Plan)
+3-8  6 Hours Check database for exisiting workspace names
+3-9  4 Refine UI
+3-10 2 Hours Finish email functionality
+3-11 4 Hours Enable creating multiple resizable application windows
+3-12 2 Hours Quality of life improvements
+
