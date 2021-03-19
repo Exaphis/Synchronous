@@ -54,15 +54,12 @@ setupLogRocketReact(LogRocket);
   drift.track('LogRocket', { sessionURL: sessionURL });
 });*/
 
-const WorkspaceContext = React.createContext(true);
 const ElementContext = React.createContext(true);
 
 
 export default function App() {
-  const [valid, setValid] = useState(true)
 
   return (
-      <WorkspaceContext.Provider value={{valid, setValid}}>
           <Router>
             <div>
               <Switch>
@@ -87,7 +84,6 @@ export default function App() {
               </Switch>
             </div>
           </Router>
-      </WorkspaceContext.Provider>
   );
 }
 
@@ -213,18 +209,6 @@ function SignIn() {
       </Container>
   );
 }
-
-function Copyright() {
-  return (
-      <Typography variant="body2" color="textSecondary" align="center">
-        {'Copyright © Synchronous '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
-
 
 // const Search = () => {
 //   const [showResults, setShowResults] = React.useState(false)
@@ -417,15 +401,11 @@ function Workspace() {
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
     const [auth, setAuth] = React.useState(true);
-    const [ received, setReceived ] = React.useState(false);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const [ validEmail, setValidEmail ] = React.useState(true)
     //console.log(JSON.stringify(userList));
 
-    /*if (!received && localStorage.getItem(uniqueId) === null) {
-        checkForPassword(uniqueId, received, setReceived)
-    }*/
 
     const handleChange = (event) => {
         setAuth(event.target.checked);
@@ -599,7 +579,7 @@ function Workspace() {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
-                        onClick={ refresh }
+                        //onClick={ refresh }
                     >
                         Return to open workspace
                     </Button>
@@ -630,7 +610,6 @@ function Workspace() {
         </div>
     }
 
-    let time = getTimeRemaining(workspace)
 
     return (
         <Container component="main" maxWidth="xl">
@@ -753,114 +732,17 @@ function Workspace() {
 
 }
 
-function getTimeRemaining(created) {
-    if (created === null) {
-        return 0
-    }
-
-    let date = new Date().toISOString()
-
-    let now  = date.substring(7, 9) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4) + " " +
-        date.substring(11, 19)
-    date = created.created_at
-
-    let then = date.substring(7, 9) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4) + " " +
-        date.substring(11, 19)
-
-    let mom = moment.utc(moment(now,"DD/MM/YYYY HH:mm:ss").diff(moment(then,"DD/MM/YYYY HH:mm:ss"))).format("HH:mm:ss")
-
-    let from = moment("24:00:00", "hh:mm:ss")
-    let sub = from.subtract(mom)
-    let format = moment(sub).format("hh:mm:ss")
-
-    if (parseInt((mom + "").substring(0,2)) < 12) {
-        let time = ""
-        time = time + (parseInt((format + "").substring(0,2)) + 12)
-        time = time + (format + "").substring(2)
-        return time
-    }
-
-    return format
-}
-
-async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
-
-    let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-
-    if (regex.test(email.value)) {
-        let name = workspace.nickname !== null ? JSON.stringify(workspace.nickname) :
-            JSON.stringify(workspace.unique_id)
-        name = name.substring(1, name.length - 1)
-        let key = localStorage.getItem(workspace.unique_id)
-        key = key !== null ? key : "N/A"
-        let resp = await fetchAPI('POST', 'send-mail/',
-        {
-            email: email.value,
-            subject: "Workspace Invitation",
-            message: "Hello,\n\n" +
-                "You are invited to join Workspace: " + name + "\n" +
-                "http://localhost:3000/Workspace/" + workspace.unique_id + "\n\n" +
-                "Password: " + key + "\n\n" +
-                "Additional Notes: " + message.value + "\n\n\n" +
-                "Best wishes,\n" +
-                "Synchronous"
-        })
-
-        if (resp.error) {
-            if (JSON.stringify(resp.details).includes("200")) {
-                alert('Email Sent');
-                setValidEmail(true)
-            } else {
-                alert('error!');
-                alert(JSON.stringify(resp.details))
-                setValidEmail(false)
-            }
-        } else {
-            alert('Email Sent');
-            setValidEmail(true)
-        }
-
-    } else {
-        alert("Invalid Email")
-        setValidEmail(false)
-    }
-}
-
-
-async function checkForPassword(uniqueID, received, setReceived) {
-    setReceived(true)
-    let resp = await fetchAPI('POST', 'api-token-auth/',
-        {
-            unique_id: uniqueID,
-            password: 'TEST'
-        });
-
-    if (resp.error) {
-        if (JSON.stringify(resp.details).includes("Workspace is globally editable")) {
-            localStorage.setItem(uniqueID, "")
-        }
-        alert('error!');
-        alert(JSON.stringify(resp.details))
-    } else {
-        alert('success!')
-        alert(JSON.stringify(resp));
-        alert(resp.unique_id)
-        setReceived(false)
-    }
-}
 
 function Create() {
 
   const classes = useStyles();
-  const work = useContext(WorkspaceContext)
+  const [work, setWork] = useState(true);
   const history = useHistory();
   const [checked, setChecked] = React.useState(false);
   const handleChange = (event) => {
       setChecked(event.target.checked);
   };
 
-  if (work.valid) {
     return (
         <Container component="main" maxWidth="xs">
           <CssBaseline/>
@@ -880,6 +762,8 @@ function Create() {
                       name="workspace"
                       autoComplete="workspace"
                       autoFocus
+                      error={!work}
+                      helperText={work ? "" : "Workspace Name is invalid/taken"}
                   />
               <Grid container >
                   <TextField
@@ -912,8 +796,9 @@ function Create() {
                       document.getElementById('password'),
                       history,
                       work,
+                      setWork,
                       checked
-                  ) ? "" : work.setValid(false)}
+                  ) ? "" : setWork(false)}
               >
                 Create Workspace
               </Button>
@@ -921,7 +806,7 @@ function Create() {
                 <Grid item xs>
                   <Link
                       to="/Open"
-                      onClick={() => work.setValid(true)}
+                      onClick={() => setWork(true)}
                   >
                     Existing Workspace?
                   </Link>
@@ -933,89 +818,10 @@ function Create() {
           </Box>
         </Container>
     );
-  } else {
-
-    return (
-        <Container component="main" maxWidth="xs">
-          <CssBaseline/>
-          <div className={classes.paper}>
-            <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
-            <Box mt={4}>
-            </Box>
-            <Typography component="h2" variant="h5">
-              Create a Workspace
-            </Typography>
-            <TextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="name"
-                label="Workspace Name (Optional)"
-                name="workspace"
-                autoComplete="workspace"
-                autoFocus
-                error
-                helperText="Workspace Name is invalid/taken"
-            />
-            <Grid container >
-            <TextField
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                id="password"
-                label="Password (Optional)"
-                name="workspace"
-                type="password"
-                autoComplete="workspace"
-            />
-              <FormControlLabel
-                  control={<Checkbox color="primary" />}
-                  id="check"
-                  label="Allow View Only?"
-                  onChange={handleChange}
-              />
-            </Grid>
-            <Box mt={2}>
-            </Box>
-            <Button
-                size="large"
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-                onClick={() => HandleCreate(
-                    document.getElementById('name'),
-                    document.getElementById('password'),
-                    history,
-                    work,
-                    checked)}
-                error
-                helperText={"Workspace name is invalid/taken"}
-            >
-              Create Workspace
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                  <Link
-                      to="/Open"
-                      onClick={() => work.setValid(true)}
-                  >
-                      Existing Workspace?
-                  </Link>
-              </Grid>
-            </Grid>
-          </div>
-          <Box mt={16}>
-            <Copyright/>
-          </Box>
-        </Container>
-    );
-  }
 
 }
 
-async function HandleCreate(name, password, history, work, checked) {
+async function HandleCreate(name, password, history, work, setWork, checked) {
   let resp = await fetchAPI('POST', 'workspace/',
       {
           nickname: name.value,
@@ -1026,14 +832,14 @@ async function HandleCreate(name, password, history, work, checked) {
   if (resp.error) {
       alert('error!');
       alert(JSON.stringify(resp.details));
-      work.setValid(false)
+      setWork(false)
       return false
   }
   else {
       alert('success!')
       alert(JSON.stringify(resp));
       alert(resp.unique_id)
-      work.setValid(true)
+      setWork(true)
       if (password.value !== "") {
           //alert("password: " + password.value)
           let auth = await fetchAPI('POST', 'api-token-auth/',
@@ -1052,15 +858,13 @@ async function HandleCreate(name, password, history, work, checked) {
 
 function Open() {
   const classes = useStyles();
-  const work = useContext(WorkspaceContext)
   const history = useHistory();
-
+  const [work, setWork] = React.useState(true);
   const [checked, setChecked] = React.useState(false);
     const handleChange = (event) => {
         setChecked(event.target.checked);
     };
 
-  if (work.valid) {
       return (
           <Container component="main" maxWidth="xs">
               <CssBaseline/>
@@ -1081,6 +885,8 @@ function Open() {
                       name="workspace"
                       autoComplete="workspace"
                       autoFocus
+                      error={!work}
+                      helperText={work ? "" : "No Workspace with given credentials"}
                       required
                   />
                   <FormControlLabel
@@ -1113,8 +919,9 @@ function Open() {
                           document.getElementById('password'),
                           history,
                           work,
+                          setWork,
                           checked
-                      ) ? "" : work.setValid(false)}
+                      ) ? "" : setWork(false)}
                   >
                       Open
                   </Button>
@@ -1122,7 +929,7 @@ function Open() {
                       <Grid item xs>
                           <Link
                               to="/Create"
-                              onClick={() => work.setValid(true)}
+                              onClick={() => setWork(true)}
                           >
                               Need a new workspace?
                           </Link>
@@ -1134,106 +941,24 @@ function Open() {
               </Box>
           </Container>
       );
-  }
-
-    return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <div className={classes.paper}>
-                <Avatar  alt="s" src={s} className={classes.sizeAvatar} />
-                <Box mt={4}>
-                </Box>
-                <Typography component="h2" variant="h5">
-                    Open Existing Workspace
-                </Typography>
-                <Grid container >
-                    <TextField
-                        variant="outlined"
-                        margin="normal"
-                        fullWidth
-                        id="name"
-                        label={checked ? "Workspace ID" : "Workspace Name"}
-                        name="workspace"
-                        autoComplete="workspace"
-                        autoFocus
-                        required
-                        error
-                        helperText={"No Workspace with given credentials"}
-                    />
-                    <FormControlLabel
-                        control={<Checkbox color="primary" />}
-                        id="check"
-                        label="Use ID?"
-                        onChange={handleChange}
-                    />
-                </Grid>
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    fullWidth
-                    id="password"
-                    label="Password (if applicable)"
-                    name="workspace"
-                    type="password"
-                    autoComplete="workspace"
-                />
-                <Box mt={2}>
-                </Box>
-                <Button
-                    size="large"
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    className={classes.submit}
-                    onClick={() => HandleOpen(document.getElementById('name'),
-                        document.getElementById('password'),
-                        history,
-                        work,
-                        checked
-                    ) ? "" : work.setValid(false)}
-                >
-                    Open
-                </Button>
-                <Grid container>
-                    <Grid item xs>
-                        <Link
-                            to="/Create"
-                            onClick={() => work.setValid(true)}
-                        >
-                            Need a new workspace?
-                        </Link>
-                    </Grid>
-                </Grid>
-            </div>
-            <Box mt={16}>
-                <Copyright />
-            </Box>
-        </Container>
-        )
-
 
 }
 
-async function HandleOpen(name, password, history, work, usedID) {
+async function HandleOpen(name, password, history, work, setWork, usedID) {
     let resp;
     if (usedID === false) {
         let unique = await fetchAPI('GET', 'workspace/nickname/?nickname=' + name.value);
         if (unique.error) {
             alert('error!');
             alert(JSON.stringify(unique.details));
-            work.setValid(false)
+            setWork(false)
         }
 
         let length = JSON.stringify(unique).length
         unique = JSON.stringify(unique).substring(14, length-2);
         if (password.value === "") {
-            //if (await checkPass(unique)) {
                 resp = await fetchAPI('GET', 'workspace/' + unique + "/");
-                openWithout(unique, resp, work, history)
-            //} else {
-                //work.setValid(false)
-            //}
+                openWithout(unique, resp, work, setWork, history)
 
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
@@ -1241,76 +966,50 @@ async function HandleOpen(name, password, history, work, usedID) {
                     unique_id: unique,
                     password: password.value
                 });
-            openWith(unique, resp, work, history)
+            openWith(unique, resp, work, setWork, history)
         }
     } else {
         if (password.value === "") {
-            //if (await checkPass(name.value)) {
                 resp = await fetchAPI('GET', 'workspace/' + name.value);
-            //    openWithout(name.value, resp, work, history)
-            //} else {
-            //    work.setValid(false)
-            //}
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
                 {
                     unique_id: name.value,
                     password: password.value
                 });
-            openWith(name.value, resp, work, history)
+            openWith(name.value, resp, work, setWork, history)
         }
     }
-
 
 }
 
-/*async function checkPass(uniqueID) {
-    let resp = await fetchAPI('POST', 'api-token-auth/',
-        {
-            unique_id: uniqueID,
-            password: 'TEST'
-        });
 
+async function openWith(uniqueID, resp, work, setWork, history) {
     if (resp.error) {
-        if (JSON.stringify(resp.details).includes("Workspace is globally editable")) {
-            return true
-        }
-        alert('error!');
-        alert(JSON.stringify(resp.details))
-    } else {
-        alert('success!')
-        alert(JSON.stringify(resp));
-        alert(resp.unique_id)
-    }
-    return false
-}*/
-
-async function openWith(uniqueID, resp, work, history) {
-    if (resp.error) {
-        alert('error!');
-        alert(JSON.stringify(resp.details));
-        work.setValid(false)
+        //alert('error!');
+        //alert(JSON.stringify(resp.details));
+        setWork(false)
     }
     else {
         alert('success!')
         alert(JSON.stringify(resp));
-        work.setValid(true)
+        setWork(true)
         localStorage.setItem(uniqueID, resp.token)
 
         await history.push('/Workspace/' + resp.unique_id);
     }
 }
 
-async function openWithout(uniqueID, resp, work, history) {
+async function openWithout(uniqueID, resp, work, setWork, history) {
     if (resp.error) {
-        alert('error!');
-        alert(JSON.stringify(resp.details));
-        work.setValid(false)
+        //alert('error!');
+        //alert(JSON.stringify(resp.details));
+        setWork(false)
     }
     else {
         alert('success!')
         alert(JSON.stringify(resp));
-        work.setValid(true)
+        setWork(true)
 
         await history.push('/Workspace/' + resp.unique_id);
     }
@@ -1320,7 +1019,49 @@ function Upload() {
     return <h2>Upload: TODO</h2>
 }
 
+async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
 
+    // eslint-disable-next-line
+    let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+    if (regex.test(email.value)) {
+        let name = workspace.nickname !== null ? JSON.stringify(workspace.nickname) :
+            JSON.stringify(workspace.unique_id)
+        name = name.substring(1, name.length - 1)
+        let key = localStorage.getItem(workspace.unique_id)
+        key = key !== null ? key : "N/A"
+        let resp = await fetchAPI('POST', 'send-mail/',
+            {
+                email: email.value,
+                subject: "Workspace Invitation",
+                message: "Hello,\n\n" +
+                    "You are invited to join Workspace: " + name + "\n" +
+                    "http://localhost:3000/Workspace/" + workspace.unique_id + "\n\n" +
+                    "Password: " + key + "\n\n" +
+                    "Additional Notes: " + message.value + "\n\n\n" +
+                    "Best wishes,\n" +
+                    "Synchronous"
+            })
+
+        if (resp.error) {
+            if (JSON.stringify(resp.details).includes("200")) {
+                alert('Email Sent');
+                setValidEmail(true)
+            } else {
+                alert('error!');
+                alert(JSON.stringify(resp.details))
+                setValidEmail(false)
+            }
+        } else {
+            alert('Email Sent');
+            setValidEmail(true)
+        }
+
+    } else {
+        alert("Invalid Email")
+        setValidEmail(false)
+    }
+}
 
 const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -1331,8 +1072,17 @@ function refresh() {
   })
 }
 
-const drawerWidth = 240;
+function Copyright() {
+    return (
+        <Typography variant="body2" color="textSecondary" align="center">
+            {'Copyright © Synchronous '}
+            {new Date().getFullYear()}
+            {'.'}
+        </Typography>
+    );
+}
 
+const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
   paper: {
