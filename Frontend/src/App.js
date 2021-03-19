@@ -971,7 +971,7 @@ async function HandleOpen(name, password, history, work, setWork, usedID) {
     } else {
         if (password.value === "") {
             resp = await fetchAPI('GET', 'workspace/' + name.value);
-            openWithout(name.value, resp, work, history)
+            openWithout(name.value, resp, work, setWork, history)
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
                 {
