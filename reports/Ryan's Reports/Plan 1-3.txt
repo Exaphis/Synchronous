@@ -1,0 +1,33 @@
+Weekly Individual Report (Team 10: Synchronous)
+Name: Ryan Borzello
+
+Week 0 (Summary)
+2-25 1 Hour N/A Went through the React intro Tutorial 
+2-25 1 Hour N/A Went through the React game Tutorial
+2-27 1 Hour b86017462683f03774fa7ee650f259b39c4e6be5 Set React App within Webstorm and linked with git Repository
+2-27 1 Hour a5df567a7fab8a48e227889c5c4c050e5da70dbf Implemented a simple tic-tac-toe game, and sucessfully ran it online
+2-27 2 Hour 17ffe0aa5cca17d1564864610e559c7633bd4728 Created an initial Title screen interface
+
+Week 1 (Summary)
+3-5 3 Hours 92fa5acb6af2560b1b3b1b6d613b94d92bc747b5 Added website redirection 
+3-6 1 Hour 7a16b3c8e1c338019101fe7f18e4a6328c07a43f Created "Create Workspace" UI
+3-6 1 Hour 7fa124084881ed9e868c0cdb0f6899803cbbfdab Created "Open Workspace" UI
+3-7 2 Hours 6ecff48bf13acfa9916bdf9d1688eb0b98e12852 Created email to test invities
+
+Week 2 (Summary)
+3-8  2 Hours d8d29d0218d14f6b3e17f1b323fc2ac6f59017ec Fixed issues with the UI of text boxes
+3-8  3 Hours 5b62a74d9d52da1a7df0f8048be653058c98b02d Helped with linking frontend to backend
+3-9  3 Hours cccf13ceb2a688c09d87dd438db579d796d512d2 Error message when opening invalid workspace
+3-9  1 Hour  becd2954e88345d368aef3bcd5aed904656d3930 Created checkbox to specify input method
+3-9  3 Hours a9e4f2b856c3ce0aa01610c5bbe6b7b7d9828265 Allowed for reopening workspace by nickname or id
+3-10 3 Hours e8f9e34a54ca8edb246d6cf867303c9c091d358f Added password functionality
+3-11 1 Hours eb9efb8cae0ddcb954162d24074df760a204fcaa Added checkbox to set viewable
+3-11 2 Hours 0ce468253960a5bd711c25a29bba9ff58c22b589 Created App bar interface to the top
+3-11 3 Hours a9717dfa896b8285479424741551fd75abfffbb9 Finished email invites
+3-12 1 Hour  a0653181de5544ad2730f6da5bf14951dcbea096 Added countdown timer
+
+Week 3 (Plan) Start of sprint 2
+TBD: Have not yet finished Sprint planning document.
+General:
+Will need to start integrating the different apps. Expand on UI. 
+

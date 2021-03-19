@@ -1,0 +1,21 @@
+Weekly Individual Report (Team 10: Synchronous)
+Name: Ryan Borzello
+
+Week 0 (Summary)
+2-25 1 Hour N/A Went through the React intro Tutorial 
+2-25 1 Hour N/A Went through the React game Tutorial
+2-27 1 Hour b86017462683f03774fa7ee650f259b39c4e6be5 Set React App within Webstorm and linked with git Repository
+2-27 1 Hour a5df567a7fab8a48e227889c5c4c050e5da70dbf Implemented a simple tic-tac-toe game, and sucessfully ran it online
+2-27 2 Hour 17ffe0aa5cca17d1564864610e559c7633bd4728 Created an initial Title screen interface
+
+Week 1 (Plan)
+3-3 2 Hours Create all the initial web pages and interfaces
+3-4 2 Hours Start adding basic functionality to the webpage such as switching the page
+3-6 4 Hours Create application windows that can be moved around and resized
+3-7 2 Hours Start implementing applications into Web interface
+
+Week 2 (Plan)
+Note: Largely depends on how Week 1 goes
+3-10 5 Hours Continue with implementing applications and ensure compatibility
+3-11 4 Hours Start implementing Email capabilities
+3-12 4 Hours Ensure email functionality and testing
