@@ -18,6 +18,7 @@
     "logrocket-react": "^4.0.1",
     "moment": "^2.29.1",
     "react": "^17.0.1",
+    "react-chat-widget": "^3.0.5",
     "react-context-menu": "^3.0.2",
     "react-dom": "^17.0.1",
     "react-draggable": "^4.4.3",
