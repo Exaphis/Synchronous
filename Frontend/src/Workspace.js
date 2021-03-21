@@ -62,6 +62,125 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
 }
 
 
+function WorkspaceInfoBar(props) {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [validEmail, setValidEmail] = React.useState(true)
+    const open = Boolean(anchorEl);
+
+    const classes = useStyles();
+    const workspace = props.workspace;
+    const updateNickname = props.onWorkspaceNicknameUpdate;
+    const changePassword = props.onPasswordChange;
+    const tokenRef = props.tokenRef;
+
+    const handleMenu = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+        document.getElementById('email').value = "";
+        document.getElementById('message').value = "";
+        setValidEmail(true);
+    };
+
+    return (
+        <AppBar position="absolute" className={clsx(classes.appBar)}>
+            <Toolbar className={classes.toolbar}>
+                <Typography variant="h4" className={classes.title}>
+                    {workspace !== null ?
+                        (workspace.nickname !== null ?
+                            "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
+                            "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
+                        ""}
+                </Typography>
+                <Typography variant="h6" className={classes.title}>
+                    &nbsp;&nbsp;&nbsp; Duration: {workspace !== null ? <Moment date={workspace.created_at} format="hh:mm:ss" durationFromNow /> : null }
+                </Typography>
+
+
+                <div>
+                <Button color="secondary" variant="contained" edge="end"
+                        onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
+                    Change nickname
+                </Button>
+                {workspace !== null && workspace.is_password_protected
+                && tokenRef.current !== null && (
+                    <Button color="secondary" variant="contained" edge="end"
+                            onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
+                    Change password
+                    </Button>
+                )}
+                <IconButton color="inherit" edge="end" onClick={handleMenu}>
+                    <EmailIcon />
+                </IconButton>
+                <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    anchorOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'right',
+                    }}
+                    open={open}
+                    onClose={handleClose}
+                >
+                    <Container component="main" maxWidth="xs">
+                        <div className={classes.paper}>
+                        &nbsp;{"Invite Collaborators:"}
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            id="email"
+                            label="Email"
+                            error={!validEmail}
+                            helperText={validEmail ? "" : "Invalid Email"}
+                            required
+                            autoFocus
+                        >
+                        </TextField>
+                        <TextField
+                            variant="outlined"
+                            margin="normal"
+                            id="message"
+                            label="Additional Message?"
+                        >
+                        </TextField>
+                            <Button
+                                size="large"
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                className={classes.submit}
+                                onClick={() => {
+                                    emailHandler(
+                                        document.getElementById('email'),
+                                        document.getElementById('message'),
+                                        workspace,
+                                        validEmail,
+                                        setValidEmail
+                                    ).then();
+                                    handleClose();
+                                }}
+                            >
+                                Submit
+                            </Button>
+                        </div>
+                    </Container>
+                </Menu>
+                </div>
+
+            </Toolbar>
+        </AppBar>
+    );
+}
+
+
 function Workspace() {
     // TODO: allow modify nickname
     const classes = useStyles();
@@ -72,9 +191,6 @@ function Workspace() {
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
     // const [auth, setAuth] = React.useState(true);
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const open = Boolean(anchorEl);
-    const [ validEmail, setValidEmail ] = React.useState(true)
 
     // for changing nickname in NicknameCell
     const [ nameDialogOpen, setNameDialogOpen ] = React.useState(false);
@@ -86,38 +202,50 @@ function Workspace() {
     //     setAuth(event.target.checked);
     // };
 
-    const handleMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const handleClose = () => {
-        setAnchorEl(null);
-        document.getElementById('email').value = ""
-        document.getElementById('message').value = ""
-        setValidEmail(true)
-    };
-
-
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
         tokenRef.current = localStorage.getItem(uniqueId);
-        let resp = await fetchAPI('GET', 'workspace/' + uniqueId, null, tokenRef.current);
+
+        let newWorkspace = await fetchAPI(
+            'GET', 'workspace/' + uniqueId,
+            null, tokenRef.current
+        );
+
         // TODO: handle response errors
-        console.log(resp);
-        setWorkspace(resp);
+        console.log(newWorkspace);
+
+        /**
+         * @property {number}  nickname               - Unique nickname of the workspace.
+         * @property {string}  unique_id              - Unique ID (UUID v4) of the workspace.
+         * @property {string}  created_at             - Timestamp of when workspace was created.
+         * @property {string}  expiration_date        - Timestamp of when workspace will be deleted.
+         * @property {boolean} anonymous_readable     - Whether read-only mode is allowed in the workspace.
+         *     Should be false if the workspace is not password protected.
+         * @property {boolean} is_password_protected  - Whether the workspace is password protected.
+         * @property {string}  user_list_ws           - URI for the WebSocket used to send user list info.
+         */
+        setWorkspace(newWorkspace);
     };
 
     const updateInactivityText = (newUserList) => {
         Object.keys(newUserList).forEach((userId) => {
+            /**
+             * @property {string}  nickname          - Unique nickname of the user.
+             * @property {string}  color             - Hex color of the user.
+             * @property {boolean} active            - Whether the user is active.
+             * @property {number}  id                - Numerical ID of the user.
+             * @property {string}  went_inactive_at  - Timestamp of when the user went inactive.
+             */
             let user = newUserList[userId];
+
             if (user.active) {
                 user.activity_text = 'Active';
             }
             else {
                 const inactive_since = new Date(user.went_inactive_at);
-                const now = Date.now();
-                const secs_inactive = Math.round(parseInt(now - inactive_since) / 1000);
-                newUserList[userId].activity_text = `Inactive for ${secs_inactive} sec`;
+                const millis_inactive = Date.now() - inactive_since.getTime();
+                const secs_inactive = Math.round(millis_inactive / 1000);
+                user.activity_text = `Inactive for ${secs_inactive} sec`;
             }
         })
 
@@ -135,7 +263,8 @@ function Workspace() {
         ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
             if (data.type === 'user_list') {
-                setUserList(updateInactivityText(data['user_list']));
+                const newUserList = data['user_list'];
+                setUserList(updateInactivityText(newUserList));
             }
             else if (data.type === 'current_user') {
                 userIdRef.current = data['user_id']
@@ -260,7 +389,7 @@ function Workspace() {
                     </DialogContent>
 
                     <DialogActions>
-                        <Button onClick={handleClose} color="primary">
+                        <Button onClick={closeNameDialog} color="primary">
                             Cancel
                         </Button>
 
@@ -336,100 +465,17 @@ function Workspace() {
 
     return (
         <Container component="main" maxWidth="xl">
-            <AppBar position="absolute" className={clsx(classes.appBar)}>
-                <Toolbar className={classes.toolbar}>
-                    <Typography variant="h4" className={classes.title}>
-                        {workspace !== null ?
-                            (workspace.nickname !== null ?
-                                "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
-                                "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
-                            ""}
-                    </Typography>
-                    {/*<Typography variant="h6" className={classes.title}>&nbsp;&nbsp;&nbsp; Time Remaining: {time}</Typography>*/}
-                    <Typography variant="h6" className={classes.title}>
-                        &nbsp;&nbsp;&nbsp; Duration: {workspace !== null ? <Moment date={workspace.created_at} format="hh:mm:ss" durationFromNow /> : null }
-                    </Typography>
-
-
-                    <div>
-                    <Button color="secondary" variant="contained" edge="end"
-                            onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
-                        Change nickname
-                    </Button>
-                    {workspace !== null && workspace.is_password_protected
-                    && tokenRef.current !== null && (
-                        <Button color="secondary" variant="contained" edge="end"
-                                onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
-                        Change password
-                        </Button>
-                    )}
-                    <IconButton color="inherit" edge="end" onClick={handleMenu}>
-                        <EmailIcon />
-                    </IconButton>
-                    <Menu
-                        id="menu-appbar"
-                        anchorEl={anchorEl}
-                        anchorOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        keepMounted
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'right',
-                        }}
-                        open={open}
-                        onClose={handleClose}
-                    >
-                        <Container component="main" maxWidth="xs">
-                            <div className={classes.paper}>
-                            &nbsp;{"Invite Collaborators:"}
-                            <TextField
-                                variant="outlined"
-                                margin="normal"
-                                id="email"
-                                label="Email"
-                                error={!validEmail}
-                                helperText={validEmail ? "" : "Invalid Email"}
-                                required
-                                autoFocus
-                            >
-                            </TextField>
-                            <TextField
-                                variant="outlined"
-                                margin="normal"
-                                id="message"
-                                label="Additonal Message?"
-                            >
-                            </TextField>
-                                <Button
-                                    size="large"
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    color="primary"
-                                    className={classes.submit}
-                                    onClick={() => emailHandler(document.getElementById('email'),
-                                        document.getElementById('message'),
-                                        workspace,
-                                        validEmail,
-                                        setValidEmail
-                                    )}
-                                >
-                                    Submit
-                                </Button>
-                            </div>
-                        </Container>
-                    </Menu>
-                    </div>
-
-                </Toolbar>
-            </AppBar>
+            <WorkspaceInfoBar
+                workspace={workspace}
+                tokenRef={tokenRef}
+                onWorkspaceNicknameUpdate={updateNickname}
+                onPasswordChange={changePassword}
+            />
             <Box mt={10}>
             </Box>
             {/*<h1>{JSON.stringify(workspace)}</h1>*/}
             {/*<p>{JSON.stringify(userList)}</p>*/}
-            {workspace_details}
+            { workspace_details }
             <Table>
                 <TableHead>
                     <TableRow>
