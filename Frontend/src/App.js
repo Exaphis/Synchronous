@@ -4,6 +4,9 @@ import './App.css';
 import * as React from 'react'
 import {useRef, useState} from 'react'
 import useInterval from '@use-it/interval';
+import { ProSidebar, menu, menuItem, SubMenu } from 'react-pro-sidebar';
+import 'react-pro-sidebar/dist/css/styles.css';
+
 
 import {BrowserRouter as Router, Link, Route, Switch, useHistory, useParams} from "react-router-dom";
 
@@ -362,6 +365,7 @@ function Test() {
 
 
 
+
     const createNewTab = () => {
         let newTabIdx = numTabs.current;
         let uuid = uuidv4();
@@ -381,14 +385,7 @@ function Test() {
     }
 
     return (
-        <div>
-            <h1>Hello World!</h1>
-				<button
-					onClick={this.toggleSideBar}
-					style={{float: 'right'}}
-				>
-					Toggle Sidebar
-				</button>
+        <div>        
         <Container component="main" maxWidth="xl">
         <AppBar position="static">
             <Tabs value={currTab} edge="start" onChange={handleTabChange}>
@@ -409,6 +406,16 @@ function Test() {
         }
 
         </Container>
+        <ProSidebar>
+        <menu iconShape="square">
+          <menuItem >Dashboard</menuItem>
+          <SubMenu title="Components" >
+            <menuItem>Component 1</menuItem>
+            <menuItem>Component 2</menuItem>
+          </SubMenu>
+        </menu>
+      </ProSidebar>
+
         </div>
     )
 }
