@@ -21,6 +21,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 //import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 //import AddIcon from '@material-ui/icons/Add'
+import CommentIcon from '@material-ui/icons/Comment';
 import {Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs} from '@material-ui/core';
 
 //import {Link as uiLink} from '@material-ui/core/Link';
@@ -46,6 +47,9 @@ import moment from 'moment/min/moment-with-locales';
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import ContextMenu from "react-context-menu";
+
+import { Widget, addResponseMessage, addLinkSnippet, addUserMessage } from 'react-chat-widget';
+import  style from 'react-chat-widget/lib/styles.css';
 
 LogRocket.init('a1vl8a/synchronous');
 
@@ -81,6 +85,9 @@ export default function App() {
                 <Route exact path="/Workspace/:uniqueId">
                     <Workspace/>
                 </Route>
+                  <Route exact path="/Chat">
+                      <Chat/>
+                  </Route>
               </Switch>
             </div>
           </Router>
@@ -199,6 +206,18 @@ function SignIn() {
                 >
                   Test Workspace
                 </Button>
+                  <Button
+                      component={ Link }
+                      to={"/Chat"}
+                      type="submit"
+                      fullWidth
+                      variant="contained"
+                      //color="primary"
+                      className={classes.submit}
+                      onClick={ refresh }
+                  >
+                      Chat Test
+                  </Button>
               </div>
             </Router>
           </form>
@@ -1019,6 +1038,33 @@ async function openWithout(uniqueID, resp, work, setWork, history) {
 function Upload() {
     return <h2>Upload: TODO</h2>
 }
+
+function Chat() {
+    React.useEffect(() => {
+        addResponseMessage('Welcome!');
+    }, []);
+
+    const handleNewUserMessage = (newMessage) => {
+        console.log(`New message incoming! ${newMessage}`);
+        // Now send the message throught the backend API
+        //addResponseMessage(response);
+    };
+
+
+    return (
+        <div className="App">
+            <Widget
+                handleNewUserMessage={handleNewUserMessage}
+                title="Chat"
+                subtitle=""
+                />
+        </div>
+    );
+}
+
+
+
+
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
 
