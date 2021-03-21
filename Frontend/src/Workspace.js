@@ -66,12 +66,12 @@ function WorkspaceInfoBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [validEmail, setValidEmail] = React.useState(true)
     const open = Boolean(anchorEl);
-
     const classes = useStyles();
+
     const workspace = props.workspace;
+    const isLoggedIn = props.isLoggedIn;
     const updateNickname = props.onWorkspaceNicknameUpdate;
     const changePassword = props.onPasswordChange;
-    const tokenRef = props.tokenRef;
 
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
@@ -105,7 +105,7 @@ function WorkspaceInfoBar(props) {
                     Change nickname
                 </Button>
                 {workspace !== null && workspace.is_password_protected
-                && tokenRef.current !== null && (
+                && isLoggedIn && (
                     <Button color="secondary" variant="contained" edge="end"
                             onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
                     Change password
@@ -467,7 +467,7 @@ function Workspace() {
         <Container component="main" maxWidth="xl">
             <WorkspaceInfoBar
                 workspace={workspace}
-                tokenRef={tokenRef}
+                isLoggedIn={tokenRef.current !== null}
                 onWorkspaceNicknameUpdate={updateNickname}
                 onPasswordChange={changePassword}
             />

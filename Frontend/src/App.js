@@ -17,7 +17,7 @@ import {v4 as uuidv4} from 'uuid';
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import ContextMenu from "react-context-menu";
-import { Widget, addResponseMessage} from 'react-chat-widget';
+import { Widget, addResponseMessage } from 'react-chat-widget';
 
 import logo from './logo.png';
 import s from './s.png';
@@ -58,7 +58,7 @@ export default function App() {
                 </Switch>
             </div>
         </Router>
-  );
+    );
 }
 
 function SignIn() {
@@ -315,6 +315,7 @@ function Test() {
                 <AddIcon />
             </IconButton>
         </AppBar>
+
         {
             tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
                 tab.component
@@ -433,15 +434,15 @@ async function HandleCreate(name, password, history, work, setWork, checked) {
       });
 
   if (resp.error) {
-      alert('error!');
-      alert(JSON.stringify(resp.details));
+      // alert('error!');
+      // alert(JSON.stringify(resp.details));
       setWork(false)
       return false
   }
   else {
-      alert('success!')
-      alert(JSON.stringify(resp));
-      alert(resp.unique_id)
+      // alert('success!')
+      // alert(JSON.stringify(resp));
+      // alert(resp.unique_id)
       setWork(true)
       if (password.value !== "") {
           //alert("password: " + password.value)
@@ -552,52 +553,50 @@ async function HandleOpen(name, password, history, work, setWork, usedID) {
     if (usedID === false) {
         let unique = await fetchAPI('GET', 'workspace/nickname/?nickname=' + name.value);
         if (unique.error) {
-            alert('error!');
-            alert(JSON.stringify(unique.details));
-            setWork(false)
+            // alert('error!');
+            // alert(JSON.stringify(unique.details));
+            setWork(false);
         }
 
         let length = JSON.stringify(unique).length
         unique = JSON.stringify(unique).substring(14, length-2);
         if (password.value === "") {
-                resp = await fetchAPI('GET', 'workspace/' + unique + "/");
-                openWithout(unique, resp, work, setWork, history)
-
+            resp = await fetchAPI('GET', 'workspace/' + unique + "/");
+            await openWithout(unique, resp, work, setWork, history)
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
                 {
                     unique_id: unique,
                     password: password.value
                 });
-            openWith(unique, resp, work, setWork, history)
+            await openWith(unique, resp, work, setWork, history)
         }
     } else {
         if (password.value === "") {
             resp = await fetchAPI('GET', 'workspace/' + name.value);
-            openWithout(name.value, resp, work, setWork, history)
+            await openWithout(name.value, resp, work, setWork, history)
         } else {
             resp = await fetchAPI('POST', 'api-token-auth/',
                 {
                     unique_id: name.value,
                     password: password.value
                 });
-            openWith(name.value, resp, work, setWork, history)
+            await openWith(name.value, resp, work, setWork, history)
         }
     }
-
 }
 
-
+// open with password
 async function openWith(uniqueID, resp, work, setWork, history) {
     if (resp.error) {
         //alert('error!');
         //alert(JSON.stringify(resp.details));
-        setWork(false)
+        setWork(false);
     }
     else {
-        alert('success!')
-        alert(JSON.stringify(resp));
-        setWork(true)
+        // alert('success!');
+        // alert(JSON.stringify(resp));
+        setWork(true);
         localStorage.setItem(uniqueID, resp.token)
 
         await history.push('/Workspace/' + resp.unique_id);
@@ -608,12 +607,12 @@ async function openWithout(uniqueID, resp, work, setWork, history) {
     if (resp.error) {
         //alert('error!');
         //alert(JSON.stringify(resp.details));
-        setWork(false)
+        setWork(false);
     }
     else {
-        alert('success!')
-        alert(JSON.stringify(resp));
-        setWork(true)
+        // alert('success!');
+        // alert(JSON.stringify(resp));
+        setWork(true);
 
         await history.push('/Workspace/' + resp.unique_id);
     }
@@ -630,10 +629,9 @@ function Chat() {
 
     const handleNewUserMessage = (newMessage) => {
         console.log(`New message incoming! ${newMessage}`);
-        // Now send the message throught the backend API
+        // Now send the message through the backend API
         //addResponseMessage(response);
     };
-
 
     return (
         <div className="App">
