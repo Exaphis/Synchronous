@@ -14,29 +14,23 @@ import {useIdleTimer} from 'react-idle-timer'
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable from 'react-draggable'; // Both at the same time
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
-import {Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs} from '@material-ui/core';
+import {
+    Tab, Table, TableBody, TableCell,
+    TableHead, TableRow, Tabs, Dialog,
+    DialogTitle, DialogContent, DialogContentText,
+    DialogActions, Grid, Box, Avatar,
+    Button, CssBaseline, TextField, FormControlLabel,
+    Checkbox, Typography, Container, AppBar,
+    IconButton, Toolbar, Menu
+} from '@material-ui/core';
 
-import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
 import AddIcon from '@material-ui/icons/Add';
 import {v4 as uuidv4} from 'uuid';
 
 
-import Typography from '@material-ui/core/Typography';
 import {makeStyles} from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
 import EmailIcon from '@material-ui/icons/Email';
-import IconButton from '@material-ui/core/IconButton';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
 import clsx from 'clsx';
-import Menu from '@material-ui/core/Menu';
 
 import Moment from 'react-moment';
 
@@ -56,35 +50,34 @@ setupLogRocketReact(LogRocket);
 
 
 export default function App() {
-
-  return (
-          <Router>
+    return (
+        <Router>
             <div>
-              <Switch>
-                <Route exact path="/Create">
-                    <Create/>
-                </Route>
-                <Route exact path="/Open">
-                  <Open/>
-                </Route>
-                <Route exact path="/Upload">
-                  <Upload/>
-                </Route>
-                <Route exact path="/">
-                  <SignIn/>
-                </Route>
-                <Route exact path="/Test">
-                  <Test/>
-                </Route>
-                <Route exact path="/Workspace/:uniqueId">
-                    <Workspace/>
-                </Route>
-                  <Route exact path="/Chat">
-                      <Chat/>
-                  </Route>
-              </Switch>
+                <Switch>
+                    <Route exact path="/Create">
+                        <Create/>
+                    </Route>
+                    <Route exact path="/Open">
+                        <Open/>
+                    </Route>
+                    <Route exact path="/Upload">
+                        <Upload/>
+                    </Route>
+                    <Route exact path="/">
+                        <SignIn/>
+                    </Route>
+                    <Route exact path="/Test">
+                        <Test/>
+                    </Route>
+                    <Route exact path="/Workspace/:uniqueId">
+                        <Workspace/>
+                    </Route>
+                    <Route exact path="/Chat">
+                        <Chat/>
+                    </Route>
+                </Switch>
             </div>
-          </Router>
+        </Router>
   );
 }
 
@@ -364,8 +357,6 @@ function Test() {
     }
 
 
-
-
     const createNewTab = () => {
         let newTabIdx = numTabs.current;
         let uuid = uuidv4();
@@ -375,8 +366,6 @@ function Test() {
             idx: newTabIdx,
             uuid: uuid
         }
-
-        
         setTabs(tabs);
 
         numTabs.current++;
@@ -433,8 +422,12 @@ function Workspace() {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const [ validEmail, setValidEmail ] = React.useState(true)
-    //console.log(JSON.stringify(userList));
 
+    // for changing nickname in NicknameCell
+    const [ nameDialogOpen, setNameDialogOpen ] = React.useState(false);
+    const nicknameFieldValue = React.useRef('');
+
+    //console.log(JSON.stringify(userList));
 
     const handleChange = (event) => {
         setAuth(event.target.checked);
@@ -494,6 +487,11 @@ function Workspace() {
             else if (data.type === 'current_user') {
                 userIdRef.current = data['user_id']
             }
+            else if (data.type === 'nicknameChange') {
+                if (!data.success) {
+                    alert(data.details);
+                }
+            }
         };
 
         setUserListWs(ws);
@@ -521,7 +519,7 @@ function Workspace() {
     const [refresh, setRefresh] = useState(false);
     useInterval(() => {
         setUserList((ul) => updateInactivityText(ul));
-        setRefresh((refresh) => !refresh);  // if this isn't here it doesn't work
+        setRefresh((e) => !e);  // if this isn't here it doesn't work
     }, 1000);
 
     React.useEffect(() => {
@@ -569,11 +567,55 @@ function Workspace() {
     }
 
     function NicknameCell(props) {
+        function changeUserNickname() {
+            userListWs.send(JSON.stringify(
+                {
+                    'type': 'nicknameChange',
+                    'nickname': nicknameFieldValue.current
+                }
+            ));
+
+            closeNameDialog();
+        }
+
+        function closeNameDialog() {
+            setNameDialogOpen(false);
+        }
+
         let user = props.user;
-        // console.log(userIdRef.current === user.id);
         if (user.id === userIdRef.current) {
             return <TableCell>
                 <Typography fontWeight={900}>{user.nickname}</Typography>
+
+                <Button variant="outlined" color="primary" onClick={() => setNameDialogOpen(true)}>
+                    Change name
+                </Button>
+
+                <Dialog open={nameDialogOpen} onClose={closeNameDialog} aria-labelledby="form-dialog-title">
+                    <DialogTitle id="form-dialog-title">Change name</DialogTitle>
+
+                    <DialogContent>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="name"
+                            label="New Nickname"
+                            type="text"
+                            fullWidth
+                            onChange={(ev) => (nicknameFieldValue.current = ev.target.value)}
+                        />
+                    </DialogContent>
+
+                    <DialogActions>
+                        <Button onClick={handleClose} color="primary">
+                            Cancel
+                        </Button>
+
+                        <Button onClick={changeUserNickname} color="primary">
+                            Change name
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </TableCell>
         }
         else {
@@ -638,7 +680,6 @@ function Workspace() {
             {view_dialog}
         </div>
     }
-
 
     return (
         <Container component="main" maxWidth="xl">
