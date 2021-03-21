@@ -2,14 +2,12 @@ import logo from './logo.png';
 import s from './s.png';
 import './App.css';
 import * as React from 'react'
-import {useContext, useRef, useState} from 'react'
+import {useRef, useState} from 'react'
 import useInterval from '@use-it/interval';
 
 import {BrowserRouter as Router, Link, Route, Switch, useHistory, useParams} from "react-router-dom";
 
-// import ReactDOM from 'react-dom'
 import {useIdleTimer} from 'react-idle-timer'
-//import rnd, { Rnd } from 'react-rnd'
 import TextareaAutosize from 'react-textarea-autosize';
 import Draggable from 'react-draggable'; // Both at the same time
 
@@ -19,12 +17,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-//import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-//import AddIcon from '@material-ui/icons/Add'
-import CommentIcon from '@material-ui/icons/Comment';
 import {Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs} from '@material-ui/core';
 
-//import {Link as uiLink} from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import AddIcon from '@material-ui/icons/Add';
@@ -42,14 +36,12 @@ import clsx from 'clsx';
 import Menu from '@material-ui/core/Menu';
 
 import Moment from 'react-moment';
-import moment from 'moment/min/moment-with-locales';
 
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import ContextMenu from "react-context-menu";
 
-import { Widget, addResponseMessage, addLinkSnippet, addUserMessage } from 'react-chat-widget';
-import  style from 'react-chat-widget/lib/styles.css';
+import { Widget, addResponseMessage} from 'react-chat-widget';
 
 LogRocket.init('a1vl8a/synchronous');
 
@@ -58,7 +50,6 @@ setupLogRocketReact(LogRocket);
   drift.track('LogRocket', { sessionURL: sessionURL });
 });*/
 
-const ElementContext = React.createContext(true);
 
 
 export default function App() {
@@ -369,15 +360,19 @@ function Test() {
         return currTab === tabNum;
     }
 
+
+
     const createNewTab = () => {
         let newTabIdx = numTabs.current;
         let uuid = uuidv4();
         tabs[newTabIdx] = {
             component: <WorkspaceTab key={uuid} setRefresh={setRefresh}
-                                     isVisible={() => isTabVisible(newTabIdx)} />,
+                                     isVisible={() => isTabVisible(newTabIdx)}/>,
             idx: newTabIdx,
             uuid: uuid
         }
+
+        
         setTabs(tabs);
 
         numTabs.current++;
@@ -386,6 +381,14 @@ function Test() {
     }
 
     return (
+        <div>
+            <h1>Hello World!</h1>
+				<button
+					onClick={this.toggleSideBar}
+					style={{float: 'right'}}
+				>
+					Toggle Sidebar
+				</button>
         <Container component="main" maxWidth="xl">
         <AppBar position="static">
             <Tabs value={currTab} edge="start" onChange={handleTabChange}>
@@ -399,7 +402,6 @@ function Test() {
                 <AddIcon />
             </IconButton>
         </AppBar>
-
         {
             tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
                 tab.component
@@ -407,6 +409,7 @@ function Test() {
         }
 
         </Container>
+        </div>
     )
 }
 
