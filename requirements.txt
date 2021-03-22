@@ -5,3 +5,4 @@ channels
 django-colorfield
 coolname
 celery
+etherpad_lite
