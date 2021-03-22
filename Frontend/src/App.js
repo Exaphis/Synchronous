@@ -43,6 +43,8 @@ import Menu from '@material-ui/core/Menu';
 import Moment from 'react-moment';
 import moment from 'moment/min/moment-with-locales';
 
+import Iframe from 'react-iframe'
+
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import ContextMenu from "react-context-menu";
@@ -251,6 +253,8 @@ function WorkspaceApp(props) {
             <Button variant="contained" onClick={() => setMinimized(true)}>Minimize</Button>
             <TextareaAutosize value={val}
                               onChange={(e) => setVal(e.target.value)} />
+             <Iframe url="http://127.0.0.1:9001/" width="450px" height="450px" id="myId" className="myClassname" display="initial" position="relative"/>
+
         </div>
     } else {
         contents = <div ref={nodeRef} id={uuid.current}>
@@ -323,6 +327,7 @@ function WorkspaceTab(props) {
 
             return apps;
         });
+        //document.getElementById("etherpad-iframe").innerHTML = "<Iframe url=\"http://127.0.0.1:9001/\" width=\"450px\" height=\"450px\" id=\"myId\" className=\"myClassname\" display=\"initial\" position=\"relative\"/>"
     };
 
     console.log(Object.keys(apps).length);
