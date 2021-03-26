@@ -1,0 +1,12 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 4 (Summary)
+3/21/21 2 hrs    3827007 Refactor workspace code
+3/21/21 6 hrs    1e078d7 Let users change nicknames in workspaces
+3/21/21 2 hrs    973f50a Add etherpad-lite submodule, experiment with Etherpad API
+
+Week 5 (Plan)
+3/23/21 5 hrs    Use Etherpad API to allow pads to be created from Django
+3/25/21 3 hrs    Fix nickname modal remounting/re-rendering
+3/28/21 2 hrs    Add chat backend

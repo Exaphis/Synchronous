@@ -61,8 +61,20 @@ def get_random_nickname():
     return ''.join(word.capitalize() for word in coolname.generate(2))
 
 
+def get_random_unique_nickname():
+    base_nickname = get_random_nickname()
+    unique_nickname = base_nickname
+
+    num_tries = 1
+    while WorkspaceUser.objects.filter(nickname=unique_nickname).exists():
+        unique_nickname = f'{base_nickname}{num_tries}'
+        num_tries += 1
+
+    return unique_nickname
+
+
 class WorkspaceUser(models.Model):
-    nickname = models.CharField(max_length=150, default=get_random_nickname)
+    nickname = models.CharField(max_length=150, default=get_random_unique_nickname, unique=True)
     color = ColorField(default=get_random_color)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)

@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.db import IntegrityError
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
@@ -31,8 +32,6 @@ class UserListConsumer(JsonWebsocketConsumer):
             self.channel_name
         )
 
-        # num_users = WorkspaceUser.objects.filter(workspace=self.workspace).count()
-        # new_user_num = num_users + 1
         self.user = WorkspaceUser.objects.create(workspace=self.workspace)
         self.user.save()
 
@@ -88,3 +87,21 @@ class UserListConsumer(JsonWebsocketConsumer):
                 self.user.save()
 
                 self.send_user_list()
+        elif content['type'] == 'nicknameChange':
+            new_nickname = content['nickname']
+            try:
+                self.user.nickname = new_nickname
+                self.user.save()
+                self.send_json({
+                    'type': 'nicknameChange',
+                    'success': True
+                })
+            except IntegrityError:
+                self.send_json({
+                    'type': 'nicknameChange',
+                    'success': False,
+                    'details': 'Duplicate nickname.'
+                })
+
+            print('current user nickname: ', self.user.nickname)
+            self.send_user_list()
