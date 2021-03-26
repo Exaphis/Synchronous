@@ -2,7 +2,7 @@ import logo from './logo.png';
 import s from './s.png';
 import './App.css';
 import * as React from 'react'
-import {useContext, useRef, useState} from 'react'
+import {useContext, useRef, useState, useCallback, useEffect } from 'react'
 import useInterval from '@use-it/interval';
 
 import {BrowserRouter as Router, Link, Route, Switch, useHistory, useParams} from "react-router-dom";
@@ -19,6 +19,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import { StreamChat } from 'stream-chat';
 //import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 //import AddIcon from '@material-ui/icons/Add'
 import CommentIcon from '@material-ui/icons/Comment';
@@ -59,6 +60,8 @@ setupLogRocketReact(LogRocket);
 });*/
 
 const ElementContext = React.createContext(true);
+//const chatClient = StreamChat.getInstance('');
+const STREAM_API = 'n9utf8kxctuk'
 
 
 export default function App() {
@@ -1039,16 +1042,59 @@ function Upload() {
     return <h2>Upload: TODO</h2>
 }
 
-function Chat() {
-    React.useEffect(() => {
-        addResponseMessage('Welcome!');
+export const DEFAULT_USER = {
+    id: 'id',
+    name: 'Testing'
+};
+
+Chat.defaultProps = {
+    user: DEFAULT_USER
+};
+
+function Chat({ user }) {
+    const client = new StreamChat(STREAM_API);
+    const [messages, setMessages] = useState(null);
+    const { id, name } = user ;
+    const channel = useRef(null);
+
+    const setUser = useCallback(async () => {
+        await client.setUser(
+            { id, name },
+            client.devToken(id)
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, name]);
+
+    const setChannel = useCallback(async () => {
+        channel.current = client.channel('messaging', 'wolox-support', {
+            name: 'Wolox customer support',
+        });
+
+        const channelWatch = await channel.current.watch();
+        setMessages(channelWatch.messages);
+
+        return async () => {
+            await channelWatch.stopWatching();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleNewUserMessage = (newMessage) => {
-        console.log(`New message incoming! ${newMessage}`);
-        // Now send the message throught the backend API
-        //addResponseMessage(response);
-    };
+    const handleNewUserMessage = useCallback(async message =>
+        await channel.current.sendMessage({
+            text: message
+        }), []);
+
+    useEffect(() => {
+        setUser();
+        setChannel();
+    }, [setUser, setChannel]);
+
+
+
+    useEffect(
+        () => messages?.map(message => addUserMessage(message.text)),
+        [messages]
+    );
 
 
     return (

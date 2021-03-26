@@ -33,6 +33,7 @@
     "react-scripts": "4.0.3",
     "react-textarea-autosize": "^8.3.2",
     "react-textfit": "^1.1.1",
+    "stream-chat": "^3.7.0",
     "uuid": "^8.3.2",
     "web-vitals": "^1.1.0"
   },
