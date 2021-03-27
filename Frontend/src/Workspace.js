@@ -194,6 +194,8 @@ function Workspace() {
 
     // for changing nickname in NicknameCell
     const [ isNameDialogOpen, setNameDialogOpen ] = React.useState(false);
+    const [ nameDialogError, setNameDialogError ] = React.useState('');
+
     const nicknameFieldValue = React.useRef('');
 
     //console.log(JSON.stringify(userList));
@@ -270,9 +272,7 @@ function Workspace() {
                 userIdRef.current = data['user_id']
             }
             else if (data.type === 'nicknameChange') {
-                if (!data.success) {
-                    alert(data.details);
-                }
+                onUserNicknameChangeResponse(data);
             }
         };
 
@@ -348,16 +348,60 @@ function Workspace() {
         }
     }
 
-    function changeUserNickname() {
+    // -------- User Nickname Change Dialog
+
+    function openUserNicknameChangeDialog() {
+        setNameDialogOpen(true);
+        setNameDialogError('');
+    }
+
+    function sendUserNicknameChange() {
         userListWs.send(JSON.stringify(
             {
                 'type': 'nicknameChange',
                 'nickname': nicknameFieldValue.current
             }
         ));
-
-        setNameDialogOpen(false);
     }
+
+    function onUserNicknameChangeResponse(resp) {
+        if (resp.success) {
+            setNameDialogOpen(false);
+        }
+        else {
+            setNameDialogError(resp.details);
+        }
+    }
+
+    const nameDialog = <Dialog key="dialog" open={isNameDialogOpen} onClose={() => setNameDialogOpen(false)}>
+        <DialogTitle id="form-dialog-title">Change name</DialogTitle>
+
+        <DialogContent>
+            <TextField
+                error={nameDialogError !== ''}
+                helperText={nameDialogError}
+                autoFocus
+                margin="dense"
+                id="name"
+                label="New Nickname"
+                type="text"
+                fullWidth
+                onChange={(ev) => (nicknameFieldValue.current = ev.target.value)}
+            />
+        </DialogContent>
+
+        <DialogActions>
+            <Button onClick={() => setNameDialogOpen(false)} color="primary">
+                Cancel
+            </Button>
+
+            <Button onClick={sendUserNicknameChange} color="primary">
+                Change name
+            </Button>
+        </DialogActions>
+    </Dialog>
+
+    // --------
 
     function NicknameCell(props) {
         let user = props.user;
@@ -365,7 +409,7 @@ function Workspace() {
             return <TableCell>
                 <Typography fontWeight={900}>{user.nickname}</Typography>
 
-                <Button variant="outlined" color="primary" onClick={() => setNameDialogOpen(true)}>
+                <Button variant="outlined" color="primary" onClick={openUserNicknameChangeDialog}>
                     Change name
                 </Button>
             </TableCell>
@@ -402,7 +446,6 @@ function Workspace() {
                         variant="contained"
                         color="primary"
                         className={classes.submit}
-                        //onClick={ refresh }
                     >
                         Return to open workspace
                     </Button>
@@ -418,9 +461,9 @@ function Workspace() {
     if (workspace === null) {
         workspace_details = <p>Null</p>
     } else {
-        let view_dialog = <p>Workspace editable</p>
+        let view_status = <p>Workspace editable</p>
         if (workspace.anonymous_readable && tokenRef.current === null) {
-            view_dialog = <p>Password empty, view only</p>
+            view_status = <p>Password empty, view only</p>
         }
 
         workspace_details = <div>
@@ -429,43 +472,19 @@ function Workspace() {
             <p>Created at: {workspace.created_at}</p>
             <p>Password protected: {workspace.is_password_protected.toString()}</p>
             <p>Allow view only: {workspace.anonymous_readable.toString()}</p>
-            {view_dialog}
+            { view_status }
         </div>
     }
 
     return (
         <Container component="main" maxWidth="xl">
-            <Dialog key="name-dialog" open={isNameDialogOpen} onClose={() => setNameDialogOpen(false)}>
-                <DialogTitle id="form-dialog-title">Change name</DialogTitle>
-
-                <DialogContent>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label="New Nickname"
-                        type="text"
-                        fullWidth
-                        onChange={(ev) => (nicknameFieldValue.current = ev.target.value)}
-                    />
-                </DialogContent>
-
-                <DialogActions>
-                    <Button onClick={() => setNameDialogOpen(false)} color="primary">
-                        Cancel
-                    </Button>
-
-                    <Button onClick={changeUserNickname} color="primary">
-                        Change name
-                    </Button>
-                </DialogActions>
-            </Dialog>
             <WorkspaceInfoBar
                 workspace={workspace}
                 isLoggedIn={tokenRef.current !== null}
                 onWorkspaceNicknameUpdate={updateNickname}
                 onPasswordChange={changePassword}
             />
+            { nameDialog }
             <Box mt={10}>
             </Box>
             {/*<h1>{JSON.stringify(workspace)}</h1>*/}
