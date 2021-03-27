@@ -5,10 +5,11 @@ import {
     Button, CssBaseline, TextField, FormControlLabel,
     Checkbox, Typography, Container, AppBar,
     IconButton,
+    Menu,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
-import { ProSidebar, SubMenu } from 'react-pro-sidebar';
+import * as rps from 'react-pro-sidebar';
 import 'react-pro-sidebar/dist/css/styles.css';
 import { BrowserRouter as Router, Link, Route, Switch, useHistory } from "react-router-dom";
 import TextareaAutosize from 'react-textarea-autosize';
@@ -32,9 +33,6 @@ LogRocket.init('a1vl8a/synchronous');
 
 setupLogRocketReact(LogRocket);
 
-const ElementContext = React.createContext(true);
-
-//const chatClient = StreamChat.getInstance('');
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -175,9 +173,13 @@ function SignIn() {
 function WorkspaceApp(props) {
     const uuid = useRef(props.uuid);
     const nodeRef = useRef(null);
-    const [minimized, setMinimized] = useState(false);
+
+    const setMinimized = props.setMinimized;
+
+    
     const [val, setVal] = useState(props.id.toString());
     const [, setRefresh] = useState(false);
+
 
     const onDelete = () => {
         props.onDelete();
@@ -188,7 +190,7 @@ function WorkspaceApp(props) {
     console.log(uuid.current);
 
     let contents;
-    if (!minimized) {
+    if (!props.minimized) {
         contents = <div ref={nodeRef} id={uuid.current}>
             <Button variant="contained" onClick={onDelete}>Delete</Button>
             <Button variant="contained" onClick={() => setMinimized(true)}>Minimize</Button>
@@ -232,7 +234,6 @@ function WorkspaceTab(props) {
     const newAppIdRef = useRef(0);
     const [apps, setApps] = useState({});
     const [, setRefresh] = useState(false);
-
     const deletedRef = useRef({})
 
     const addApp = () => {
@@ -253,11 +254,32 @@ function WorkspaceTab(props) {
                 return deletedRef.current[key];
             }
 
+            const getMinimized = () => {
+                console.log("called getMinimized" + newAppId)
+                console.log(apps[newAppId].minimized)
+                return apps[newAppId].minimized
+            }
+
+            const setMinimized = (minimized) => {
+                console.log("called setMinimized " + newAppId)
+                console.log("previous: " + apps[newAppId].minimized)
+                apps[newAppId].minimized = minimized
+                console.log("next: " + apps[newAppId].minimized)
+                setRefresh(e => !e)
+                props.setRefresh(e => !e);
+            }
+            
+                //nested dict,
             apps[newAppId] = {
                 key: key,
-                component: <WorkspaceApp id={newAppId} key={key}
-                                         isDeleted={isDeleted} onDelete={deleteApp}
-                                         uuid={key}/>,
+                newAppId: newAppId,
+                minimized:false,
+                isDeleted: isDeleted,
+                getMinimized: getMinimized,
+                setMinimized: setMinimized, 
+                deleteApp: deleteApp,
+
+
             };
             newAppIdRef.current++;
             setRefresh(e => !e);
@@ -272,9 +294,22 @@ function WorkspaceTab(props) {
     console.log(deletedRef.current);
     return (
         // TODO: set invisible when tab switch
-        <div style={{visibility: props.isVisible() ? "block" : "block"}}>
+        <div>
             <Button variant="contained" onClick={addApp}>Add app</Button>
-            {Object.values(apps).map((app) => app.component)}
+            {Object.values(apps).map((app) => {
+               return <WorkspaceApp id={app.newAppId} key={app.key}
+                        isDeleted={app.isDeleted} onDelete={app.deleteApp}
+                            uuid={app.key} minimized={app.getMinimized()} setMinimized={app.setMinimized}/>})}
+            <rps.ProSidebar>
+            <rps.Menu>
+               {
+                Object.keys(apps).map((appId) => <rps.MenuItem>
+                    <Button variant="contained" onClick={ () => apps[appId].setMinimized(!apps[appId].getMinimized())} > {appId}
+                    </Button>
+                    </rps.MenuItem>)
+               } 
+            </rps.Menu>
+        </rps.ProSidebar>
         </div>
     )
 }
@@ -284,6 +319,7 @@ function Test() {
     const [tabs, setTabs] = useState({});
     const [currTab, setCurrTab] = useState(-1);
     const numTabs = useRef(0);
+    const [visible, setvisible] = useState(true);
 
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
@@ -292,6 +328,7 @@ function Test() {
     function isTabVisible(tabNum) {
         return currTab === tabNum;
     }
+
 
 
     const createNewTab = () => {
@@ -310,10 +347,16 @@ function Test() {
         setRefresh(e => !e);
     }
 
+    const tabslist = () => {
+        
+    }
+
     return (
-        <div>        
-        <Container component="main" maxWidth="xl">
+        <div>
+            
+             <Container component="main" maxWidth="xl">
         <AppBar position="static">
+        
             <Tabs value={currTab} edge="start" onChange={handleTabChange}>
                 {
                     tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
@@ -327,22 +370,15 @@ function Test() {
         </AppBar>
 
         {
-            tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
-                tab.component
+           tabs.length === 0 ? null : Object.values(tabs).map((tab) => (
+               tab.component
             ))
+            
+            
         }
 
         </Container>
-        <ProSidebar>
-        <menu iconShape="square">
-          <menuItem >Dashboard</menuItem>
-          <SubMenu title="Components" >
-            <menuItem>Component 1</menuItem>
-            <menuItem>Component 2</menuItem>
-          </SubMenu>
-        </menu>
-      </ProSidebar>
-
+        
         </div>
     )
 }
