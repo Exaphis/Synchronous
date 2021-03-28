@@ -16,6 +16,7 @@ import EmailIcon from "@material-ui/icons/Email";
 
 import { fetchAPI, getUrlFromEndpoint } from './api';
 import { useStyles, Copyright } from './App';
+import { WorkspaceArea } from './WorkspaceArea';
 
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
@@ -182,7 +183,6 @@ function WorkspaceInfoBar(props) {
 
 
 function Workspace() {
-    // TODO: allow modify nickname
     const classes = useStyles();
     const { uniqueId } = useParams();  // destructuring assignment
     const [ workspace, setWorkspace ] = React.useState(null);
@@ -229,8 +229,8 @@ function Workspace() {
         setWorkspace(newWorkspace);
     };
 
-    const updateInactivityText = (newUserList) => {
-        Object.keys(newUserList).forEach((userId) => {
+    const updateInactivityText = (userList) => {
+        Object.keys(userList).forEach((userId) => {
             /**
              * @property {string}  nickname          - Unique nickname of the user.
              * @property {string}  color             - Hex color of the user.
@@ -238,7 +238,7 @@ function Workspace() {
              * @property {number}  id                - Numerical ID of the user.
              * @property {string}  went_inactive_at  - Timestamp of when the user went inactive.
              */
-            let user = newUserList[userId];
+            let user = userList[userId];
 
             if (user.active) {
                 user.activity_text = 'Active';
@@ -251,7 +251,7 @@ function Workspace() {
             }
         })
 
-        return newUserList;
+        return userList;
     };
 
     // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
@@ -296,7 +296,6 @@ function Workspace() {
         onActive: () => sendActivityMessage(true)
     });
 
-    // wtf why does this work
     // hack to allow inactivity text to re-render everything every second
     const [, setRefresh] = useState(false);
     useInterval(() => {
@@ -477,6 +476,7 @@ function Workspace() {
     }
 
     return (
+        <div>
         <Container component="main" maxWidth="xl">
             <WorkspaceInfoBar
                 workspace={workspace}
@@ -511,6 +511,10 @@ function Workspace() {
                 </TableBody>
             </Table>
         </Container>
+
+        <WorkspaceArea/>
+
+        </div>
     )
 }
 
