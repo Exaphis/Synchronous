@@ -18,7 +18,7 @@ import { fetchAPI, getUrlFromEndpoint } from './api';
 import { useStyles, Copyright } from './App';
 
 import { StreamChat } from 'stream-chat';
-import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
+import { Widget, addResponseMessage, addUserMessage, deleteMessages } from 'react-chat-widget';
 import 'react-chat-widget/lib/styles.css';
 
 const STREAM_API = 'n9utf8kxctuk'
@@ -517,32 +517,13 @@ function Workspace() {
 }
 
 
-export const DEFAULT_USER = {
-    id: 'id',
-    name: 'Testing1'
-};
-
-// Chat.defaultProps = {
-//     user: DEFAULT_USER
-// };
-
-
 function Chat({workspace}) {
-    if (workspace === null) {
-        alert("lkasjf;laskdfj")
-    }
     const client = new StreamChat(STREAM_API);
     const [messages, setMessages] = useState(null);
-    const [valid, setValid] = React.useState(false);
+    //const [valid, setValid] = React.useState(false);
     let id = 'id'
     let name = 'name'
     const channel = useRef(null);
-
-    console.log(id)
-    console.log(name)
-    console.log(workspace)
-
-
 
     let chatName = "Chat";
     if (workspace !== null && workspace !== undefined) {
@@ -553,6 +534,12 @@ function Chat({workspace}) {
         }
     }
 
+    if (channel !== null && channel.current !== null) {
+        //console.log(channel.current.watch.messages)
+
+    }
+
+
     const setUser = useCallback(async () => {
         await client.setUser(
             { id, name },
@@ -560,15 +547,12 @@ function Chat({workspace}) {
         );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, name]);
-    console.log(chatName)
-    console.log("hello")
-    console.log(channel.current)
+
 
     const setChannel = useCallback(async () => {
         channel.current = client.channel('messaging', workspace.unique_id, {
             name: workspace.unique_id,
         });
-
 
         const channelWatch = await channel.current.watch();
         setMessages(channelWatch.messages);
@@ -579,15 +563,32 @@ function Chat({workspace}) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    updateMessages(messages, setMessages, channel);
+
+
+    // const handleSubmit = useCallback(async () => {
+    //    const channelWatch =  await channel.current.watch();
+    //     setMessages(channelWatch.messages);
+    // }, []);
+
+    // if (channel !== null && channel.current !== null) {
+    //     const channelWatch = channel.current.watch();
+    //     setMessages(channelWatch.messages);
+    //
+    // }
     const handleNewUserMessage = useCallback(async message =>
         await channel.current.sendMessage({
-            text: message
-        }), []);
+                text: message
+            }
+        ), []);
+
 
     useEffect(() => {
         setUser();
         setChannel();
     }, [setUser, setChannel]);
+
+    //deleteMessages(10)
 
 
     useEffect(
@@ -615,9 +616,25 @@ function Chat({workspace}) {
                 handleNewUserMessage={handleNewUserMessage}
                 title={chatName}
                 subtitle=""
+                showTimeStamp={true}
+
             />
         </div>
     );
+}
+
+async function updateMessages(messages, setMessages, channel) {
+    // if (channel !== null && channel.current !== null) {
+    //     addResponseMessage('Welcome!');
+    //     deleteMessages(100);
+    //     const channelWatch = await channel.current.watch();
+    //     setMessages(channelWatch.messages);
+    //
+    //     return async () => {
+    //         await channelWatch.stopWatching();
+    //     };
+    //
+    // }
 }
 
 function timeout(delay: number) {
