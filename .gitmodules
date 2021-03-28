@@ -1,0 +1,3 @@
+[submodule "external-applications/external-applications/etherpad-lite"]
+	path = external-applications/external-applications/etherpad-lite
+	url = https://github.com/ether/etherpad-lite.git
