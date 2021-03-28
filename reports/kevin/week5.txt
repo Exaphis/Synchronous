@@ -1,0 +1,12 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 5 (Summary)
+3/27/21 2 hrs    6fd5015 Help Shreyas with completing minimization from sidebar
+3/27/21 3 hrs    189843e Fix name dialog rerendering every second
+3/27/21 3 hrs    1e159cc Implement tab app location persistence
+3/28/21 5 hrs    717d95a Add iframe embedding and window-like functionality to workspace
+
+Week 6 (Plan)
+3/29/21 5 hrs    Use Etherpad API to allow pads to be created from Django
+3/31/21 5 hrs    Create file upload app

@@ -44,7 +44,8 @@ function WorkspaceApp(props) {
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
             <iframe style={{flexGrow: 1, display: props.minimized ? 'none' : 'block'}}
-                    src="https://google.com?igu=1" />
+                    src="https://google.com?igu=1"
+                    title={props.uuid}/>
         </div>
     )
 }
