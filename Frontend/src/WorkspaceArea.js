@@ -7,6 +7,8 @@ import * as rps from "react-pro-sidebar";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
+import * as filestack from 'filestack-js';
+const client = filestack.init('ABFJfmCStQGmS8LZG3Miez');
 
 
 function AppTitleBar(props) {
@@ -44,7 +46,7 @@ function WorkspaceApp(props) {
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
             <iframe style={{flexGrow: 1, display: props.minimized ? 'none' : 'block'}}
-                    src="https://google.com?igu=1"
+                    src={client.picker().open()}
                     title={props.uuid}/>
         </div>
     )
