@@ -92,10 +92,15 @@ function WorkspaceInfoBar(props) {
         setValidEmail(true);
     };
 
+    if (workspace === undefined || workspace === null) {
+        return <div>
+
+        </div>
+    }
+
     return (
         <AppBar position="absolute" className={clsx(classes.appBar)}>
-            {/*<Chat/>*/}
-            <Chat id='id' name='Testing' workspace={workspace}/>
+            <Chat workspace={workspace} />
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
                     {workspace !== null ?
@@ -511,109 +516,59 @@ function Workspace() {
     )
 }
 
-// export const DEFAULT_USER = {
-//     id: 'id',
-//     name: 'Testing'
-// };
-//
+
+export const DEFAULT_USER = {
+    id: 'id',
+    name: 'Testing1'
+};
+
 // Chat.defaultProps = {
 //     user: DEFAULT_USER
 // };
-//
-// function Chat({ user }) {
-//     //const client = new StreamChat(STREAM_API);
-//     const client = StreamChat.connect(STREAM_API, null, AppID)
-//     const [messages, setMessages] = useState(null);
-//     const { id, name } = user ;
-//     const channel = useRef(null);
-//
-//     console.log(id)
-//     console.log(name)
-//
-//     const setUser = useCallback(async () => {
-//         await client.setUser(
-//             { id, name },
-//             client.devToken(id)
-//         );
-//         // eslint-disable-next-line react-hooks/exhaustive-deps
-//     }, [id, name]);
-//
-//     const setChannel = useCallback(async () => {
-//         channel.current = client.channel('messaging', 'Chat', {
-//             name: 'Chat',
-//         });
-//
-//         const channelWatch = await channel.current.watch();
-//         setMessages(channelWatch.messages);
-//
-//         return async () => {
-//             await channelWatch.stopWatching();
-//         };
-//         // eslint-disable-next-line react-hooks/exhaustive-deps
-//     }, []);
-//
-//     const handleNewUserMessage = useCallback(async message =>
-//         await channel.current.sendMessage({
-//             text: message
-//         }), []);
-//
-//     useEffect(() => {
-//         setUser();
-//         setChannel();
-//     }, [setUser, setChannel]);
-//
-//     useEffect(
-//         () => messages?.map(message => addUserMessage(message.text)),
-//         [messages]
-//     );
-//
-//
-//     return (
-//         <div className="App">
-//             <Widget
-//                 handleNewUserMessage={handleNewUserMessage}
-//                 title="Chat"
-//                 subtitle=""
-//             />
-//         </div>
-//     );
-// }
 
-// export const DEFAULT_USER = {
-//     id: 'id',
-//     name: 'Testing'
-// };
-//
-// Chat.defaultProps = {
-//     ID: DEFAULT_USER.id,
-//     Name: DEFAULT_USER.name
-// };
 
-function Chat(ID , Name, workspace) {
-    console.log("here")
-    console.log(JSON.stringify(ID))
-    console.log(JSON.stringify(Name))
-    console.log("bye")
+function Chat({workspace}) {
+    if (workspace === null) {
+        alert("lkasjf;laskdfj")
+    }
     const client = new StreamChat(STREAM_API);
     const [messages, setMessages] = useState(null);
-    const channel = useRef(null);
+    const [valid, setValid] = React.useState(false);
     let id = 'id'
-    let name = 'Testing'
+    let name = 'name'
+    const channel = useRef(null);
 
+    console.log(id)
+    console.log(name)
+    console.log(workspace)
+
+
+
+    let chatName = "Chat";
+    if (workspace !== null && workspace !== undefined) {
+        if (workspace.nickname !== null) {
+            chatName = "Workspace: " + workspace.nickname;
+        } else {
+            chatName = "Workspace: " + workspace.unique_id;
+        }
+    }
 
     const setUser = useCallback(async () => {
         await client.setUser(
             { id, name },
-            client.devToken(id),
+            client.devToken(id)
         );
-
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id, name]);
+    console.log(chatName)
+    console.log("hello")
+    console.log(channel.current)
 
     const setChannel = useCallback(async () => {
-        channel.current = client.channel('messaging', workspace !== undefined ? workspace.nickname : "", {
-            name: workspace !== undefined ? workspace.nickname : "",
+        channel.current = client.channel('messaging', workspace.unique_id, {
+            name: workspace.unique_id,
         });
+
 
         const channelWatch = await channel.current.watch();
         setMessages(channelWatch.messages);
@@ -634,20 +589,39 @@ function Chat(ID , Name, workspace) {
         setChannel();
     }, [setUser, setChannel]);
 
+
     useEffect(
         () => messages?.map(message => addUserMessage(message.text)),
         [messages]
     );
 
+    // let channelID = ""
+    // if (channel.current !== null) {
+    //     setChannel();
+    // }
+
+    // if (!valid && workspace !== null && workspace !== undefined && channel.current !== null) {
+    //     console.log('pls')
+    //     setValid(true);
+    //     console.log(channel.current)
+    //     channel.current = client.channel('messaging', workspace.unique_id, {
+    //         name: workspace.unique_id,
+    //     });
+    // }
+
     return (
         <div className="App">
             <Widget
                 handleNewUserMessage={handleNewUserMessage}
-                title={workspace !== undefined ? workspace.nickname : ""}
+                title={chatName}
                 subtitle=""
             />
         </div>
     );
+}
+
+function timeout(delay: number) {
+    return new Promise( res => setTimeout(res, delay) );
 }
 
 export default Workspace;
