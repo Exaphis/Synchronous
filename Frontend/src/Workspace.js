@@ -1,7 +1,7 @@
 import {Link, useParams} from "react-router-dom";
 import * as React from "react";
 import {useIdleTimer} from "react-idle-timer";
-import {useState} from "react";
+import {useContext, useRef, useState, useCallback, useEffect } from 'react'
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
@@ -16,6 +16,14 @@ import EmailIcon from "@material-ui/icons/Email";
 
 import { fetchAPI, getUrlFromEndpoint } from './api';
 import { useStyles, Copyright } from './App';
+
+import { StreamChat } from 'stream-chat';
+import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
+import 'react-chat-widget/lib/styles.css';
+
+const STREAM_API = 'n9utf8kxctuk'
+const SECRET = 'tvf924vk92ytw86zpnpmevajnuna6wtgu9mjqzwszyf9snc44hr7r2h3mbuqav7v'
+const AppID = '1116711'
 
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
@@ -86,6 +94,8 @@ function WorkspaceInfoBar(props) {
 
     return (
         <AppBar position="absolute" className={clsx(classes.appBar)}>
+            {/*<Chat/>*/}
+            <Chat id='id' name='Testing' workspace={workspace}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
                     {workspace !== null ?
@@ -470,6 +480,7 @@ function Workspace() {
                 isLoggedIn={tokenRef.current !== null}
                 onWorkspaceNicknameUpdate={updateNickname}
                 onPasswordChange={changePassword}
+                // user={userList}
             />
             <Box mt={10}>
             </Box>
@@ -498,6 +509,145 @@ function Workspace() {
             </Table>
         </Container>
     )
+}
+
+// export const DEFAULT_USER = {
+//     id: 'id',
+//     name: 'Testing'
+// };
+//
+// Chat.defaultProps = {
+//     user: DEFAULT_USER
+// };
+//
+// function Chat({ user }) {
+//     //const client = new StreamChat(STREAM_API);
+//     const client = StreamChat.connect(STREAM_API, null, AppID)
+//     const [messages, setMessages] = useState(null);
+//     const { id, name } = user ;
+//     const channel = useRef(null);
+//
+//     console.log(id)
+//     console.log(name)
+//
+//     const setUser = useCallback(async () => {
+//         await client.setUser(
+//             { id, name },
+//             client.devToken(id)
+//         );
+//         // eslint-disable-next-line react-hooks/exhaustive-deps
+//     }, [id, name]);
+//
+//     const setChannel = useCallback(async () => {
+//         channel.current = client.channel('messaging', 'Chat', {
+//             name: 'Chat',
+//         });
+//
+//         const channelWatch = await channel.current.watch();
+//         setMessages(channelWatch.messages);
+//
+//         return async () => {
+//             await channelWatch.stopWatching();
+//         };
+//         // eslint-disable-next-line react-hooks/exhaustive-deps
+//     }, []);
+//
+//     const handleNewUserMessage = useCallback(async message =>
+//         await channel.current.sendMessage({
+//             text: message
+//         }), []);
+//
+//     useEffect(() => {
+//         setUser();
+//         setChannel();
+//     }, [setUser, setChannel]);
+//
+//     useEffect(
+//         () => messages?.map(message => addUserMessage(message.text)),
+//         [messages]
+//     );
+//
+//
+//     return (
+//         <div className="App">
+//             <Widget
+//                 handleNewUserMessage={handleNewUserMessage}
+//                 title="Chat"
+//                 subtitle=""
+//             />
+//         </div>
+//     );
+// }
+
+// export const DEFAULT_USER = {
+//     id: 'id',
+//     name: 'Testing'
+// };
+//
+// Chat.defaultProps = {
+//     ID: DEFAULT_USER.id,
+//     Name: DEFAULT_USER.name
+// };
+
+function Chat(ID , Name, workspace) {
+    console.log("here")
+    console.log(JSON.stringify(ID))
+    console.log(JSON.stringify(Name))
+    console.log("bye")
+    const client = new StreamChat(STREAM_API);
+    const [messages, setMessages] = useState(null);
+    const channel = useRef(null);
+    let id = 'id'
+    let name = 'Testing'
+
+
+    const setUser = useCallback(async () => {
+        await client.setUser(
+            { id, name },
+            client.devToken(id),
+        );
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, name]);
+
+    const setChannel = useCallback(async () => {
+        channel.current = client.channel('messaging', workspace !== undefined ? workspace.nickname : "", {
+            name: workspace !== undefined ? workspace.nickname : "",
+        });
+
+        const channelWatch = await channel.current.watch();
+        setMessages(channelWatch.messages);
+
+        return async () => {
+            await channelWatch.stopWatching();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleNewUserMessage = useCallback(async message =>
+        await channel.current.sendMessage({
+            text: message
+        }), []);
+
+    useEffect(() => {
+        setUser();
+        setChannel();
+    }, [setUser, setChannel]);
+
+    useEffect(
+        () => messages?.map(message => addUserMessage(message.text)),
+        [messages]
+    );
+
+    return (
+        <div className="App">
+            <Widget
+                handleNewUserMessage={handleNewUserMessage}
+                title={workspace !== undefined ? workspace.nickname : ""}
+                subtitle=""
+            />
+        </div>
+    );
 }
 
 export default Workspace;

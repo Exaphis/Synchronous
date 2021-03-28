@@ -35,7 +35,6 @@ setupLogRocketReact(LogRocket);
 const ElementContext = React.createContext(true);
 
 //const chatClient = StreamChat.getInstance('');
-
 const STREAM_API = 'n9utf8kxctuk'
 
 
@@ -634,7 +633,7 @@ function Upload() {
 
 export const DEFAULT_USER = {
     id: 'id',
-    name: 'Testing'
+    name: 'Testing1'
 };
 
 Chat.defaultProps = {
@@ -647,6 +646,9 @@ function Chat({ user }) {
     const { id, name } = user ;
     const channel = useRef(null);
 
+    console.log(id)
+    console.log(name)
+
     const setUser = useCallback(async () => {
         await client.setUser(
             { id, name },
@@ -656,8 +658,8 @@ function Chat({ user }) {
     }, [id, name]);
 
     const setChannel = useCallback(async () => {
-        channel.current = client.channel('messaging', 'wolox-support', {
-            name: 'Wolox customer support',
+        channel.current = client.channel('messaging', 'Chat', {
+            name: 'Chat',
         });
 
         const channelWatch = await channel.current.watch();
