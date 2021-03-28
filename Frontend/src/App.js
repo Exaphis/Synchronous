@@ -48,6 +48,18 @@ import Iframe from 'react-iframe'
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import ContextMenu from "react-context-menu";
+import IframeResizer from 'iframe-resizer-react'
+//import MessageData from 'iframe-resizer-react/message-data'
+import axios from 'axios';
+
+
+let api = require('etherpad-lite-client')
+let etherpad = api.connect({
+  apikey: 'c4fc77ae6eadec30c970b932eebd58f569163a4f31ffa8ee3b5e869feabe5249',
+  host: 'localhost',
+  port: 9001,
+})
+
 
 LogRocket.init('a1vl8a/synchronous');
 
@@ -95,7 +107,8 @@ function getUrlFromEndpoint(protocol, endpoint) {
 
 function fetchAPI(methodType, endpoint, data=null, token=null) {
     let headers = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
     }
     if (token !== null) {
         headers['Authorization'] = 'Token ' + token.toString()
@@ -232,6 +245,11 @@ function SignIn() {
 // ReactDOM.render(<Search />, document.querySelector("#container"))
 
 function WorkspaceApp(props) {
+    let uuid_etherpad = uuidv4();
+    const { uniqueId } = useParams();  // destructuring assignment
+    const tokenRef = React.useRef(null);
+    //let uuid_group = uuidv4();
+    uuid_etherpad = uuid_etherpad
     const uuid = useRef(props.uuid);
     const nodeRef = useRef(null);
     const [minimized, setMinimized] = useState(false);
@@ -246,14 +264,46 @@ function WorkspaceApp(props) {
     console.log('uuid:')
     console.log(uuid.current);
 
+    var args = {
+        padID: uuid_etherpad,
+        text: "This works"
+    }
+    etherpad.createPad(args, function(error){
+    if(error) console.error('Error creating pad: ' + error.message)
+    else console.log("Pad created")
+    //pad_id = data.padID;
+    })
+    //uuid_etherpad = group_id + "$" + uuid_etherpad;
+    console.log("padID: " + uuid_etherpad);
+    let pad_url = "http://127.0.0.1:9001/p/" + uuid_etherpad;
+    console.log(pad_url);
+    
+    const iframeRef = useRef(null)
+    //const [messageData, setMessageData] = useState()
+  
+    //const onResized = data => setMessageData(data)
+  
+    /*const onMessage = data => {
+      setMessageData(data)
+      iframeRef.current.sendMessage('Hello back from the parent page')
+    }*/
+
+
+      
+
     let contents;
     if (!minimized) {
-        contents = <div ref={nodeRef} id={uuid.current}>
+        contents = 
+        
+        <div ref={nodeRef} id={uuid.current}>
             <Button variant="contained" onClick={onDelete}>Delete</Button>
             <Button variant="contained" onClick={() => setMinimized(true)}>Minimize</Button>
             <TextareaAutosize value={val}
                               onChange={(e) => setVal(e.target.value)} />
-             <Iframe url="http://127.0.0.1:9001/" width="450px" height="450px" id="myId" className="myClassname" display="initial" position="relative"/>
+            
+            <div>
+                <Iframe url={pad_url} width="450px" height="450px" id="myId" className="re-frame" display="initial" position="relative" resize="both"/>
+            </div>  
 
         </div>
     } else {
