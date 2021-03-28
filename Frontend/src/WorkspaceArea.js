@@ -145,7 +145,7 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     {
                         Object.values(apps).map((app) => (
-                            <rps.MenuItem icon={
+                            app.minimized && <rps.MenuItem icon={
                                 <IconButton component="div"
                                             onClick={(event) => {
                                                 event.stopPropagation();
