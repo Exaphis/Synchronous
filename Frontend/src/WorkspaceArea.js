@@ -8,6 +8,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import * as filestack from 'filestack-js';
+import {PickerInline, PickerOverlay} from 'filestack-react';
 const client = filestack.init('ABFJfmCStQGmS8LZG3Miez');
 
 
@@ -46,8 +47,11 @@ function WorkspaceApp(props) {
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
             <iframe style={{flexGrow: 1, display: props.minimized ? 'none' : 'block'}}
-                    src={client.picker().open()}
                     title={props.uuid}/>
+                    <PickerInline
+                        apikey={'ABFJfmCStQGmS8LZG3Miez'}
+                        onSuccess={(res) => console.log("result" + JSON.stringify(res))}
+                    />
         </div>
     )
 }
