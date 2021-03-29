@@ -22,7 +22,8 @@ function AppTitleBar(props) {
             backgroundColor: 'darkGray',
             display: 'flex'
         }} className="handle">
-            <span style={{flexGrow: 1, height: '100%', display: 'inline-flex', alignItems: 'center', overflow: 'hidden'}}>
+            <span style={{flexGrow: 1, height: '100%', display: 'inline-flex',
+                alignItems: 'center', overflow: 'hidden'}}>
                 { title }
             </span>
             <IconButton size="small" style={{ height: '100%'}} onClick={props.onMinimize}>
@@ -41,19 +42,19 @@ function WorkspaceApp(props) {
         meta: { type: 'avatar' },
         restrictions: { maxNumberOfFiles: 1 },
         autoProceed: true
-      })
-      
-      uppy.use(Tus, { endpoint: '/upload' })
-      
-      uppy.on('complete', (result) => {
+    })
+
+    uppy.use(Tus, { endpoint: '/upload' })
+
+    uppy.on('complete', (result) => {
         const url = result.successful[0].uploadURL
         store.dispatch({
-          type: 'SET_USER_AVATAR_URL',
-          payload: { url: url }
+            type: 'SET_USER_AVATAR_URL',
+            payload: { url: url }
         })
-      })
-      
-      const AvatarPicker = ({ currentAvatar }) => {
+    })
+
+    const AvatarPicker = ({ currentAvatar }) => {
         return (
           <div>
             <img src={currentAvatar} alt="Current Avatar" />
@@ -73,7 +74,6 @@ function WorkspaceApp(props) {
         )
       }
 
-
     return (
         <div id={props.uuid} style={{
             backgroundColor: 'white',
@@ -85,10 +85,9 @@ function WorkspaceApp(props) {
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
-            <iframe style={{flexGrow: 1, display: props.minimized ? 'none' : 'block'}}
-                    title={props.uuid}/>
-                    <AvatarPicker></AvatarPicker>
-                    
+            <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                    title={props.uuid} src='https://google.com?igu=1'/>
+            {/*<AvatarPicker/>*/}
         </div>
     )
 }
@@ -96,7 +95,8 @@ function WorkspaceApp(props) {
 
 function WorkspaceTab(props) {
     const [apps, setApps] = useState({});
-    const [, setRefresh] = useState(false);
+    const [pointerEventsEnabled, setPointerEventsEnabled] = useState(true);
+    const [topAppUuid, setTopAppUuid] = useState();
 
     // contains the states (i.e. position + size) of each app
     const appStatesRef = useRef({});
@@ -105,71 +105,82 @@ function WorkspaceTab(props) {
         setApps((apps) => {
             const uuid = uuidv4();
 
-            function switchMinimized() {
-                apps[uuid].minimized = !apps[uuid].minimized;
-                setRefresh(e => !e);
+            function setMinimized(minimizedUpdater) {
+                setApps((prevApps) => {
+                    let apps = Object.assign({}, prevApps);
+                    apps[uuid].minimized = minimizedUpdater(apps[uuid].minimized);
+                    return apps;
+                });
             }
 
-            function onMinimize() {
-                apps[uuid].minimized = true;
-                setRefresh(e => !e);
-            }
-
-            function onClose() {
-                delete apps[uuid];
-                delete appStatesRef.current[uuid];
-
-                setRefresh(e => !e);
-            }
-
-            appStatesRef.current[uuid] = {x: 0, y: 0, width: 'auto', height: 'auto'};
-
-            // nested dict
-            apps[uuid] = {
-                uuid: uuid,
-                minimized: false,
-                switchMinimized: switchMinimized,
-                onMinimize: onMinimize,
-                onClose: onClose,
+            appStatesRef.current[uuid] = {
+                x: 0,
+                y: 0,
+                width: 'auto',
+                height: 'auto'
             };
 
-            setRefresh(e => !e);
-            props.setRefresh(e => !e);
-
-            return apps;
+            // nested dict
+            return {...apps,
+                [uuid]: {
+                    id: uuid,
+                    minimized: false,
+                    switchMinimized: function switchMinimized() {
+                        setMinimized(minimized => !minimized);
+                    },
+                    onMinimize: function onMinimize() {
+                        setMinimized(() => true);
+                    },
+                    onClose: function onClose() {
+                        delete appStatesRef.current[uuid];
+                        setApps((prevApps) => {
+                            let apps = Object.assign({}, prevApps);
+                            delete apps[uuid];
+                            return apps;
+                        });
+                    },
+                }
+            };
         });
     }
 
     const appComponents = Object.values(apps).map((app) => {
         return (
             <Rnd
-                key={app.uuid}
+                key={app.id}
                 bounds='parent'
+                onDragStart={(e, data) => {
+                    setPointerEventsEnabled(false);
+                    setTopAppUuid(app.id);
+                }}
                 onDragStop={(e, data) => {
-                    const appState = appStatesRef.current[app.uuid];
+                    setPointerEventsEnabled(true);
+                    const appState = appStatesRef.current[app.id];
                     appState.x = data.x;
                     appState.y = data.y;
                 }}
                 onResizeStop={(e, direction, ref, delta, position) => {
-                    const appState = appStatesRef.current[app.uuid];
+                    const appState = appStatesRef.current[app.id];
                     appState.width = ref.style.width;
                     appState.height = ref.style.height;
                     // position can also change in resizing when moving the top left corner
                     appState.x = position.x;
                     appState.y = position.y;
                 }}
-                default={appStatesRef.current[app.uuid]}
+                default={appStatesRef.current[app.id]}
                 dragHandleClassName="handle"
                 minHeight='30px'  // how to not use magic constants?
                 minWidth='50px'
+                style={{     // change z index to prioritize recently selected app
+                    zIndex: topAppUuid === app.id ? '1' : 'auto'
+                }}
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
-                              onMinimize={app.onMinimize} uuid={app.uuid}/>
+                              onMinimize={app.onMinimize} uuid={app.id}
+                              pointerEventsEnabled={pointerEventsEnabled} />
             </Rnd>
         );
     });
-
-    // TODO: change z index to prioritize selected app
 
     return (
         <div style={{
@@ -188,18 +199,19 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     {
                         Object.values(apps).map((app) => (
-                            app.minimized && <rps.MenuItem icon={
-                                <IconButton component="div"
-                                            onClick={(event) => {
-                                                event.stopPropagation();
-                                                app.onClose();
-                                            }}
-                                            color="inherit">
-                                    <CloseIcon />
-                                </IconButton>}
-                                          key={app.uuid}
-                                          onClick={app.switchMinimized}>
-                                {app.uuid}
+                            app.minimized &&
+                            <rps.MenuItem key={app.id} onClick={app.switchMinimized}
+                                icon={
+                                    <IconButton component="div"
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
+                                                    app.onClose();
+                                                }}
+                                                color="inherit">
+                                        <CloseIcon />
+                                    </IconButton>
+                                } >
+                                {app.id}
                             </rps.MenuItem>
                         ))
                     }
@@ -216,7 +228,6 @@ function WorkspaceTab(props) {
 
 
 function WorkspaceArea() {
-    const [, setRefresh] = React.useState(false);
     const [tabs, setTabs] = React.useState([]);
     const [currTab, setCurrTab] = React.useState(-1);
 
@@ -224,45 +235,39 @@ function WorkspaceArea() {
         setCurrTab(newValue);
     };
 
-    const createNewTab = () => {
+    function closeTab(event, id) {
+        // https://stackoverflow.com/a/63277341
+        // prevent close press from propagating to tab button
+        event.stopPropagation();
+
+        // use function to avoid capturing the current value of currTab
+        // within closure
+        setCurrTab(currTab => Math.min(currTab, tabs.length - 2));
+
+        setTabs(tabs.filter(tab => tab.id !== id));
+    }
+
+    function createNewTab() {
         const uuid = uuidv4();
 
+        setCurrTab(tabs.length);  // new tab will be appended to the end
+
         setTabs((tabs) => {
-            function closeTab(event) {
-                // https://stackoverflow.com/a/63277341
-                // prevent close press from propagating to tab button
-                event.stopPropagation();
+            // State must not be modified (even in updater function!)
+            // Must create a copy of the object instead and modify that.
+            // See https://reactjs.org/docs/react-component.html#setstate
+            // (state is a reference to the component state at the time the change is being applied.
+            // It should not be directly mutated)
 
-                for (let i = 0; i < tabs.length; i++) {
-                    if (tabs[i].uuid === uuid) {
-                        tabs.splice(i, 1);
-                        break;
-                    }
-                }
-
-                // use function to avoid capturing the current value of currTab
-                // within closure
-                setCurrTab(currTab => Math.min(currTab, tabs.length - 1));
-                setRefresh(e => !e);
-            }
-
-            tabs.push({
-                uuid: uuid,
-                closeTab: closeTab
-            });
-
-            return tabs;
-        })
-
-        setCurrTab(tabs.length - 1);
-        setRefresh(e => !e);
+            // Using spread syntax to create copy with new object appended
+            return [...tabs, {id: uuid}];
+        });
     }
 
     let tabComponents = <p>You have no tabs. How about creating one?</p>;
     if (tabs.length > 0) {
         tabComponents = tabs.map((tab, tabIdx) => {
-            return <WorkspaceTab key={tab.uuid} setRefresh={setRefresh}
-                          hidden={currTab !== tabIdx}/>;
+            return <WorkspaceTab key={tab.id} hidden={currTab !== tabIdx}/>;
         });
     }
 
@@ -275,10 +280,10 @@ function WorkspaceArea() {
                             tabs.length === 0 ? null : tabs.map((tab, tabIdx) => {
                                 const labelText = "Tab " + tabIdx.toString();
                                 return (
-                                    <Tab key={tab.uuid} label={
+                                    <Tab key={tab.id} label={
                                         <span> {labelText}
                                             <IconButton component="div"  // https://stackoverflow.com/a/63277341
-                                                        onClick={(event) => tab.closeTab(event)}
+                                                        onClick={(event) => closeTab(event, tab.id)}
                                                         color="inherit">
                                                <CloseIcon />
                                             </IconButton>

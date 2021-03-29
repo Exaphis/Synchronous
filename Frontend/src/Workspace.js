@@ -184,10 +184,10 @@ function WorkspaceInfoBar(props) {
 
 function Workspace() {
     const classes = useStyles();
-    const { uniqueId } = useParams();  // destructuring assignment
-    const [ workspace, setWorkspace ] = React.useState(null);
-    const [ userListWs, setUserListWs ] = React.useState(null);
-    const [ userList, setUserList ] = React.useState({});
+    const {uniqueId} = useParams();
+    const [workspace, setWorkspace] = React.useState(null);
+    const [userListWs, setUserListWs] = React.useState(null);
+    const [userList, setUserList] = React.useState({});
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
     // const [auth, setAuth] = React.useState(true);
@@ -214,7 +214,7 @@ function Workspace() {
         );
 
         // TODO: handle response errors
-        console.log(newWorkspace);
+        // console.log(newWorkspace);
 
         /**
          * @property {number}  nickname               - Unique nickname of the workspace.
@@ -229,7 +229,9 @@ function Workspace() {
         setWorkspace(newWorkspace);
     };
 
-    const updateInactivityText = (userList) => {
+    function updateInactivityText(prevUserList) {
+        let userList = Object.assign({}, prevUserList);
+
         Object.keys(userList).forEach((userId) => {
             /**
              * @property {string}  nickname          - Unique nickname of the user.
@@ -252,7 +254,7 @@ function Workspace() {
         })
 
         return userList;
-    };
+    }
 
     // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
     // why does it sometimes not refresh the user list when joining an already joined workspace?
@@ -296,11 +298,9 @@ function Workspace() {
         onActive: () => sendActivityMessage(true)
     });
 
-    // hack to allow inactivity text to re-render everything every second
-    const [, setRefresh] = useState(false);
+    // re-render inactivity text to re-render everything every second
     useInterval(() => {
         setUserList((ul) => updateInactivityText(ul));
-        setRefresh((e) => !e);  // if this isn't here it doesn't work
     }, 1000);
 
     React.useEffect(() => {
