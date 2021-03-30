@@ -6,11 +6,15 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
+    volumes:
+      - .:/code
   frontend:
     build: Frontend
     command: npm start
     ports:
       - "3000:3000"
+    volumes:
+      - ./Frontend:/app
   tusd:
     image: tusproject/tusd
     ports:
