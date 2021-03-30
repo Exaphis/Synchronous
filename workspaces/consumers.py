@@ -103,5 +103,5 @@ class UserListConsumer(JsonWebsocketConsumer):
                     'details': 'Duplicate nickname.'
                 })
 
-            print('current user nickname: ', self.user.nickname)
+            print('current user nickname:', self.user.nickname)
             self.send_user_list()

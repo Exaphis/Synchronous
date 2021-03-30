@@ -74,7 +74,7 @@ def get_random_unique_nickname():
 
 
 class WorkspaceUser(models.Model):
-    nickname = models.CharField(max_length=150, default=get_random_unique_nickname, unique=True)
+    nickname = models.CharField(max_length=150, default=get_random_unique_nickname, unique=True, blank=False)
     color = ColorField(default=get_random_color)
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
