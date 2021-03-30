@@ -1,7 +1,7 @@
 import {Link, useParams} from "react-router-dom";
 import * as React from "react";
 import {useIdleTimer} from "react-idle-timer";
-import {useState} from "react";
+import {useContext, useRef, useState, useCallback, useEffect } from 'react'
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
@@ -17,6 +17,14 @@ import EmailIcon from "@material-ui/icons/Email";
 import { fetchAPI, getUrlFromEndpoint } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
+
+import { StreamChat } from 'stream-chat';
+import { Widget, addResponseMessage, addUserMessage, deleteMessages } from 'react-chat-widget';
+import 'react-chat-widget/lib/styles.css';
+
+const STREAM_API = 'n9utf8kxctuk'
+const SECRET = 'tvf924vk92ytw86zpnpmevajnuna6wtgu9mjqzwszyf9snc44hr7r2h3mbuqav7v'
+const AppID = '1116711'
 
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
@@ -85,8 +93,15 @@ function WorkspaceInfoBar(props) {
         setValidEmail(true);
     };
 
+    if (workspace === undefined || workspace === null) {
+        return <div>
+
+        </div>
+    }
+
     return (
         <AppBar position="absolute" className={clsx(classes.appBar)}>
+            <Chat workspace={workspace} />
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
                     {workspace !== null ?
@@ -483,6 +498,7 @@ function Workspace() {
                 isLoggedIn={tokenRef.current !== null}
                 onWorkspaceNicknameUpdate={updateNickname}
                 onPasswordChange={changePassword}
+                // user={userList}
             />
             { nameDialog }
             <Box mt={10}>
@@ -517,5 +533,110 @@ function Workspace() {
         </div>
     )
 }
+
+
+function Chat({workspace}) {
+    const client = new StreamChat(STREAM_API);
+    const [messages, setMessages] = useState(null);
+    const [count, setCount] = useState(null);
+    let id = 'id'
+    let name = 'name'
+    const channel = useRef(null);
+
+    if (messages !== null && count === null) {
+        setCount(messages.length)
+        localStorage.setItem('last', messages[messages.length - 1].text)
+    }
+
+    let chatName = "Chat";
+    if (workspace !== null && workspace !== undefined) {
+        if (workspace.nickname !== null) {
+            chatName = "Workspace: " + workspace.nickname;
+        } else {
+            chatName = "Workspace: " + workspace.unique_id;
+        }
+    }
+
+    if (channel !== null && channel.current !== null && count !== null) {
+        updateMessages(messages, setMessages, channel, count, setCount);
+    }
+
+
+    const setUser = useCallback(async () => {
+        await client.setUser(
+            { id, name },
+            client.devToken(id)
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, name]);
+
+
+    const setChannel = useCallback(async () => {
+        channel.current = client.channel('messaging', workspace.unique_id, {
+            name: workspace.unique_id,
+        });
+
+        const channelWatch = await channel.current.watch();
+        setMessages(channelWatch.messages);
+
+        return async () => {
+            await channelWatch.stopWatching();
+
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const handleNewUserMessage = useCallback(async message =>
+        await channel.current.sendMessage({
+            text: message
+        })
+        , []);
+
+    useEffect(() => {
+        setUser();
+        setChannel();
+    }, [setUser, setChannel]);
+
+    useEffect(
+        () => messages?.map(message => addResponseMessage(message.text)),
+        [messages]
+    );
+
+
+    return (
+        <div className="App">
+            <Widget
+                handleSubmit={() => setCount(count + 1)}
+                handleNewUserMessage={handleNewUserMessage}
+                title={chatName}
+                subtitle=""
+            />
+        </div>
+    );
+}
+
+
+async function updateMessages(messages, setMessages, channel, count, setCount) {
+        const channelWatch = await channel.current.watch();
+        let len = channelWatch.messages.length;
+
+        if (len > count) {
+            let message = channelWatch.messages[count].text;
+            if (message === localStorage.getItem('last')) {
+            } else {
+                addResponseMessage(message)
+                localStorage.setItem('last', message)
+            }
+
+            setCount(count + 1)
+        }
+
+        return async () => {
+            await channelWatch.stopWatching();
+        };
+
+}
+
+
 
 export default Workspace;
