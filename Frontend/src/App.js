@@ -1,5 +1,4 @@
 import * as React from 'react'
-import {useRef, useState, useCallback, useEffect } from 'react'
 import {
     Grid, Box, Avatar, Button, CssBaseline,
     TextField, FormControlLabel, Checkbox,
@@ -155,9 +154,8 @@ function Test() {
 }
 
 function Create() {
-
     const classes = useStyles();
-    const [work, setWork] = useState(true);
+    const [work, setWork] = React.useState(true);
     const history = useHistory();
     const [checked, setChecked] = React.useState(false);
     const handleChange = (event) => {

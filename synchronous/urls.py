@@ -19,5 +19,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('workspaces.urls')),
-    path('tusd/', include('tusd_hooks.urls'))
+    path('tusd/', include('tusdfileshare.urls'))
 ]

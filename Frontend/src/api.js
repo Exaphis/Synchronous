@@ -1,8 +1,14 @@
-function getUrlFromEndpoint(protocol, endpoint) {
+export const TUSD_URL = 'http://0.0.0.0:1080/files/';
+export const USER_LIST_TOPIC = 'user_list';
+export const CURRENT_USER_TOPIC = 'current_user';
+export const NICKNAME_CHANGE_TOPIC = 'nickname_change';
+export const FILE_LIST_TOPIC = 'file_list';
+
+export function getUrlFromEndpoint(protocol, endpoint) {
     return protocol + '://localhost:8000/' + endpoint;
 }
 
-function fetchAPI(methodType, endpoint, data=null, token=null) {
+export function fetchAPI(methodType, endpoint, data=null, token=null) {
     let headers = {
         'Content-Type': 'application/json'
     }
@@ -49,5 +55,3 @@ function fetchAPI(methodType, endpoint, data=null, token=null) {
         }
     });
 }
-
-export {getUrlFromEndpoint, fetchAPI};

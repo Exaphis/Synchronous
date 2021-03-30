@@ -50,9 +50,9 @@ INSTALLED_APPS = [
     'colorfield',
 
     # local apps
-    'workspaces.apps.WorkspaceConfig',
+    'workspaces.apps.WorkspacesConfig',
     'users.apps.UsersConfig',
-    'tusd_hooks.apps.TusdHooksConfig',
+    'tusdfileshare.apps.TusdFileShareConfig',
 ]
 
 MIDDLEWARE = [

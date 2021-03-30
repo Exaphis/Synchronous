@@ -74,7 +74,13 @@ class UserListConsumer(JsonWebsocketConsumer):
             'user_list': user_list
         })
 
-    # TODO: show inactive timestamp
+    def file_list_changed(self, event):
+        file_list = event['file_list']
+        self.send_json({
+            'type': 'file_list',
+            'file_list': file_list
+        })
+
     def receive_json(self, content, **kwargs):
         if content['type'] == 'activity':
             new_active = content['isActive']
@@ -93,12 +99,12 @@ class UserListConsumer(JsonWebsocketConsumer):
                 self.user.nickname = new_nickname
                 self.user.save()
                 self.send_json({
-                    'type': 'nicknameChange',
+                    'type': 'nickname_change',
                     'success': True
                 })
-            except IntegrityError:
+            except IntegrityError:  # TODO: reset nickname on failure
                 self.send_json({
-                    'type': 'nicknameChange',
+                    'type': 'nickname_change',
                     'success': False,
                     'details': 'Duplicate nickname.'
                 })
