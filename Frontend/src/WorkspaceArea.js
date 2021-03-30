@@ -117,11 +117,16 @@ function WorkspaceApp(props) {
 
 function WorkspaceTab(props) {
     const [apps, setApps] = React.useState({});
+    const [which_app, setWhich_app] = React.useState(0);
     const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(true);
     const [topAppUuid, setTopAppUuid] = React.useState();
 
     // contains the states (i.e. position + size) of each app
     const appStatesRef = React.useRef({});
+    
+    function setpath (e)  {
+            setWhich_app(e);
+    }
 
     function addApp() {
         setApps((apps) => {
@@ -167,44 +172,94 @@ function WorkspaceTab(props) {
     }
 
     const appComponents = Object.values(apps).map((app) => {
-        return (
-            <Rnd
-                key={app.id}
-                bounds='parent'
-                onDragStart={(e, data) => {
-                    setPointerEventsEnabled(false);
-                    setTopAppUuid(app.id);
-                }}
-                onDragStop={(e, data) => {
-                    setPointerEventsEnabled(true);
-                    const appState = appStatesRef.current[app.id];
-                    appState.x = data.x;
-                    appState.y = data.y;
-                }}
-                onResizeStop={(e, direction, ref, delta, position) => {
-                    const appState = appStatesRef.current[app.id];
-                    appState.width = ref.style.width;
-                    appState.height = ref.style.height;
-                    // position can also change in resizing when moving the top left corner
-                    appState.x = position.x;
-                    appState.y = position.y;
-                }}
-                default={appStatesRef.current[app.id]}
-                dragHandleClassName="handle"
-                minHeight='30px'  // how to not use magic constants?
-                minWidth='50px'
-                style={{     // change z index to prioritize recently selected app
-                    zIndex: topAppUuid === app.id ? '1' : 'auto'
-                }}
-            >
-                <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
-                              onMinimize={app.onMinimize} uuid={app.id}
-                              pointerEventsEnabled={pointerEventsEnabled} >
-                    {/*<TemplateAppContents/>*/}
-                    <FileUploadAppContents/>
-                </WorkspaceApp>
-            </Rnd>
-        );
+
+        if (which_app === 0)  {
+            return (
+                <Rnd
+                    key={app.id}
+                    bounds='parent'
+                    onDragStart={(e, data) => {
+                        setPointerEventsEnabled(false);
+                        setTopAppUuid(app.id);
+                    }}
+                    onDragStop={(e, data) => {
+                        setPointerEventsEnabled(true);
+                        const appState = appStatesRef.current[app.id];
+                        appState.x = data.x;
+                        appState.y = data.y;
+                    }}
+                    onResizeStop={(e, direction, ref, delta, position) => {
+                        const appState = appStatesRef.current[app.id];
+                        appState.width = ref.style.width;
+                        appState.height = ref.style.height;
+                        // position can also change in resizing when moving the top left corner
+                        appState.x = position.x;
+                        appState.y = position.y;
+                    }}
+                    default={appStatesRef.current[app.id]}
+                    dragHandleClassName="handle"
+                    minHeight='30px'  // how to not use magic constants?
+                    minWidth='50px'
+                    style={{     // change z index to prioritize recently selected app
+                        zIndex: topAppUuid === app.id ? '1' : 'auto'
+                    }}
+                >
+                    
+                            <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
+                                        onMinimize={app.onMinimize} uuid={app.id}
+                                        pointerEventsEnabled={pointerEventsEnabled} >
+                            <FileUploadAppContents/> 
+
+                            </WorkspaceApp>
+                </Rnd>
+                
+            );
+         }
+
+        else if (which_app === 1) {
+
+            return (
+                <Rnd
+                    key={app.id}
+                    bounds='parent'
+                    onDragStart={(e, data) => {
+                        setPointerEventsEnabled(false);
+                        setTopAppUuid(app.id);
+                    }}
+                    onDragStop={(e, data) => {
+                        setPointerEventsEnabled(true);
+                        const appState = appStatesRef.current[app.id];
+                        appState.x = data.x;
+                        appState.y = data.y;
+                    }}
+                    onResizeStop={(e, direction, ref, delta, position) => {
+                        const appState = appStatesRef.current[app.id];
+                        appState.width = ref.style.width;
+                        appState.height = ref.style.height;
+                        // position can also change in resizing when moving the top left corner
+                        appState.x = position.x;
+                        appState.y = position.y;
+                    }}
+                    default={appStatesRef.current[app.id]}
+                    dragHandleClassName="handle"
+                    minHeight='30px'  // how to not use magic constants?
+                    minWidth='50px'
+                    style={{     // change z index to prioritize recently selected app
+                        zIndex: topAppUuid === app.id ? '1' : 'auto'
+                    }}
+                >
+                    
+                            <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
+                                        onMinimize={app.onMinimize} uuid={app.id}
+                                        pointerEventsEnabled={pointerEventsEnabled} >
+                            <TemplateAppContents/> 
+
+                            </WorkspaceApp>
+                </Rnd>
+                
+            );
+
+         }
     });
 
     return (
@@ -219,8 +274,13 @@ function WorkspaceTab(props) {
         }}>
             <rps.ProSidebar>
                 <rps.Menu>
-                    <rps.MenuItem icon={<AddIcon />} onClick={addApp} >
+                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp();
+                    setpath(0)}} >
                         Add app
+                    </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp();
+                    setpath(1)}} >
+                        Add pad
                     </rps.MenuItem>
                     {
                         Object.values(apps).map((app) => (
