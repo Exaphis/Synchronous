@@ -20,7 +20,7 @@ import { WorkspaceArea } from './WorkspaceArea';
 
 import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage, addUserMessage, deleteMessages } from 'react-chat-widget';
-import 'react-chat-widget/lib/styles.css';
+import './styles.css';
 
 const STREAM_API = 'n9utf8kxctuk'
 const SECRET = 'tvf924vk92ytw86zpnpmevajnuna6wtgu9mjqzwszyf9snc44hr7r2h3mbuqav7v'

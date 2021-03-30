@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Link, Route, Switch, useHistory } from "react-
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
 import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
-import 'react-chat-widget/lib/styles.css';
+import './styles.css';
 
 import logo from './logo.png';
 import s from './s.png';
