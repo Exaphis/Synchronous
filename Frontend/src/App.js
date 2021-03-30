@@ -53,9 +53,6 @@ export default function App() {
                     <Route exact path="/Workspace/:uniqueId">
                         <Workspace/>
                     </Route>
-                    <Route exact path="/Chat">
-                        <Chat/>
-                    </Route>
                 </Switch>
             </div>
         </Router>
@@ -120,18 +117,6 @@ function SignIn() {
                                 onClick={ refresh }
                             >
                                 Test Workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/Chat"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                //color="primary"
-                                className={classes.submit}
-                                onClick={ refresh }
-                            >
-                                Chat Test
                             </Button>
                         </div>
                     </Router>
@@ -452,70 +437,6 @@ async function openWithout(uniqueID, resp, work, setWork, history) {
 
 function Upload() {
     return <h2>Upload: TODO</h2>
-}
-
-export const DEFAULT_USER = {
-    id: 'id',
-    name: 'Testing'
-};
-
-Chat.defaultProps = {
-    user: DEFAULT_USER
-};
-
-function Chat({ user }) {
-    const client = new StreamChat(STREAM_API);
-    const [messages, setMessages] = useState(null);
-    const { id, name } = user ;
-    const channel = useRef(null);
-
-    const setUser = useCallback(async () => {
-        await client.setUser(
-            { id, name },
-            client.devToken(id)
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, name]);
-
-    const setChannel = useCallback(async () => {
-        channel.current = client.channel('messaging', 'wolox-support', {
-            name: 'Wolox customer support',
-        });
-
-        const channelWatch = await channel.current.watch();
-        setMessages(channelWatch.messages);
-
-        return async () => {
-            await channelWatch.stopWatching();
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    const handleNewUserMessage = useCallback(async message =>
-        await channel.current.sendMessage({
-            text: message
-        }), []);
-
-    useEffect(() => {
-        setUser();
-        setChannel();
-    }, [setUser, setChannel]);
-
-    useEffect(
-        () => messages?.map(message => addUserMessage(message.text)),
-        [messages]
-    );
-
-
-    return (
-        <div className="App">
-            <Widget
-                handleNewUserMessage={handleNewUserMessage}
-                title="Chat"
-                subtitle=""
-            />
-        </div>
-    );
 }
 
 const sleep = (milliseconds) => {
