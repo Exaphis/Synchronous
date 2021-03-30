@@ -520,10 +520,20 @@ function Workspace() {
 function Chat({workspace}) {
     const client = new StreamChat(STREAM_API);
     const [messages, setMessages] = useState(null);
+    const [count, setCount] = useState(null);
+    const [inUse, setUse] = useState(false);
+    const [lastMessage, setLastMessage] = useState(null);
     //const [valid, setValid] = React.useState(false);
     let id = 'id'
     let name = 'name'
     const channel = useRef(null);
+
+    if (messages !== null && count === null) {
+        setCount(messages.length)
+        setLastMessage(messages[messages.length - 1].text)
+        localStorage.setItem('last', messages[messages.length - 1].text)
+    }
+    console.log(lastMessage)
 
     let chatName = "Chat";
     if (workspace !== null && workspace !== undefined) {
@@ -534,8 +544,10 @@ function Chat({workspace}) {
         }
     }
 
-    if (channel !== null && channel.current !== null) {
-        //console.log(channel.current.watch.messages)
+    if (channel !== null && channel.current !== null && count !== null && inUse === false) {
+        //updateUse(setUse, true);
+        updateMessages(messages, setMessages, channel, count, setCount, lastMessage, setLastMessage);
+        //updateUse(setUse, false);
 
     }
 
@@ -559,82 +571,74 @@ function Chat({workspace}) {
 
         return async () => {
             await channelWatch.stopWatching();
+
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    updateMessages(messages, setMessages, channel);
-
-
-    // const handleSubmit = useCallback(async () => {
-    //    const channelWatch =  await channel.current.watch();
-    //     setMessages(channelWatch.messages);
-    // }, []);
 
     // if (channel !== null && channel.current !== null) {
     //     const channelWatch = channel.current.watch();
     //     setMessages(channelWatch.messages);
     //
     // }
+
     const handleNewUserMessage = useCallback(async message =>
         await channel.current.sendMessage({
-                text: message
-            }
-        ), []);
-
+            text: message
+        })
+        , []);
 
     useEffect(() => {
         setUser();
         setChannel();
     }, [setUser, setChannel]);
 
-    //deleteMessages(10)
-
-
     useEffect(
-        () => messages?.map(message => addUserMessage(message.text)),
+        () => messages?.map(message => addResponseMessage(message.text)),
         [messages]
     );
 
-    // let channelID = ""
-    // if (channel.current !== null) {
-    //     setChannel();
-    // }
-
-    // if (!valid && workspace !== null && workspace !== undefined && channel.current !== null) {
-    //     console.log('pls')
-    //     setValid(true);
-    //     console.log(channel.current)
-    //     channel.current = client.channel('messaging', workspace.unique_id, {
-    //         name: workspace.unique_id,
-    //     });
-    // }
 
     return (
         <div className="App">
             <Widget
+                handleSubmit={() => setCount(count + 1)}
                 handleNewUserMessage={handleNewUserMessage}
                 title={chatName}
                 subtitle=""
-                showTimeStamp={true}
-
             />
         </div>
     );
 }
 
-async function updateMessages(messages, setMessages, channel) {
-    // if (channel !== null && channel.current !== null) {
-    //     addResponseMessage('Welcome!');
-    //     deleteMessages(100);
-    //     const channelWatch = await channel.current.watch();
-    //     setMessages(channelWatch.messages);
-    //
-    //     return async () => {
-    //         await channelWatch.stopWatching();
-    //     };
-    //
-    // }
+
+async function updateMessages(messages, setMessages, channel, count, setCount, lastMessage, setLastMessage) {
+        const channelWatch = await channel.current.watch();
+        let len = channelWatch.messages.length;
+        //console.log(channelWatch.messages)
+
+        if (len > count) {
+            let message = channelWatch.messages[count].text;
+            if (message === localStorage.getItem('last')) {
+                console.log('yes')
+            } else {
+                console.log('no')
+                addResponseMessage(message)
+                localStorage.setItem('last', message)
+            }
+
+            setCount(count + 1)
+        }
+
+        return async () => {
+            await channelWatch.stopWatching();
+        };
+
+}
+
+function updateUse(setUse, bool) {
+    setUse(bool)
+    return null;
 }
 
 function timeout(delay: number) {
