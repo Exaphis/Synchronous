@@ -1,26 +1,23 @@
 import {v4 as uuidv4} from "uuid";
 import {AppBar, Container, IconButton, Tab, Tabs, Toolbar} from "@material-ui/core";
 import * as React from "react";
-import {useRef, useState} from "react";
 import {Rnd} from "react-rnd";
 import * as rps from "react-pro-sidebar";
+import {PubSub} from "pubsub-js";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
-import Uppy from '@uppy/core'
-import Tus from '@uppy/tus'
-import '@uppy/core/dist/style.css'
-import '@uppy/dashboard/dist/style.css'
+import Uppy from '@uppy/core';
+import Tus from '@uppy/tus';
+import DashboardModal from '@uppy/react/lib/DashboardModal';
+import {useUppy} from '@uppy/react';
+import '@uppy/core/dist/style.css';
+import '@uppy/dashboard/dist/style.css';
 
-
-
-
-const { DashboardModal, useUppy } = require('@uppy/react')
-const DefaultStore = require('@uppy/store-default')
-
-
-
+import {WorkspaceUniqueIdContext} from "./Workspace";
+import {FILE_LIST_TOPIC, TUSD_URL} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -45,34 +42,60 @@ function AppTitleBar(props) {
 }
 
 
+function FileUploadAppContents(props) {
+    const workspaceUniqueId = React.useContext(WorkspaceUniqueIdContext);
+    const tmpRef = React.useRef(null);
 
-function WorkspaceApp(props) {
     const uppy = useUppy(() => {
         return new Uppy({
-            id:'uppy',
-            autoProceed:false,
-            allowMultipleUploads: true,
-            debug: false,
-            restrictions: {
-                minFileSize:null,
-                maxFileSize:2000000,
-                maxTotalFileSize:null,
-                maxNumberOfFiles: 3,
-                minNumberOfFiles: null,
-                allowedFileTypes: ['image/*','video/*', 'text*']
-            },
-            meta:{},
-            onBeforeFileAdded: (currentFile, files) => currentFile,
-            onBeforeUpload: (files) => {},
-            locale: {},
-            store: new DefaultStore(),
-            infoTimeout:5000,
+            meta: {
+                workspaceUniqueId: workspaceUniqueId
+            }
+        }).use(Tus, {endpoint: TUSD_URL})
+    })
 
-        })
-        .use(Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
-        
-      })
+    React.useEffect(() => {
+        let token = PubSub.subscribe(FILE_LIST_TOPIC, (msg, data) => {
+            console.log(data);
+            tmpRef.current = <span>{JSON.stringify(data.file_list)}</span>;
+        });
 
+        // console.log(PubSub.countSubscriptions(FILE_LIST_TOPIC));
+
+        return function cleanup() {
+            PubSub.unsubscribe(token);
+        }
+    });
+
+    const [isModalOpen, setModalOpen] = React.useState(false);
+
+    return (
+        <div>
+            {tmpRef.current}
+            <IconButton color="inherit" onClick={() => setModalOpen(true)}>
+                <CloudUploadIcon />
+            </IconButton>
+            {/* Portal to root needed for modal? */}
+            <DashboardModal
+                uppy={uppy}
+                closeModalOnClickOutside
+                open={isModalOpen}
+                onRequestClose={() => setModalOpen(false)}
+            />
+        </div>
+    );
+}
+
+
+function TemplateAppContents(props) {
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src='https://google.com?igu=1' />
+    );
+}
+
+
+function WorkspaceApp(props) {
     return (
         <div id={props.uuid} style={{
             backgroundColor: 'white',
@@ -84,23 +107,19 @@ function WorkspaceApp(props) {
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
-            <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-                    title={props.uuid} //src='https://google.com?igu=1'
-                    />
-                    
-                <DashboardModal uppy={uppy} plugins={['tus']} />
+            {props.children}
         </div>
     )
 }
 
 
 function WorkspaceTab(props) {
-    const [apps, setApps] = useState({});
-    const [pointerEventsEnabled, setPointerEventsEnabled] = useState(true);
-    const [topAppUuid, setTopAppUuid] = useState();
+    const [apps, setApps] = React.useState({});
+    const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(true);
+    const [topAppUuid, setTopAppUuid] = React.useState();
 
     // contains the states (i.e. position + size) of each app
-    const appStatesRef = useRef({});
+    const appStatesRef = React.useRef({});
 
     function addApp() {
         setApps((apps) => {
@@ -178,7 +197,10 @@ function WorkspaceTab(props) {
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
                               onMinimize={app.onMinimize} uuid={app.id}
-                              pointerEventsEnabled={pointerEventsEnabled} />
+                              pointerEventsEnabled={pointerEventsEnabled} >
+                    {/*<TemplateAppContents/>*/}
+                    <FileUploadAppContents/>
+                </WorkspaceApp>
             </Rnd>
         );
     });

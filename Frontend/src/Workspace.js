@@ -1,7 +1,7 @@
 import {Link, useParams} from "react-router-dom";
+import {PubSub} from 'pubsub-js';
 import * as React from "react";
 import {useIdleTimer} from "react-idle-timer";
-import {useContext, useRef, useState, useCallback, useEffect } from 'react'
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
@@ -14,7 +14,10 @@ import clsx from "clsx";
 import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
 
-import { fetchAPI, getUrlFromEndpoint } from './api';
+import {
+    fetchAPI, getUrlFromEndpoint, CURRENT_USER_TOPIC,
+    NICKNAME_CHANGE_TOPIC, USER_LIST_TOPIC
+} from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
 
@@ -25,6 +28,8 @@ import './styles.css';
 const STREAM_API = 'n9utf8kxctuk'
 const SECRET = 'tvf924vk92ytw86zpnpmevajnuna6wtgu9mjqzwszyf9snc44hr7r2h3mbuqav7v'
 const AppID = '1116711'
+
+export const WorkspaceUniqueIdContext = React.createContext(undefined);
 
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
@@ -104,14 +109,13 @@ function WorkspaceInfoBar(props) {
             <Chat workspace={workspace} />
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
-                    {workspace !== null ?
-                        (workspace.nickname !== null ?
-                            "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
-                            "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1)) :
-                        ""}
+                    {(workspace.nickname !== null ?
+                        "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
+                        "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1))}
                 </Typography>
                 <Typography variant="h6" className={classes.title}>
-                    &nbsp;&nbsp;&nbsp; Duration: {workspace !== null ? <Moment date={workspace.created_at} format="hh:mm:ss" durationFromNow /> : null }
+                    &nbsp;&nbsp;&nbsp; Duration: {<Moment date={workspace.created_at} format="hh:mm:ss"
+                                                          durationFromNow/> }
                 </Typography>
 
 
@@ -120,8 +124,7 @@ function WorkspaceInfoBar(props) {
                         onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
                     Change nickname
                 </Button>
-                {workspace !== null && workspace.is_password_protected
-                && isLoggedIn && (
+                {workspace.is_password_protected && isLoggedIn && (
                     <Button color="secondary" variant="contained" edge="end"
                             onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
                     Change password
@@ -196,7 +199,6 @@ function WorkspaceInfoBar(props) {
     );
 }
 
-
 function Workspace() {
     const classes = useStyles();
     const {uniqueId} = useParams();
@@ -208,12 +210,12 @@ function Workspace() {
     // const [auth, setAuth] = React.useState(true);
 
     // for changing nickname in NicknameCell
-    const [ isNameDialogOpen, setNameDialogOpen ] = React.useState(false);
-    const [ nameDialogError, setNameDialogError ] = React.useState('');
+    const [isNameDialogOpen, setNameDialogOpen] = React.useState(false);
+    const [nameDialogError, setNameDialogError] = React.useState('');
 
     const nicknameFieldValue = React.useRef('');
 
-    //console.log(JSON.stringify(userList));
+    // console.log(JSON.stringify(userList));
 
     // const handleChange = (event) => {
     //     setAuth(event.target.checked);
@@ -281,16 +283,8 @@ function Workspace() {
 
         ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            if (data.type === 'user_list') {
-                const newUserList = data['user_list'];
-                setUserList(updateInactivityText(newUserList));
-            }
-            else if (data.type === 'current_user') {
-                userIdRef.current = data['user_id']
-            }
-            else if (data.type === 'nicknameChange') {
-                onUserNicknameChangeResponse(data);
-            }
+            console.log('published ' + data.type);
+            PubSub.publish(data.type, data);
         };
 
         setUserListWs(ws);
@@ -323,6 +317,27 @@ function Workspace() {
             getWorkspace().then();
         } else if (userListWs === null) {
             userListConnect()
+        }
+
+        let pubSubTokens = [];
+        let token = PubSub.subscribe(USER_LIST_TOPIC, (msg, data) => {
+            const newUserList = data['user_list'];
+            setUserList(updateInactivityText(newUserList));
+        });
+        pubSubTokens.push(token);
+
+        token = PubSub.subscribe(CURRENT_USER_TOPIC, (msg, data) => {
+            userIdRef.current = data['user_id'];
+        });
+        pubSubTokens.push(token);
+
+        token = PubSub.subscribe(NICKNAME_CHANGE_TOPIC, (msg, data) => {
+            onUserNicknameChangeResponse(data);
+        });
+        pubSubTokens.push(token);
+
+        return function cleanup() {
+            pubSubTokens.forEach(token => PubSub.unsubscribe(token));
         }
     });
 
@@ -528,7 +543,9 @@ function Workspace() {
             </Table>
         </Container>
 
-        <WorkspaceArea/>
+        <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
+            <WorkspaceArea/>
+        </WorkspaceUniqueIdContext.Provider>
 
         </div>
     )
@@ -537,15 +554,17 @@ function Workspace() {
 
 function Chat({workspace}) {
     const client = new StreamChat(STREAM_API);
-    const [messages, setMessages] = useState(null);
-    const [count, setCount] = useState(null);
+    const [messages, setMessages] = React.useState(null);
+    const [count, setCount] = React.useState(null);
     let id = 'id'
     let name = 'name'
-    const channel = useRef(null);
+    const channel = React.useRef(null);
 
     if (messages !== null && count === null) {
         setCount(messages.length)
-        localStorage.setItem('last', messages[messages.length - 1].text)
+        if (messages.length > 0) {
+            localStorage.setItem('last', messages[messages.length - 1].text)
+        }
     }
 
     let chatName = "Chat";
@@ -562,7 +581,7 @@ function Chat({workspace}) {
     }
 
 
-    const setUser = useCallback(async () => {
+    const setUser = React.useCallback(async () => {
         await client.setUser(
             { id, name },
             client.devToken(id)
@@ -571,7 +590,7 @@ function Chat({workspace}) {
     }, [id, name]);
 
 
-    const setChannel = useCallback(async () => {
+    const setChannel = React.useCallback(async () => {
         channel.current = client.channel('messaging', workspace.unique_id, {
             name: workspace.unique_id,
         });
@@ -586,18 +605,18 @@ function Chat({workspace}) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleNewUserMessage = useCallback(async message =>
+    const handleNewUserMessage = React.useCallback(async message =>
         await channel.current.sendMessage({
             text: message
         })
         , []);
 
-    useEffect(() => {
+    React.useEffect(() => {
         setUser();
         setChannel();
     }, [setUser, setChannel]);
 
-    useEffect(
+    React.useEffect(
         () => messages?.map(message => addResponseMessage(message.text)),
         [messages]
     );
