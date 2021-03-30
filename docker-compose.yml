@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+  frontend:
+    build: Frontend
+    command: npm start
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Frontend:/app
+  tusd:
+    image: tusproject/tusd
+    ports:
+      - "1080:1080"
+    command: --hooks-http http://backend:8000/tusd/
+  etherpad:
+    image: etherpad/etherpad
+    ports:
+      - "9001:9001"
+    profiles:
+      - etherpad

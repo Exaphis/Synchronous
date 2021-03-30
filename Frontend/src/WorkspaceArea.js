@@ -10,8 +10,16 @@ import MinimizeIcon from '@material-ui/icons/Minimize';
 
 import Uppy from '@uppy/core'
 import Tus from '@uppy/tus'
-import { DragDrop } from '@uppy/react'
-import store from '@uppy/store-default'
+import '@uppy/core/dist/style.css'
+import '@uppy/dashboard/dist/style.css'
+
+
+
+
+const { DashboardModal, useUppy } = require('@uppy/react')
+const DefaultStore = require('@uppy/store-default')
+
+
 
 
 function AppTitleBar(props) {
@@ -37,42 +45,33 @@ function AppTitleBar(props) {
 }
 
 
+
 function WorkspaceApp(props) {
-    const uppy = new Uppy({
-        meta: { type: 'avatar' },
-        restrictions: { maxNumberOfFiles: 1 },
-        autoProceed: true
-    })
+    const uppy = useUppy(() => {
+        return new Uppy({
+            id:'uppy',
+            autoProceed:false,
+            allowMultipleUploads: true,
+            debug: false,
+            restrictions: {
+                minFileSize:null,
+                maxFileSize:2000000,
+                maxTotalFileSize:null,
+                maxNumberOfFiles: 3,
+                minNumberOfFiles: null,
+                allowedFileTypes: ['image/*','video/*', 'text*']
+            },
+            meta:{},
+            onBeforeFileAdded: (currentFile, files) => currentFile,
+            onBeforeUpload: (files) => {},
+            locale: {},
+            store: new DefaultStore(),
+            infoTimeout:5000,
 
-    uppy.use(Tus, { endpoint: '/upload' })
-
-    uppy.on('complete', (result) => {
-        const url = result.successful[0].uploadURL
-        store.dispatch({
-            type: 'SET_USER_AVATAR_URL',
-            payload: { url: url }
         })
-    })
-
-    const AvatarPicker = ({ currentAvatar }) => {
-        return (
-          <div>
-            <img src={currentAvatar} alt="Current Avatar" />
-            <DragDrop
-              uppy={uppy}
-              locale={{
-                strings: {
-                  // Text to show on the droppable area.
-                  // `%{browse}` is replaced with a link that opens the system file selection dialog.
-                  dropHereOr: 'Drop here or %{browse}',
-                  // Used as the label for the link that opens the system file selection dialog.
-                  browse: 'browse'
-                }
-              }}
-            />
-          </div>
-        )
-      }
+        .use(Tus, { endpoint: 'https://tusd.tusdemo.net/files/' })
+        
+      })
 
     return (
         <div id={props.uuid} style={{
@@ -86,8 +85,10 @@ function WorkspaceApp(props) {
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize}/>
             <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-                    title={props.uuid} src='https://google.com?igu=1'/>
-            {/*<AvatarPicker/>*/}
+                    title={props.uuid} //src='https://google.com?igu=1'
+                    />
+                    
+                <DashboardModal uppy={uppy} plugins={['tus']} />
         </div>
     )
 }
