@@ -19,6 +19,7 @@ services:
     image: tusproject/tusd
     ports:
       - "1080:1080"
+    command: --hooks-http http://backend:8000/tusd/
   etherpad:
     image: etherpad/etherpad
     ports:

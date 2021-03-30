@@ -25,7 +25,10 @@ SECRET_KEY = 'g00v#yyz4r_^p1fhv5am%i(w!!^k4tqnp^p_e(o+rh@5#&9q4p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'backend',  # used when docker containers are talking to each other
+    'localhost'
+]
 
 
 # Application definition
@@ -49,6 +52,7 @@ INSTALLED_APPS = [
     # local apps
     'workspaces.apps.WorkspaceConfig',
     'users.apps.UsersConfig',
+    'tusd_hooks.apps.TusdHooksConfig',
 ]
 
 MIDDLEWARE = [
