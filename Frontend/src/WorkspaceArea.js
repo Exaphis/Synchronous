@@ -17,7 +17,7 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext} from "./Workspace";
-import {FILE_LIST_TOPIC, TUSD_URL} from "./api";
+import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -60,12 +60,14 @@ function FileUploadAppContents(props) {
             tmpRef.current = <span>{JSON.stringify(data.file_list)}</span>;
         });
 
-        // console.log(PubSub.countSubscriptions(FILE_LIST_TOPIC));
-
         return function cleanup() {
             PubSub.unsubscribe(token);
         }
     });
+
+    React.useEffect(() => {
+        PubSub.publish(FILE_LIST_REQUEST_TOPIC, undefined);
+    }, []);
 
     const [isModalOpen, setModalOpen] = React.useState(false);
 

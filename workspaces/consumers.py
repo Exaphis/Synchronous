@@ -6,6 +6,8 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from .models import Workspace
 from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
+from tusdfileshare.models import TusdFileShare, TusdFile
+from tusdfileshare.serializers import TusdFileSerializer
 
 
 # TODO: ensure that non-authed users cannot connect to the websocket
@@ -111,3 +113,16 @@ class UserListConsumer(JsonWebsocketConsumer):
 
             print('current user nickname:', self.user.nickname)
             self.send_user_list()
+        elif content['type'] == 'fileListRequest':
+            files = []
+
+            try:
+                tusd_file_share = TusdFileShare.objects.get(workspace=self.workspace)
+
+                for file in TusdFile.objects.filter(file_share=tusd_file_share).order_by('created_at'):
+                    file_data = TusdFileSerializer(file).data
+                    files.append(file_data)
+            except TusdFileShare.DoesNotExist:
+                pass
+
+            self.file_list_changed({'file_list': files})

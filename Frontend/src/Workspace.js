@@ -16,7 +16,7 @@ import EmailIcon from "@material-ui/icons/Email";
 
 import {
     fetchAPI, getUrlFromEndpoint, CURRENT_USER_TOPIC,
-    NICKNAME_CHANGE_TOPIC, USER_LIST_TOPIC
+    NICKNAME_CHANGE_TOPIC, USER_LIST_TOPIC, FILE_LIST_REQUEST_TOPIC
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
@@ -283,7 +283,7 @@ function Workspace() {
 
         ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            console.log('published ' + data.type);
+            // console.log('published ' + data.type);
             PubSub.publish(data.type, data);
         };
 
@@ -333,6 +333,17 @@ function Workspace() {
 
         token = PubSub.subscribe(NICKNAME_CHANGE_TOPIC, (msg, data) => {
             onUserNicknameChangeResponse(data);
+        });
+        pubSubTokens.push(token);
+
+        token = PubSub.subscribe(FILE_LIST_REQUEST_TOPIC, (msg, data) => {
+            if (userListWs !== null) {
+                userListWs.send(JSON.stringify(
+                    {
+                        'type': 'fileListRequest'
+                    }
+                ));
+            }
         });
         pubSubTokens.push(token);
 
