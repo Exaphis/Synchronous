@@ -19,6 +19,17 @@ import '@uppy/dashboard/dist/style.css';
 import {WorkspaceUniqueIdContext} from "./Workspace";
 import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC} from "./api";
 
+
+let etherpad_api = require('etherpad-lite-client')
+let etherpad = etherpad_api.connect({
+  apikey: '5da9f78b8445e157e04332920ba299aaa2aa54dc1fd9ab55519c4e5165fb6c88',
+  host: 'localhost',
+  port: 9001,
+  ssl: true,
+  rejectUnauthorized: false,
+})
+
+
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
     return (
@@ -97,6 +108,44 @@ function TemplateAppContents(props) {
 }
 
 
+function PadAppContents(props) {
+
+    let [uuid_etherpad, setUuid_etherpad] = React.useState("");
+    let uuid_temp;
+    React.useEffect(() => {
+        uuid_temp = uuidv4();
+        setUuid_etherpad(uuid_temp);
+
+        var args = {
+            padID: uuid_temp,
+            text: "This works"
+        }
+
+        etherpad.createPad(args, function(error){
+        if(error) console.error('Error creating pad: ' + error.message)
+        else console.log("Pad created")
+        //pad_id = data.padID;
+        })
+        console.log("in useEffect")
+        console.log("padID: " + uuid_etherpad);
+    }, []);
+    //uuid_etherpad = group_id + "$" + uuid_etherpad;
+    
+    let pad_url = "https://127.0.0.1:9001/p/" + uuid_etherpad;
+    //console.log(pad_url);
+
+    if (uuid_etherpad == "") {
+        return (<span>UUID IS BLANK</span>)
+    }
+
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src={pad_url}/>
+    );
+}
+
+
+
 function WorkspaceApp(props) {
     return (
         <div id={props.uuid} style={{
@@ -128,7 +177,7 @@ function WorkspaceTab(props) {
             setWhich_app(e);
     }
 
-    function addApp() {
+    function addApp(num_type) {
         setApps((apps) => {
             const uuid = uuidv4();
 
@@ -166,6 +215,8 @@ function WorkspaceTab(props) {
                             return apps;
                         });
                     },
+
+                    type: num_type,
                 }
             };
         });
@@ -173,7 +224,7 @@ function WorkspaceTab(props) {
 
     const appComponents = Object.values(apps).map((app) => {
 
-        if (which_app === 0)  {
+        if (app.type === 0)  {
             return (
                 <Rnd
                     key={app.id}
@@ -216,7 +267,7 @@ function WorkspaceTab(props) {
             );
          }
 
-        else if (which_app === 1) {
+        else if (app.type === 1) {
 
             return (
                 <Rnd
@@ -252,7 +303,8 @@ function WorkspaceTab(props) {
                             <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
                                         onMinimize={app.onMinimize} uuid={app.id}
                                         pointerEventsEnabled={pointerEventsEnabled} >
-                            <TemplateAppContents/> 
+                            <PadAppContents
+                            pointerEventsEnabled={pointerEventsEnabled}/> 
 
                             </WorkspaceApp>
                 </Rnd>
@@ -274,11 +326,11 @@ function WorkspaceTab(props) {
         }}>
             <rps.ProSidebar>
                 <rps.Menu>
-                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp();
+                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp(0);
                     setpath(0)}} >
                         Add app
                     </rps.MenuItem>
-                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp();
+                    <rps.MenuItem icon={<AddIcon />} onClick={(event) => {addApp(1);
                     setpath(1)}} >
                         Add pad
                     </rps.MenuItem>
