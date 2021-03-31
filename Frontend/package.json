@@ -12,6 +12,7 @@
     "@uppy/core": "^1.16.2",
     "@uppy/dashboard": "^1.17.1",
     "@uppy/react": "^1.11.5",
+    "@uppy/thumbnail-generator": "^1.7.7",
     "@uppy/tus": "^1.8.6",
     "@use-it/interval": "^1.0.0",
     "animated": "^0.2.2",

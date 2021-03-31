@@ -1,5 +1,5 @@
 import {v4 as uuidv4} from "uuid";
-import {AppBar, Container, IconButton, Tab, Tabs, Toolbar} from "@material-ui/core";
+import {AppBar, Container, IconButton, Tab, Tabs, ThemeProvider, Toolbar} from "@material-ui/core";
 import * as React from "react";
 import {Rnd} from "react-rnd";
 import * as rps from "react-pro-sidebar";
@@ -12,12 +12,14 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import Uppy from '@uppy/core';
 import Tus from '@uppy/tus';
 import DashboardModal from '@uppy/react/lib/DashboardModal';
+import Dashboard from '@uppy/dashboard'
 import {useUppy} from '@uppy/react';
 import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext} from "./Workspace";
 import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC} from "./api";
+import Thumbnail from '@uppy/thumbnail-generator'
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -44,20 +46,28 @@ function AppTitleBar(props) {
 
 function FileUploadAppContents(props) {
     const workspaceUniqueId = React.useContext(WorkspaceUniqueIdContext);
-    const tmpRef = React.useRef(null);
+    // const tmpRef = React.useRef(null);
+    const [tmpRef,setmpRef] = React.useState([])
 
     const uppy = useUppy(() => {
         return new Uppy({
             meta: {
                 workspaceUniqueId: workspaceUniqueId
             }
-        }).use(Tus, {endpoint: TUSD_URL})
+        })
+        
+        .use(Tus, {endpoint: TUSD_URL})
     })
 
     React.useEffect(() => {
         let token = PubSub.subscribe(FILE_LIST_TOPIC, (msg, data) => {
-            console.log(data);
-            tmpRef.current = <span>{JSON.stringify(data.file_list)}</span>;
+            console.log(data.file_list[0].file_id);
+            // tmpRef.current = <span>{JSON.stringify(data.file_list)}</span>;
+                var arr = [];
+            for(var i = 0; i < data.file_list.length; i++){
+                arr[i] =<span><a href = {TUSD_URL + data.file_list[i].file_id} download = "lmao">{data.file_list[i].name} </a></span>
+            }
+            setmpRef(arr)
         });
 
         return function cleanup() {
@@ -73,7 +83,7 @@ function FileUploadAppContents(props) {
 
     return (
         <div>
-            {tmpRef.current}
+            {tmpRef}
             <IconButton color="inherit" onClick={() => setModalOpen(true)}>
                 <CloudUploadIcon />
             </IconButton>
@@ -83,6 +93,7 @@ function FileUploadAppContents(props) {
                 closeModalOnClickOutside
                 open={isModalOpen}
                 onRequestClose={() => setModalOpen(false)}
+                
             />
         </div>
     );
