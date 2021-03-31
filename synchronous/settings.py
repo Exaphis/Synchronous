@@ -141,7 +141,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]

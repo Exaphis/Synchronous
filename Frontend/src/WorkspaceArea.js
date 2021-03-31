@@ -61,11 +61,10 @@ function FileUploadAppContents(props) {
 
     React.useEffect(() => {
         let token = PubSub.subscribe(FILE_LIST_TOPIC, (msg, data) => {
-            console.log(data.file_list[0].file_id);
             // tmpRef.current = <span>{JSON.stringify(data.file_list)}</span>;
                 var arr = [];
             for(var i = 0; i < data.file_list.length; i++){
-                arr[i] =<span><a href = {TUSD_URL + data.file_list[i].file_id} download = "lmao">{data.file_list[i].name} </a></span>
+                arr[i] =<span><a href = {TUSD_URL + data.file_list[i].file_id} target="_blank">{data.file_list[i].name} </a></span>
             }
             setmpRef(arr)
         });
@@ -311,7 +310,7 @@ function WorkspaceArea() {
         <Container maxWidth="xl" disableGutters={true}>
             <AppBar position="static">
                 <Toolbar>
-                    <Tabs value={currTab} edge="start" onChange={handleTabChange}>
+                    <Tabs value={currTab} edge="start" onChange={handleTabChange}  variant="scrollable" scrollButtons="auto">
                         {
                             tabs.length === 0 ? null : tabs.map((tab, tabIdx) => {
                                 const labelText = "Tab " + tabIdx.toString();
