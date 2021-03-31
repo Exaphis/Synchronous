@@ -229,8 +229,6 @@ function Workspace() {
 
     const nicknameFieldValue = React.useRef('');
 
-    // console.log(JSON.stringify(userList));
-
     // const handleChange = (event) => {
     //     setAuth(event.target.checked);
     // };
@@ -640,7 +638,7 @@ function Chat(props) {
         await channel.current.sendMessage({
             text: props.username.nickname + ": " + message
         })
-        , []);
+        , [props.username.nickname]);
 
     React.useEffect(() => {
         setUser();
