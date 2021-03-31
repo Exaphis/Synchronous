@@ -13,14 +13,18 @@ services:
       - frontend
       - tusd
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: ./docker/backend
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
       - .:/code
   frontend:
-    build: Frontend
+    build:
+      context: ./Frontend
+      dockerfile: ./docker/frontend
     command: npm start
     ports:
       - "3000:3000"
@@ -35,5 +39,7 @@ services:
     image: etherpad/etherpad
     ports:
       - "9001:9001"
-    profiles:
-      - etherpad
+    volumes:
+      - ./docker/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+    environment:
+      DEFAULT_PAD_TEXT: "hello\n"

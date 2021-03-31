@@ -20,7 +20,14 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext} from "./Workspace";
-import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC} from "./api";
+import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC, APP_TYPES} from "./api";
+
+let etherpad_api = require('etherpad-lite-client')
+let etherpad = etherpad_api.connect({
+    apikey: '5da9f78b8445e157e04332920ba299aaa2aa54dc1fd9ab55519c4e5165fb6c88',
+    host: 'etherpad.synchronous.localhost',
+    port: 80
+})
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -129,6 +136,37 @@ function FileUploadAppContents(props) {
 }
 
 
+function PadAppContents(props) {
+    let [etherpadUuid, setEtherpadUuid] = React.useState("");
+    React.useEffect(() => {
+        let uuid_temp = uuidv4();
+        setEtherpadUuid(uuid_temp);
+
+        let args = {
+            padID: uuid_temp,
+            text: "This works"
+        }
+
+        etherpad.createPad(args, function(error){
+            if (error) console.error('Error creating pad: ' + error.message);
+            else console.log("Pad created");
+        })
+        console.log("in useEffect")
+        console.log("padID: " + uuid_temp);
+    }, []);
+
+    let pad_url = "http://etherpad.synchronous.localhost/p/" + etherpadUuid;
+    if (etherpadUuid === "") {
+        return (<span>UUID IS BLANK</span>);
+    }
+
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src={pad_url}/>
+    );
+}
+
+
 function TemplateAppContents(props) {
     return (
         <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
@@ -163,7 +201,7 @@ function WorkspaceTab(props) {
     // contains the states (i.e. position + size) of each app
     const appStatesRef = React.useRef({});
 
-    function addApp() {
+    function addApp(type) {
         setApps((apps) => {
             const uuid = uuidv4();
 
@@ -187,6 +225,7 @@ function WorkspaceTab(props) {
                 [uuid]: {
                     id: uuid,
                     minimized: false,
+                    type: type,
                     switchMinimized: function switchMinimized() {
                         setMinimized(minimized => !minimized);
                     },
@@ -207,6 +246,18 @@ function WorkspaceTab(props) {
     }
 
     const appComponents = Object.values(apps).map((app) => {
+        let appContents;
+
+        if (app.type === APP_TYPES.PAD_APP_TYPE) {
+            appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
+        }
+        else if (app.type === APP_TYPES.FILE_SHARE_APP_TYPE) {
+            appContents = <FileUploadAppContents/>;
+        }
+        else {
+            appContents = <TemplateAppContents/>;
+        }
+
         return (
             <Rnd
                 key={app.id}
@@ -238,10 +289,8 @@ function WorkspaceTab(props) {
                 }}
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
-                              onMinimize={app.onMinimize} uuid={app.id}
-                              pointerEventsEnabled={pointerEventsEnabled} >
-                    {/*<TemplateAppContents/>*/}
-                    <FileUploadAppContents/>
+                              onMinimize={app.onMinimize} uuid={app.id} >
+                    {appContents}
                 </WorkspaceApp>
             </Rnd>
         );
@@ -259,8 +308,11 @@ function WorkspaceTab(props) {
         }}>
             <rps.ProSidebar>
                 <rps.Menu>
-                    <rps.MenuItem icon={<AddIcon />} onClick={addApp} >
-                        Add app
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPES.FILE_SHARE_APP_TYPE)} >
+                        Add file share
+                    </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPES.PAD_APP_TYPE)} >
+                        Add pad
                     </rps.MenuItem>
                     {
                         Object.values(apps).map((app) => (

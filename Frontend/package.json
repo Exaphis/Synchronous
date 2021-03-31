@@ -18,6 +18,7 @@
     "animated": "^0.2.2",
     "beautiful-react-hooks": "^0.31.0",
     "clsx": "^1.1.1",
+    "etherpad-lite-client": "^0.9.0",
     "filestack-js": "^3.22.1",
     "formik": "^2.2.6",
     "install": "^0.13.0",

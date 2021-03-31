@@ -1,4 +1,4 @@
-const REVERSE_PROXY = false;
+const REVERSE_PROXY = true;
 
 export const TUSD_URL = REVERSE_PROXY ? 'http://tusd.synchronous.localhost/files/' : 'http://0.0.0.0:1080/files/';
 export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localhost:8000';
@@ -8,6 +8,12 @@ export const CURRENT_USER_TOPIC = 'current_user';
 export const NICKNAME_CHANGE_TOPIC = 'nickname_change';
 export const FILE_LIST_TOPIC = 'file_list';
 export const FILE_LIST_REQUEST_TOPIC = 'fileListRequest';
+
+export const APP_TYPES = {
+    TEMPLATE_APP_TYPE: 0,
+    PAD_APP_TYPE: 1,
+    FILE_SHARE_APP_TYPE: 2
+};
 
 
 export function getUrlFromEndpoint(protocol, endpoint) {
