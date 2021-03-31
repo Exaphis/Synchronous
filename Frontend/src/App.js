@@ -9,7 +9,6 @@ import 'react-pro-sidebar/dist/css/styles.css';
 import { BrowserRouter as Router, Link, Route, Switch, useHistory } from "react-router-dom";
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
-import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
 import './styles.css';
 
 import logo from './logo.png';
@@ -18,15 +17,12 @@ import './App.css';
 import Workspace from './Workspace';
 import { fetchAPI } from './api';
 import { WorkspaceArea } from './WorkspaceArea';
+import Tutorial from './Tutorial';
 
-import { StreamChat } from 'stream-chat';
 
 LogRocket.init('a1vl8a/synchronous');
 
 setupLogRocketReact(LogRocket);
-
-
-const STREAM_API = 'n9utf8kxctuk'
 
 
 export default function App() {
@@ -116,6 +112,18 @@ function SignIn() {
                                 onClick={ refresh }
                             >
                                 Test Workspace
+                            </Button>
+                            <Button
+                                component={ Link }
+                                to={"/Tutorial"}
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                //color="primary"
+                                className={classes.submit}
+                                onClick={ refresh }
+                            >
+                                Tutorial
                             </Button>
                         </div>
                     </Router>
