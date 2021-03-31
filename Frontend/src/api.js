@@ -1,4 +1,8 @@
-export const TUSD_URL = 'http://0.0.0.0:1080/files/';
+const REVERSE_PROXY = false;
+
+export const TUSD_URL = REVERSE_PROXY ? 'http://tusd.synchronous.localhost/files/' : 'http://0.0.0.0:1080/files/';
+export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localhost:8000';
+
 export const USER_LIST_TOPIC = 'user_list';
 export const CURRENT_USER_TOPIC = 'current_user';
 export const NICKNAME_CHANGE_TOPIC = 'nickname_change';
@@ -7,7 +11,7 @@ export const FILE_LIST_REQUEST_TOPIC = 'fileListRequest';
 
 
 export function getUrlFromEndpoint(protocol, endpoint) {
-    return protocol + '://localhost:8000/' + endpoint;
+    return protocol + '://' + BACKEND_URL + '/' + endpoint;
 }
 
 export function fetchAPI(methodType, endpoint, data=null, token=null) {

@@ -27,7 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'backend',  # used when docker containers are talking to each other
-    'localhost'
+    'docker-backend',
+    'localhost',
+    'api.synchronous.localhost'
 ]
 
 
@@ -143,6 +145,7 @@ REST_FRAMEWORK = {
 }
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://synchronous.localhost"
 ]
 
 # channels setup
