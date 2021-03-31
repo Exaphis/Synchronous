@@ -87,6 +87,9 @@ function WorkspaceInfoBar(props) {
     const updateNickname = props.onWorkspaceNicknameUpdate;
     const changePassword = props.onPasswordChange;
 
+    const userList = props.userList;
+    const userIdRef = props.userIdRef;
+
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -98,7 +101,18 @@ function WorkspaceInfoBar(props) {
         setValidEmail(true);
     };
 
-    if (workspace === undefined || workspace === null) {
+    if (workspace === undefined || workspace === null || userIdRef === null || userList === {}) {
+        return <div>
+
+        </div>
+    }
+    let username;
+
+    if (userList[userIdRef.current] !== null) {
+        username = userList[userIdRef.current];
+    }
+
+    if (username === undefined) {
         return <div>
 
         </div>
@@ -106,7 +120,7 @@ function WorkspaceInfoBar(props) {
 
     return (
         <AppBar position="absolute" className={clsx(classes.appBar)}>
-            <Chat workspace={workspace} />
+            <Chat workspace={workspace} username={username}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
                     {(workspace.nickname !== null ?
@@ -516,6 +530,7 @@ function Workspace() {
         </div>
     }
 
+
     return (
         <div>
         <Container component="main" maxWidth="xl">
@@ -524,7 +539,8 @@ function Workspace() {
                 isLoggedIn={tokenRef.current !== null}
                 onWorkspaceNicknameUpdate={updateNickname}
                 onPasswordChange={changePassword}
-                // user={userList}
+                userList={userList}
+                userIdRef={userIdRef}
             />
             { nameDialog }
             <Box mt={10}>
@@ -563,10 +579,13 @@ function Workspace() {
 }
 
 
-function Chat({workspace}) {
+function Chat(props) {
     const client = new StreamChat(STREAM_API);
     const [messages, setMessages] = React.useState(null);
     const [count, setCount] = React.useState(null);
+    const workspace = props.workspace;
+
+
     let id = 'id'
     let name = 'name'
     const channel = React.useRef(null);
@@ -616,9 +635,10 @@ function Chat({workspace}) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+
     const handleNewUserMessage = React.useCallback(async message =>
         await channel.current.sendMessage({
-            text: message
+            text: props.username.nickname + ": " + message
         })
         , []);
 
@@ -631,7 +651,6 @@ function Chat({workspace}) {
         () => messages?.map(message => addResponseMessage(message.text)),
         [messages]
     );
-
 
     return (
         <div className="App">
@@ -659,6 +678,8 @@ async function updateMessages(messages, setMessages, channel, count, setCount) {
             }
 
             setCount(count + 1)
+
+
         }
 
         return async () => {
