@@ -20,12 +20,12 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext} from "./Workspace";
-import {FILE_LIST_TOPIC, TUSD_URL, FILE_LIST_REQUEST_TOPIC, APP_TYPES} from "./api";
+import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, ETHERPAD_URL, APP_TYPE} from "./api";
 
 let etherpad_api = require('etherpad-lite-client')
 let etherpad = etherpad_api.connect({
     apikey: '5da9f78b8445e157e04332920ba299aaa2aa54dc1fd9ab55519c4e5165fb6c88',
-    host: 'etherpad.synchronous.localhost',
+    host: ETHERPAD_URL,
     port: 80
 })
 
@@ -52,7 +52,7 @@ function AppTitleBar(props) {
 }
 
 
-function FileUploadAppContents(props) {
+function FileUploadAppContents() {
     const workspaceUniqueId = React.useContext(WorkspaceUniqueIdContext);
     const [fileComponents, setFileComponents] = React.useState([])
 
@@ -75,7 +75,7 @@ function FileUploadAppContents(props) {
          * @param {string} data.file_list[].name       - Original name of the file when uploaded.
          * @param {string} data.file_list[].created_at - Timestamp of when the file was uploaded.
          */
-        let token = PubSub.subscribe(FILE_LIST_TOPIC, (msg, data) => {
+        let token = PubSub.subscribe(SERVER_MSG_TYPE.FILE_LIST, (msg, data) => {
             setFileComponents(
                 data.file_list.map((file) => {
                     return (
@@ -111,7 +111,7 @@ function FileUploadAppContents(props) {
     });
 
     React.useEffect(() => {
-        PubSub.publish(FILE_LIST_REQUEST_TOPIC, undefined);
+        PubSub.publish(PUBSUB_TOPIC.FILE_LIST_REQUEST_TOPIC, undefined);
     }, []);
 
     const [isModalOpen, setModalOpen] = React.useState(false);
@@ -248,10 +248,10 @@ function WorkspaceTab(props) {
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
 
-        if (app.type === APP_TYPES.PAD_APP_TYPE) {
+        if (app.type === APP_TYPE.PAD) {
             appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
         }
-        else if (app.type === APP_TYPES.FILE_SHARE_APP_TYPE) {
+        else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
         }
         else {
@@ -262,7 +262,7 @@ function WorkspaceTab(props) {
             <Rnd
                 key={app.id}
                 bounds='parent'
-                onDragStart={(e, data) => {
+                onDragStart={() => {
                     setPointerEventsEnabled(false);
                     setTopAppUuid(app.id);
                 }}
@@ -308,10 +308,10 @@ function WorkspaceTab(props) {
         }}>
             <rps.ProSidebar>
                 <rps.Menu>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPES.FILE_SHARE_APP_TYPE)} >
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.FILE_SHARE)} >
                         Add file share
                     </rps.MenuItem>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPES.PAD_APP_TYPE)} >
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
                         Add pad
                     </rps.MenuItem>
                     {

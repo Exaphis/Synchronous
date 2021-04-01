@@ -18,8 +18,8 @@ import { useHistory } from "react-router-dom";
 
 
 import {
-    fetchAPI, getUrlFromEndpoint, CURRENT_USER_TOPIC,
-    NICKNAME_CHANGE_TOPIC, USER_LIST_TOPIC, FILE_LIST_REQUEST_TOPIC
+    fetchAPI, getUrlFromEndpoint, PUBSUB_TOPIC,
+    CLIENT_MSG_TYPE, SERVER_MSG_TYPE
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
@@ -305,8 +305,10 @@ function Workspace() {
 
         ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
-            // console.log('published ' + data.type);
             PubSub.publish(data.type, data);
+            if (!(data.type in SERVER_MSG_TYPE)) {
+                console.error('Unexpected server msg type: ' + data.type);
+            }
         };
 
         setUserListWs(ws);
@@ -316,7 +318,7 @@ function Workspace() {
         if (userListWs !== null) {
             userListWs.send(JSON.stringify(
                 {
-                    'type': 'activity',
+                    'type': CLIENT_MSG_TYPE.ACTIVITY,
                     'isActive': active
                 }
             ));
@@ -342,27 +344,27 @@ function Workspace() {
         }
 
         let pubSubTokens = [];
-        let token = PubSub.subscribe(USER_LIST_TOPIC, (msg, data) => {
+        let token = PubSub.subscribe(SERVER_MSG_TYPE.USER_LIST, (msg, data) => {
             const newUserList = data['user_list'];
             setUserList(updateInactivityText(newUserList));
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(CURRENT_USER_TOPIC, (msg, data) => {
+        token = PubSub.subscribe(SERVER_MSG_TYPE.CURRENT_USER, (msg, data) => {
             userIdRef.current = data['user_id'];
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(NICKNAME_CHANGE_TOPIC, (msg, data) => {
+        token = PubSub.subscribe(SERVER_MSG_TYPE.NICKNAME_CHANGE, (msg, data) => {
             onUserNicknameChangeResponse(data);
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(FILE_LIST_REQUEST_TOPIC, (msg, data) => {
+        token = PubSub.subscribe(PUBSUB_TOPIC.FILE_LIST_REQUEST_TOPIC, (msg, data) => {
             if (userListWs !== null) {
                 userListWs.send(JSON.stringify(
                     {
-                        'type': 'fileListRequest'
+                        'type': CLIENT_MSG_TYPE.FILE_LIST_REQUEST
                     }
                 ));
             }
@@ -420,7 +422,7 @@ function Workspace() {
     function sendUserNicknameChange() {
         userListWs.send(JSON.stringify(
             {
-                'type': 'nicknameChange',
+                'type': CLIENT_MSG_TYPE.NICKNAME_CHANGE,
                 'nickname': nicknameFieldValue.current
             }
         ));

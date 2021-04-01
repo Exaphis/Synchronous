@@ -2,17 +2,33 @@ const REVERSE_PROXY = window.location.hostname === 'synchronous.localhost';
 
 export const TUSD_URL = REVERSE_PROXY ? 'http://tusd.synchronous.localhost/files/' : 'http://0.0.0.0:1080/files/';
 export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localhost:8000';
+export const ETHERPAD_URL = 'etherpad.synchronous.localhost';
 
-export const USER_LIST_TOPIC = 'user_list';
-export const CURRENT_USER_TOPIC = 'current_user';
-export const NICKNAME_CHANGE_TOPIC = 'nickname_change';
-export const FILE_LIST_TOPIC = 'file_list';
-export const FILE_LIST_REQUEST_TOPIC = 'fileListRequest';
+// pubsub topics used for communication within the frontend
+export const PUBSUB_TOPIC = {
+    FILE_LIST_REQUEST_TOPIC: 'fileListRequest'
+}
 
-export const APP_TYPES = {
-    TEMPLATE_APP_TYPE: 0,
-    PAD_APP_TYPE: 1,
-    FILE_SHARE_APP_TYPE: 2
+export const APP_TYPE = {
+    TEMPLATE: 0,
+    PAD: 1,
+    FILE_SHARE: 2
+};
+
+// possible type parameters of websocket messages sent by client
+export const CLIENT_MSG_TYPE = {
+    ACTIVITY: 'activity',
+    NICKNAME_CHANGE: 'nicknameChange',
+    FILE_LIST_REQUEST: 'fileListRequest'
+};
+
+// possible type parameters of websocket messages sent by server
+// usable as pubsub-js topics for subscriptions
+export const SERVER_MSG_TYPE = {
+    USER_LIST: 'user_list',
+    CURRENT_USER: 'current_user',
+    NICKNAME_CHANGE: 'nickname_change',
+    FILE_LIST: 'file_list',
 };
 
 

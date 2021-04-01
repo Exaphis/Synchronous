@@ -41,10 +41,10 @@ def hook(request):
             name=file_name
         )
 
-        files = []
-        for file in TusdFile.objects.filter(file_share=tusd_file_share).order_by('created_at'):
-            file_data = TusdFileSerializer(file).data
-            files.append(file_data)
+        files = TusdFileSerializer(
+            TusdFile.objects.filter(file_share=tusd_file_share).order_by('created_at'),
+            many=True
+        ).data
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
