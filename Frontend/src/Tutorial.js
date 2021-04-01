@@ -1,10 +1,6 @@
 import { Route, useHistory, NavLink, HashRouter } from "react-router-dom";
 import "./Tutorial.css";
-import {
-    Grid, Box, Avatar, Button, CssBaseline,
-    TextField, FormControlLabel, Checkbox,
-    Typography, Container
-} from '@material-ui/core';
+import { Avatar } from '@material-ui/core';
 import s from './s.png';
 
 
