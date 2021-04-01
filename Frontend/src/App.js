@@ -2,14 +2,13 @@ import * as React from 'react'
 import {
     Grid, Box, Avatar, Button, CssBaseline,
     TextField, FormControlLabel, Checkbox,
-    Typography, Container,
+    Typography, Container
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import 'react-pro-sidebar/dist/css/styles.css';
 import { BrowserRouter as Router, Link, Route, Switch, useHistory } from "react-router-dom";
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
-import { Widget, addResponseMessage, addUserMessage } from 'react-chat-widget';
 import './styles.css';
 
 import logo from './logo.png';
@@ -18,15 +17,12 @@ import './App.css';
 import Workspace from './Workspace';
 import { fetchAPI } from './api';
 import { WorkspaceArea } from './WorkspaceArea';
+import Tutorial from './Tutorial';
 
-import { StreamChat } from 'stream-chat';
 
 LogRocket.init('a1vl8a/synchronous');
 
 setupLogRocketReact(LogRocket);
-
-
-const STREAM_API = 'n9utf8kxctuk'
 
 
 export default function App() {
@@ -52,6 +48,9 @@ export default function App() {
                     <Route exact path="/Workspace/:uniqueId">
                         <Workspace/>
                     </Route>
+                    <Route exact path="/Tutorial">
+                        <Tutorial/>
+                    </Route>
                 </Switch>
             </div>
         </Router>
@@ -62,69 +61,85 @@ function SignIn() {
     const classes = useStyles();
 
     return (
-        <Container component="main" maxWidth="xs">
-            <CssBaseline />
-            <div className={classes.paper}>
-                <img alt="" src={logo} width="400" height="400"/>
-                <form className={classes.form} noValidate>
-                    <Router>
-                        <div>
-                            <Button
-                                component={ Link }
-                                to={"/Create"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                                onClick={ refresh }
-                            >
-                                Start a new workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/Open"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                                onClick={ refresh }
-                            >
-                                Reopen an existing workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/Upload"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                                onClick={ refresh }
-                            >
-                                Upload a workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/Test"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                //color="primary"
-                                className={classes.submit}
-                                onClick={ refresh }
-                            >
-                                Test Workspace
-                            </Button>
-                        </div>
-                    </Router>
-                </form>
-            </div>
-            <Box mt={8}>
-                <Copyright />
-            </Box>
-        </Container>
+        <div>
+            <Container component="main" maxWidth="xs">
+                <CssBaseline />
+                <div className={classes.paper}>
+
+                    <img alt="" src={logo} width="400" height="400"/>
+                    <form className={classes.form} noValidate>
+                        <Router>
+                            <div>
+                                <Button
+                                    component={ Link }
+                                    to={"/Create"}
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}
+                                    onClick={ refresh }
+                                >
+                                    Start a new workspace
+                                </Button>
+                                <Button
+                                    component={ Link }
+                                    to={"/Open"}
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}
+                                    onClick={ refresh }
+                                >
+                                    Reopen an existing workspace
+                                </Button>
+                                <Button
+                                    component={ Link }
+                                    to={"/Upload"}
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="primary"
+                                    className={classes.submit}
+                                    onClick={ refresh }
+                                >
+                                    Upload a workspace
+                                </Button>
+                                <Button
+                                    component={ Link }
+                                    to={"/Test"}
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    //color="primary"
+                                    className={classes.submit}
+                                    onClick={ refresh }
+                                >
+                                    Test Workspace
+                                </Button>
+                                <Button
+                                    component={ Link }
+                                    to={"/Tutorial"}
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    color="secondary"
+                                    className={classes.submit}
+                                    onClick={ refresh }
+                                >
+                                    Tutorial
+                                </Button>
+                            </div>
+                        </Router>
+                    </form>
+                </div>
+                <Box mt={8}>
+                    <Copyright />
+                </Box>
+            </Container>
+        </div>
+
     );
 }
 
@@ -441,7 +456,7 @@ const sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 function refresh() {
-    sleep(250).then(() => {
+    sleep(125).then(() => {
         window.location.reload(false);
     })
 }

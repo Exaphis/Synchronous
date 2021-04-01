@@ -13,6 +13,9 @@ import s from "./s.png";
 import clsx from "clsx";
 import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
+import HelpIcon from '@material-ui/icons/Help';
+import { useHistory } from "react-router-dom";
+
 
 import {
     fetchAPI, getUrlFromEndpoint, CURRENT_USER_TOPIC,
@@ -22,12 +25,10 @@ import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
 
 import { StreamChat } from 'stream-chat';
-import { Widget, addResponseMessage, addUserMessage, deleteMessages } from 'react-chat-widget';
+import { Widget, addResponseMessage } from 'react-chat-widget';
 import './styles.css';
 
 const STREAM_API = 'n9utf8kxctuk'
-const SECRET = 'tvf924vk92ytw86zpnpmevajnuna6wtgu9mjqzwszyf9snc44hr7r2h3mbuqav7v'
-const AppID = '1116711'
 
 export const WorkspaceUniqueIdContext = React.createContext(undefined);
 
@@ -90,6 +91,12 @@ function WorkspaceInfoBar(props) {
     const userList = props.userList;
     const userIdRef = props.userIdRef;
 
+    const history = useHistory();
+
+    const handleHelp = () => {
+        history.push('/Tutorial')
+    };
+
     const handleMenu = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -146,6 +153,9 @@ function WorkspaceInfoBar(props) {
                 )}
                 <IconButton color="inherit" edge="end" onClick={handleMenu}>
                     <EmailIcon />
+                </IconButton>
+                <IconButton color="secondary" edge="end" onClick={handleHelp}>
+                    <HelpIcon />
                 </IconButton>
                 <Menu
                     id="menu-appbar"
