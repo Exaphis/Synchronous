@@ -1,4 +1,4 @@
-const REVERSE_PROXY = true;
+const REVERSE_PROXY = window.location.hostname === 'synchronous.localhost';
 
 export const TUSD_URL = REVERSE_PROXY ? 'http://tusd.synchronous.localhost/files/' : 'http://0.0.0.0:1080/files/';
 export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localhost:8000';

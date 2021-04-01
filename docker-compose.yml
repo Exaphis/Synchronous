@@ -36,10 +36,11 @@ services:
       - "1080:1080"
     command: -hooks-http http://backend:8000/tusd/ -max-size 10485760 -hooks-http-forward-headers Authorization
   etherpad:
-    image: etherpad/etherpad
+    build: etherpad-lite
     ports:
       - "9001:9001"
     volumes:
       - ./docker/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
     environment:
       DEFAULT_PAD_TEXT: "hello\n"
+      SOFFICE: "/usr/bin/soffice"
