@@ -13,18 +13,14 @@ services:
       - frontend
       - tusd
   backend:
-    build:
-      context: .
-      dockerfile: ./docker/backend
+    build: .
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - "8000:8000"
     volumes:
       - .:/code
   frontend:
-    build:
-      context: ./Frontend
-      dockerfile: ./docker/frontend
+    build: ./Frontend
     command: npm start
     ports:
       - "3000:3000"
