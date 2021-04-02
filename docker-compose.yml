@@ -40,3 +40,4 @@ services:
     environment:
       DEFAULT_PAD_TEXT: "hello\n"
       SOFFICE: "/usr/bin/soffice"
+      ADMIN_PASSWORD: "admin"
