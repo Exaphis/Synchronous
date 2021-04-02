@@ -31,6 +31,7 @@ import './styles.css';
 const STREAM_API = 'n9utf8kxctuk'
 
 export const WorkspaceUniqueIdContext = React.createContext(undefined);
+export const WorkspaceUserContext = React.createContext(undefined);
 
 
 async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
@@ -306,7 +307,8 @@ function Workspace() {
         ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
             PubSub.publish(data.type, data);
-            if (!(data.type in SERVER_MSG_TYPE)) {
+
+            if (!Object.values(SERVER_MSG_TYPE).includes(data.type)) {
                 console.error('Unexpected server msg type: ' + data.type);
             }
         };
@@ -360,13 +362,9 @@ function Workspace() {
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(PUBSUB_TOPIC.FILE_LIST_REQUEST_TOPIC, (msg, data) => {
+        token = PubSub.subscribe(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, (msg, data) => {
             if (userListWs !== null) {
-                userListWs.send(JSON.stringify(
-                    {
-                        'type': CLIENT_MSG_TYPE.FILE_LIST_REQUEST
-                    }
-                ));
+                userListWs.send(JSON.stringify(data));
             }
         });
         pubSubTokens.push(token);
@@ -544,17 +542,25 @@ function Workspace() {
     return (
         <div>
         <Container component="main" maxWidth="xl">
-            <WorkspaceInfoBar
-                workspace={workspace}
-                isLoggedIn={tokenRef.current !== null}
-                onWorkspaceNicknameUpdate={updateNickname}
-                onPasswordChange={changePassword}
-                userList={userList}
-                userIdRef={userIdRef}
-            />
+            <div style={{height: '64px' /* TODO: don't do this */ }}>
+                <WorkspaceInfoBar
+                    workspace={workspace}
+                    isLoggedIn={tokenRef.current !== null}
+                    onWorkspaceNicknameUpdate={updateNickname}
+                    onPasswordChange={changePassword}
+                    userList={userList}
+                    userIdRef={userIdRef}
+                />
+            </div>
+
             { nameDialog }
-            <Box mt={10}>
-            </Box>
+
+            <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
+                <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
+                    <WorkspaceArea/>
+                </WorkspaceUserContext.Provider>
+            </WorkspaceUniqueIdContext.Provider>
+
             {/*<h1>{JSON.stringify(workspace)}</h1>*/}
             {/*<p>{JSON.stringify(userList)}</p>*/}
             { workspace_details }
@@ -579,10 +585,6 @@ function Workspace() {
                 </TableBody>
             </Table>
         </Container>
-
-        <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
-            <WorkspaceArea/>
-        </WorkspaceUniqueIdContext.Provider>
 
         </div>
     )

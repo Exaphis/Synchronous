@@ -1,3 +1,4 @@
+import datetime
 import uuid
 
 from django.db import models
@@ -6,7 +7,8 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
-import datetime
+
+from tusdfileshare.models import TusdFileShare
 
 
 class WorkspaceManager(models.Manager):
@@ -24,11 +26,10 @@ class WorkspaceManager(models.Manager):
 
         workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable)
         workspace.expiration_date = timezone.now() + datetime.timedelta(minutes=2)
-        workspace.save()
-
         if password:
             workspace.user = User.objects.create_user(workspace.unique_id, password=password)
-            workspace.save()
+
+        workspace.save()
 
         return workspace
 
@@ -55,13 +56,34 @@ class Workspace(models.Model):
         return self.user is not None
 
 
-# catch pre-save signal for workspace to ensure anonymous_readable is set to false when
-# user is none
-# TODO: fix this it breaks things
-# @receiver(pre_save, sender=Workspace)
-# def workspace_save_hook(sender, instance=None, **kwargs):
-#     if instance is not None and instance.user is None:
-#         instance.anonymous_readable = False
+class WorkspaceTab(models.Model):
+    workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)  # used for ordering
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+
+    class Meta:
+        ordering = ['created_at']
+
+
+class WorkspaceApp(models.Model):
+    tab = models.ForeignKey(WorkspaceTab, on_delete=models.CASCADE)
+    unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    # can't use an abstract class because we need to query all WorkspaceApps
+    # of a tab
+
+
+class WorkspacePadApp(WorkspaceApp):
+    iframe_url = models.URLField()
+
+
+class WorkspaceFileShareApp(WorkspaceApp):
+    tusd_file_share = models.OneToOneField(
+        TusdFileShare,
+        on_delete=models.CASCADE,
+        primary_key=True
+    )
 
 
 # catch post-save signal for user to generate its token

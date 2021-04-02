@@ -1,9 +1,7 @@
-from abc import ABC, ABCMeta
-
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
-from .models import Workspace
+from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
 
 
 class WorkspaceSerializer(serializers.ModelSerializer):
@@ -40,3 +38,27 @@ class WorkspacePasswordChangeSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class WorkspaceTabSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkspaceTab
+        fields = ['unique_id', 'name']
+
+
+class WorkspaceAppSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkspaceApp
+        fields = ['unique_id', 'name']
+
+
+class WorkspacePadAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):
+    class Meta:
+        model = WorkspacePadApp
+        fields = WorkspaceAppSerializer.Meta.fields + ['iframe_url']
+
+
+class WorkspaceFileShareAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):
+    class Meta:
+        model = WorkspaceFileShareApp
+        fields = WorkspaceAppSerializer.Meta.fields

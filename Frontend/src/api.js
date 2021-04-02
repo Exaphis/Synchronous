@@ -5,8 +5,9 @@ export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localh
 export const ETHERPAD_URL = 'etherpad.synchronous.localhost';
 
 // pubsub topics used for communication within the frontend
+// pubsub topics and msg types must be unique!!
 export const PUBSUB_TOPIC = {
-    FILE_LIST_REQUEST_TOPIC: 'fileListRequest'
+    WS_SEND_MSG_TOPIC: 'wsSendMsg'
 }
 
 export const APP_TYPE = {
@@ -19,7 +20,13 @@ export const APP_TYPE = {
 export const CLIENT_MSG_TYPE = {
     ACTIVITY: 'activity',
     NICKNAME_CHANGE: 'nicknameChange',
-    FILE_LIST_REQUEST: 'fileListRequest'
+    FILE_LIST_REQUEST: 'fileListRequest',
+    NEW_TAB: 'newTab',
+    DELETE_TAB: 'deleteTab',
+    TAB_NAME_CHANGE: 'tabNameChange',
+    NEW_APP: 'newApp',
+    APP_LIST_REQUEST: 'appListRequest',
+    DELETE_APP: 'deleteApp'
 };
 
 // possible type parameters of websocket messages sent by server
@@ -29,6 +36,9 @@ export const SERVER_MSG_TYPE = {
     CURRENT_USER: 'current_user',
     NICKNAME_CHANGE: 'nickname_change',
     FILE_LIST: 'file_list',
+    TAB_LIST: 'tab_list',
+    NEW_APP: 'new_app',
+    APP_LIST: 'app_list'
 };
 
 

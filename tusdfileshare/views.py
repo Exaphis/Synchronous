@@ -42,7 +42,7 @@ def hook(request):
         )
 
         files = TusdFileSerializer(
-            TusdFile.objects.filter(file_share=tusd_file_share).order_by('created_at'),
+            TusdFile.objects.filter(file_share=tusd_file_share),
             many=True
         ).data
 

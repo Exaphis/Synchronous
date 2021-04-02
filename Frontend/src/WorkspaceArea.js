@@ -1,4 +1,3 @@
-import {v4 as uuidv4} from "uuid";
 import {
     AppBar, Container, IconButton, Tab, Tabs,
     Typography, Toolbar, Button, Box, Paper, Grid
@@ -19,15 +18,8 @@ import {useUppy} from '@uppy/react';
 import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
-import {WorkspaceUniqueIdContext} from "./Workspace";
-import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, ETHERPAD_URL, APP_TYPE} from "./api";
-
-let etherpad_api = require('etherpad-lite-client')
-let etherpad = etherpad_api.connect({
-    apikey: '5da9f78b8445e157e04332920ba299aaa2aa54dc1fd9ab55519c4e5165fb6c88',
-    host: ETHERPAD_URL,
-    port: 80
-})
+import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
+import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -79,9 +71,6 @@ function FileUploadAppContents() {
             setFileComponents(
                 data.file_list.map((file) => {
                     return (
-                        // <span>
-                        //     <a href = {TUSD_URL + file.file_id} rel="noreferrer" target="_blank"> {file.name} </a>
-                        // </span>
                         <Box my={5}>
                             <Paper>
                                 <Grid container style={{display: "flex"}}>
@@ -111,7 +100,10 @@ function FileUploadAppContents() {
     });
 
     React.useEffect(() => {
-        PubSub.publish(PUBSUB_TOPIC.FILE_LIST_REQUEST_TOPIC, undefined);
+        PubSub.publish(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            {'type': CLIENT_MSG_TYPE.FILE_LIST_REQUEST}
+        );
     }, []);
 
     const [isModalOpen, setModalOpen] = React.useState(false);
@@ -137,32 +129,15 @@ function FileUploadAppContents() {
 
 
 function PadAppContents(props) {
-    let [etherpadUuid, setEtherpadUuid] = React.useState("");
-    React.useEffect(() => {
-        let uuid_temp = uuidv4();
-        setEtherpadUuid(uuid_temp);
+    const currUser = React.useContext(WorkspaceUserContext);
+    const nickname = encodeURIComponent(currUser.nickname);
+    const color = encodeURIComponent(currUser.color);
 
-        let args = {
-            padID: uuid_temp,
-            text: "This works"
-        }
-
-        etherpad.createPad(args, function(error){
-            if (error) console.error('Error creating pad: ' + error.message);
-            else console.log("Pad created");
-        })
-        console.log("in useEffect")
-        console.log("padID: " + uuid_temp);
-    }, []);
-
-    let pad_url = "http://etherpad.synchronous.localhost/p/" + etherpadUuid;
-    if (etherpadUuid === "") {
-        return (<span>UUID IS BLANK</span>);
-    }
+    let padUrl = props.padUrl + `?showChat=false&userName=${nickname}&userColor=${color}`;
 
     return (
         <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-                title={props.uuid} src={pad_url}/>
+                title={props.uuid} src={padUrl}/>
     );
 }
 
@@ -186,7 +161,7 @@ function WorkspaceApp(props) {
             flexDirection: 'column'
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
-                         onMinimize={props.onMinimize}/>
+                         onMinimize={props.onMinimize} title={props.name}/>
             {props.children}
         </div>
     )
@@ -198,70 +173,148 @@ function WorkspaceTab(props) {
     const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(true);
     const [topAppUuid, setTopAppUuid] = React.useState();
 
+    const appAreaRef = React.useRef();
+    const appAreaPosRef = React.useRef({'left': 100, 'top': 100});
+
     // contains the states (i.e. position + size) of each app
     const appStatesRef = React.useRef({});
 
-    function addApp(type) {
-        setApps((apps) => {
-            const uuid = uuidv4();
-
-            function setMinimized(minimizedUpdater) {
-                setApps((prevApps) => {
-                    let apps = Object.assign({}, prevApps);
-                    apps[uuid].minimized = minimizedUpdater(apps[uuid].minimized);
-                    return apps;
-                });
-            }
-
-            appStatesRef.current[uuid] = {
-                x: 0,
-                y: 0,
-                width: 'auto',
-                height: 'auto'
-            };
-
-            // nested dict
-            return {...apps,
-                [uuid]: {
-                    id: uuid,
-                    minimized: false,
-                    type: type,
-                    switchMinimized: function switchMinimized() {
-                        setMinimized(minimized => !minimized);
-                    },
-                    onMinimize: function onMinimize() {
-                        setMinimized(() => true);
-                    },
-                    onClose: function onClose() {
-                        delete appStatesRef.current[uuid];
-                        setApps((prevApps) => {
-                            let apps = Object.assign({}, prevApps);
-                            delete apps[uuid];
-                            return apps;
-                        });
-                    },
-                }
-            };
+    function setAppMinimized(appId, minimizedUpdater) {
+        setApps((prevApps) => {
+            let apps = Object.assign({}, prevApps);
+            apps[appId].minimized = minimizedUpdater(apps[appId].minimized);
+            return apps;
         });
     }
+
+    function getElementOffset(el) {
+        // https://stackoverflow.com/a/28222246
+        const rect = el.getBoundingClientRect();
+        return {
+            left: rect.left + window.scrollX,
+            top: rect.top + window.scrollY
+        };
+    }
+
+    React.useEffect(() => {
+        appAreaPosRef.current = getElementOffset(appAreaRef.current);
+
+        PubSub.publish(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            {
+                type: CLIENT_MSG_TYPE.APP_LIST_REQUEST,
+                tabId: props.tabId
+            }
+        );
+
+        PubSub.subscribe(SERVER_MSG_TYPE.APP_LIST, (msg, data) => {
+            // data['app_list']:
+            //     - list of apps
+            //     - each app contains `type` (enum), `unique_id`, and `data`
+            console.log('app list:');
+            console.log(data['app_list']);
+
+            setApps(currApps => {
+                let newApps = {};
+                data['app_list'].forEach(serializedApp => {
+                    const appId = serializedApp['unique_id'];
+                    const appData = serializedApp['data'];
+                    const appType = serializedApp['app_type'];
+                    const appName = serializedApp['name'];
+
+                    if (appId in currApps) {
+                        newApps[appId] = currApps[appId];
+                    }
+                    else {
+                        newApps[appId] = {
+                            id: appId,
+                            minimized: true,
+                            type: appType,
+                            data: appData,
+                            name: appName,
+                            switchMinimized: () => {
+                                setAppMinimized(appId, minimized => !minimized);
+                            },
+                            onMinimize: () => {
+                                setAppMinimized(appId, () => true);
+                            },
+                            onClose: () => {
+                                PubSub.publish(
+                                    PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+                                    {'type': CLIENT_MSG_TYPE.DELETE_APP, 'tabId': props.tabId, 'appId': appId}
+                                );
+                            }
+                        }
+
+                        appStatesRef.current[appId] = {
+                            x: appAreaPosRef.current.left,
+                            y: appAreaPosRef.current.top,
+                            width: 'auto',
+                            height: 'auto'
+                        };
+                    }
+                });
+
+
+                // prune orphaned states
+                Object.keys(appStatesRef.current).forEach((appId) => {
+                    if (!(appId in newApps)) {
+                        delete appStatesRef.current[appId];
+                    }
+                });
+
+                return newApps;
+            });
+        });
+    }, [props.tabId]);
+
+    function addApp(type) {
+        let name;
+        if (type === APP_TYPE.PAD) {
+            name = "Text pad";
+        }
+        else if (type === APP_TYPE.FILE_SHARE) {
+            name = "File share";
+        }
+        else {
+            console.log('Unknown app type: ' + type);
+            return;
+        }
+
+        PubSub.publish(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            {
+                type: CLIENT_MSG_TYPE.NEW_APP,
+                tabId: props.tabId,
+                appType: type,
+                name: name
+            }
+        );
+    }
+
+    // console.log(apps);
 
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
 
         if (app.type === APP_TYPE.PAD) {
-            appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
+            const appData = app.data;
+            appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
+                                          padUrl={appData['iframe_url']} />;
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
         }
         else {
+            console.error('invalid app type: ' + app.type);
+            console.error(typeof app.type);
             appContents = <TemplateAppContents/>;
         }
 
         return (
             <Rnd
                 key={app.id}
-                bounds='parent'
+                bounds='.appArea'
                 onDragStart={() => {
                     setPointerEventsEnabled(false);
                     setTopAppUuid(app.id);
@@ -289,7 +342,7 @@ function WorkspaceTab(props) {
                 }}
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
-                              onMinimize={app.onMinimize} uuid={app.id} >
+                              onMinimize={app.onMinimize} uuid={app.id} name={app.name}>
                     {appContents}
                 </WorkspaceApp>
             </Rnd>
@@ -328,14 +381,16 @@ function WorkspaceTab(props) {
                                         <CloseIcon />
                                     </IconButton>
                                 } >
-                                {app.id}
+                                {app.name}
                             </rps.MenuItem>
                         ))
                     }
                 </rps.Menu>
             </rps.ProSidebar>
 
-            <div style={{flexGrow: 1}}>
+            <div style={{flexGrow: 1}}
+                 className="appArea"
+                 ref={appAreaRef}>
                 { appComponents }
             </div>
 
@@ -348,11 +403,24 @@ function WorkspaceArea() {
     const [tabs, setTabs] = React.useState([]);
     const [currTab, setCurrTab] = React.useState(-1);
 
+    React.useEffect(() => {
+        PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {
+            // console.log('set tab list:');
+            // console.log(data['tab_list']);
+
+            const tabList = data['tab_list'];
+            setTabs(tabList);
+            if (tabList.length > 0 && (currTab < 0 || currTab >= tabList.length)) {
+                setCurrTab(tabList.length - 1);
+            }
+        });
+    }, [currTab])
+
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
     };
 
-    function closeTab(event, id) {
+    function closeTab(event, uniqueId) {
         // https://stackoverflow.com/a/63277341
         // prevent close press from propagating to tab button
         event.stopPropagation();
@@ -361,30 +429,26 @@ function WorkspaceArea() {
         // within closure
         setCurrTab(currTab => Math.min(currTab, tabs.length - 2));
 
-        setTabs(tabs.filter(tab => tab.id !== id));
+        PubSub.publish(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            {'type': CLIENT_MSG_TYPE.DELETE_TAB, 'uniqueId': uniqueId}
+        );
     }
 
     function createNewTab() {
-        const uuid = uuidv4();
-
-        setCurrTab(tabs.length);  // new tab will be appended to the end
-
-        setTabs((tabs) => {
-            // State must not be modified (even in updater function!)
-            // Must create a copy of the object instead and modify that.
-            // See https://reactjs.org/docs/react-component.html#setstate
-            // (state is a reference to the component state at the time the change is being applied.
-            // It should not be directly mutated)
-
-            // Using spread syntax to create copy with new object appended
-            return [...tabs, {id: uuid}];
-        });
+        setCurrTab(tabs.length);  // new tab will be appended to the end (hopefully!)
+        PubSub.publish(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            {'type': CLIENT_MSG_TYPE.NEW_TAB, 'name': 'Unnamed tab'}
+        );
     }
 
     let tabComponents = <p>You have no tabs. How about creating one?</p>;
     if (tabs.length > 0) {
         tabComponents = tabs.map((tab, tabIdx) => {
-            return <WorkspaceTab key={tab.id} hidden={currTab !== tabIdx}/>;
+            return <WorkspaceTab key={tab.unique_id}
+                                 tabId={tab.unique_id}
+                                 hidden={currTab !== tabIdx} />;
         });
     }
 
@@ -394,13 +458,12 @@ function WorkspaceArea() {
                 <Toolbar>
                     <Tabs value={currTab} edge="start" onChange={handleTabChange}  variant="scrollable" scrollButtons="auto">
                         {
-                            tabs.length === 0 ? null : tabs.map((tab, tabIdx) => {
-                                const labelText = "Tab " + tabIdx.toString();
+                            tabs.length === 0 ? null : tabs.map((tab) => {
                                 return (
-                                    <Tab key={tab.id} label={
-                                        <span> {labelText}
+                                    <Tab key={tab.unique_id} label={
+                                        <span> {tab.name}
                                             <IconButton component="div"  // https://stackoverflow.com/a/63277341
-                                                        onClick={(event) => closeTab(event, tab.id)}
+                                                        onClick={(event) => closeTab(event, tab.unique_id)}
                                                         color="inherit">
                                                <CloseIcon />
                                             </IconButton>
