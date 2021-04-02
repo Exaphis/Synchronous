@@ -1,26 +1,57 @@
-import { Route, useHistory, NavLink, HashRouter } from "react-router-dom";
+import {Route, useHistory, NavLink, HashRouter} from "react-router-dom";
 import "./CSS/Tutorial.css";
-import { Avatar } from '@material-ui/core';
-import s from './Images/s.png';
-import create from './Images/Create.PNG';
-import open from './Images/Open.PNG';
-import workspace from './Images/Workspace.PNG';
 
+import {Avatar} from '@material-ui/core';
+import s from './Images/s.png';
+import cstep1 from './tutorial_images/Create-Step1.png';
+import cstep2 from './tutorial_images/Create-Step2.png';
+import cstep3 from './tutorial_images/Create-Step3.png';
+import rostep1 from './tutorial_images/Reopen-Step1.png';
+import rostep2 from './tutorial_images/Reopen-Step2.png';
+import rostep3 from './tutorial_images/Reopen-Step3.png';
+import cnickstep1 from './tutorial_images/Change-Nickname-Step1.png'
+import cnickstep2 from './tutorial_images/Change-Nickname-Step2.png'
+import cnickstep3 from './tutorial_images/Change-Nickname-Step3.png'
+import invstep1 from './tutorial_images/Invite-Step1.png'
+import invstep2 from './tutorial_images/Invite-Step2.png'
+import bugstep1 from './tutorial_images/Bug-Step1.png'
+import bugstep2 from './tutorial_images/Bug-Step2.png'
+import bugstep3 from './tutorial_images/Bug-Step3.png'
+import cnamestep1 from './tutorial_images/Change-Name-Step1.png'
+import cnamestep2 from './tutorial_images/Change-Name-Step2.png'
+import cnamestep3 from './tutorial_images/Change-Name-Step3.png'
+import createapp from './tutorial_images/Create-New-App.gif'
+import moveresize from './tutorial_images/Move-resize.gif'
+import minimize from './tutorial_images/Minimize.gif'
+import chatstep from './tutorial_images/Chat-Step.png';
 
 export default function Tutorial() {
     const history = useHistory();
 
+    console.log(window.location.href);
+    let url = JSON.stringify(window.location.href);
+    url = url.substring(url.lastIndexOf('/'), url.length - 1)
+    console.log(url)
+    console.log(url === '/Home')
+
+    if (url === '/Home') {
+        console.log('here');
+        history.push('/');
+        window.location.reload(false);
+        refresh()
+    }
+
     return (
         <HashRouter>
             <div>
-                <Avatar alt="s" src={s} onClick={() => history.push('/')}/>
+                <Avatar alt="s" src={s}/>
                 <ul className="header">
                     <li><NavLink to="/Introduction">Introduction</NavLink></li>
                     <li><NavLink to="/Create">Create a Workspace</NavLink></li>
                     <li><NavLink to="/Open">Open a Workspace</NavLink></li>
                     <li><NavLink to="/Workspace">Using your Workspace</NavLink></li>
                     <li><NavLink to="/Apps">Apps</NavLink></li>
-                    <button class="a" onClick={() => history.push('/')}>Return Home</button>
+                    <button className="a" onClick={() => history.push('/')}>Return Home</button>
                 </ul>
 
                 <div className="content">
@@ -39,10 +70,11 @@ export default function Tutorial() {
 function Introduction() {
     return (
         <div>
-            <h2>
+            <h1>
                 Introduction:
-            </h2>
-            <p>Synchronous is a real time collaboration tool, with the ability to create virtual
+            </h1>
+            <p className="tutorial-p">
+                Synchronous is a real time collaboration tool, with the ability to create virtual
                 workspaces for teams, and offering tools and services inside the workspace that will allow for better
                 communication and collaboration, such as a virtual whiteboard, notepad as well as file sharing, all
                 without having to set up an account or register with the website. We envisioned it as bridging the
@@ -65,7 +97,6 @@ function Introduction() {
                 invitations. We envisioned this as a really fast, super light program dedicated for quick team
                 meetings or minimal conferences.<br/><br/>
             </p>
-
         </div>
 
     );
@@ -74,20 +105,24 @@ function Introduction() {
 function Create() {
     return (
         <div>
-            <img src={create} alt="" class="a" height={300} />
-            <p>On the Create a Workspace page there are 2 text boxes that can be filled in. They are both optional
-            <br/><br/>
-            The first box is the desired name for your workspace. If the Workspace Name is already taken you will be
-                notified and be allowed to input a new one.
-            <br/><br/>
-            The second box is for if you want to password protect your workspace. This will make it so other users
-                will need to enter a password before being allowed into the workspace. <br/>
-                Note: There is a checkbox that when checked will allow people viewing permissions of your workspace
-                without the ability to edit.
-            <br/><br/>
-            Once you enter in a Name and Password (if desired) a new workspace will be created.
+            <h1>
+                Creating a Workspace:
+            </h1>
+            <p className="tutorial-p">To create a workspace follow these steps: </p>
+            <br/>
+            <p className="steps">
+                Step 1: Click on "Start a new workspace" in the main menu.
             </p>
-
+            <img src={cstep1} alt="Step 1 screenshot" className="step-image"/>
+            <p className="steps">
+                Step 2: Enter your workspace name or check "Use Id?" and enter your workspace ID along with password (if
+                set) and click on "Okay".
+            </p>
+            <img src={cstep2} alt="Step 2 screenshot" className="step-image"/>
+            <p className="steps">
+                Your workspace is now created! Get ready for efficiency.
+            </p>
+            <img src={cstep3} alt="Step 3 screenshot" className="step-image"/>
         </div>
 
     );
@@ -96,17 +131,24 @@ function Create() {
 function Open() {
     return (
         <div>
-            <img src={open} alt="" className="a" height={300}/>
-            <p>On the Open Existing Workspace page there are 2 text boxes that can be filled in
-                <br/><br/>
-                The first box is the name that you created for your workspace. If you do not have a workspace name or
-                want to use the workspace ID to enter, you can check the corresponding checkbox and do so.
-                <br/><br/>
-                The second box is if you password protected your workspace. If you do not have a password it does not
-                need to be filled in. Otherwise, it is required to gain access to the workspace.
-                <br/><br/>
-                Once you enter in a correct Name and Password (if applicable) you will be able to reaccess your workspace
+            <h1>
+                Opening an Existing Workspace:
+            </h1>
+            <p className="tutorial-p">To open a workspace follow these steps: </p>
+            <br/>
+            <p className="steps">
+                Step 1: Click on "Reopen an existing workspace" in the main menu.
             </p>
+            <img src={rostep1} alt="Step 1 screenshot" className="step-image"/>
+            <p className="steps">
+                Step 2: Either click on "Create Workspace" right away to create a workspace with no custom name,
+                password and accessible by all. Else, fill in the relavent details and click on create workspace.
+            </p>
+            <img src={rostep2} alt="Step 2 screenshot" className="step-image"/>
+            <p className="steps">
+                Your workspace is now opened! Get back to working.
+            </p>
+            <img src={rostep3} alt="Step 3 screenshot" className="step-image"/>
 
         </div>
 
@@ -116,29 +158,97 @@ function Open() {
 function Workspace() {
     return (
         <div>
-            <img src={workspace} alt="" className="b" height={300}/>
+            <h1>
+                Using your Workspace:
+            </h1>
+            <p className="tutorial-p"> Click on a topic to know more</p>
+            <br/>
+            <label className="collapsible">
+                <input type="checkbox"/>
+                <span className="collapser">Change workspace nickname</span>
 
-            <p>
-                <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
-                Once you enter Workspace there are many features available. <br/>
+                <div className="collapsed">
+                    Step 1: Click on "Change Nickname" button
 
-                Starting with the appbar along the top you can see your Workspace name and the duration the workspace has
-                been active (Remember workspace delete after 24 hours). There is also a button for changing your
-                nickname that other people will see you as. Then there is an email icon where you can send out invites
-                to other members of your team. Finally, there is a ? mark icon that links you to this tutorial.
-                <br/><br/>
-                In the bottom left corner there is an icon then when clicked will allow you to submit a bug report or
-                suggest improvements. Synchronous is a work in progress, so not everything is perfect.
-                <br/>
-                In the bottom right corner there is a chat icon. This can be used for communicating with other people
-                on the workspace.
-                <br/><br/>
-                Finally there is the workspace itself. <br/>
-                You can create new Tabs and each tab can have its own content (Similar to a browser). For each tab
-                you can choose what apps you would like to add to that specific tab. If you no longer want a tab you
-                can click to delete it, and if you are done using an app that can be deleted as well.
+                    <img src={cnickstep1} alt="Step 1 screenshot" className="step-image-inside"/>
 
-            </p>
+                    Step 2: Type in the nick name and click on "Okay"
+
+                    <img src={cnickstep2} alt="Step 2 screenshot" className="step-image-inside"/>
+
+                    The nick name of the workspace has now changed!
+
+                    <img src={cnickstep3} alt="Step 3 screenshot" className="step-image-inside"/>
+
+
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    Invite collaborators
+                </div>
+                <div className="collapsed">
+                    Step 1: Click on the mail icon button
+
+                    <img src={invstep1} alt="Step 1 screenshot" className="step-image-inside"/>
+
+                    Step 2: Type in the email of the collaborator. You may add a message. Click on "Submit"
+
+                    <img src={invstep2} alt="Step 2 screenshot" className="step-image-inside"/>
+
+                    The collaborator has been sent an email with the details of this workspace. Sit tight, help is
+                    coming!
+
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    Submit a bug / contact us
+                </div>
+                <div className="collapsed">
+                    Step 1: Click on the conversation bubble icon on the bottom left
+
+                    <img src={bugstep1} alt="Step 1 screenshot" className="step-image-inside"/>
+
+                    Step 2: To leave us a message, type your message in the text box on the bottom left and hit
+                    enter <br/>
+                    To send a bug report, copy paste the Google form link in the browser in a new window.
+                    <img src={bugstep2} alt="Step 2 screenshot" className="step-image-inside"/>
+
+                    Step3: Enter your bug details in the Google form and relax, as we take care of it!
+
+                    <img src={bugstep3} alt="Step 3 screenshot" className="step-image-inside"/>
+
+
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+                <span className="collapser">Change your name</span>
+
+                <div className="collapsed">
+                    Step 1: Click on "Change name" button
+
+                    <img src={cnamestep1} alt="Step 1 screenshot" className="step-image-inside"/>
+
+                    Step 2: Type in the name and click on "Change name"
+
+                    <img src={cnamestep2} alt="Step 2 screenshot" className="step-image-inside"/>
+
+                    Your name has now changed!
+
+                    <img src={cnamestep3} alt="Step 3 screenshot" className="step-image-inside"/>
+
+
+                </div>
+            </label>
 
         </div>
 
@@ -148,41 +258,126 @@ function Workspace() {
 function Apps() {
     return (
         <div>
-            <h2>
+            <h1>
                 Available Apps:
-            </h2>
-            <h3>
-                Text
-            </h3>
-            <p>
-            The Text application comes with all the necessary features. Heres a list of some of the things that are
-            possible: Edit fonts, rich text editor, suggestions, file revision, and file download.
-            </p>
-            <h3>
-                Drawing (Not yet implemented)
-            </h3>
-            <p>With the drawing application you can create any masterpiece you can imagine. You can use different
-            marker sizes, colors, and have access to all of the standard functionality of a drawing application.
-            </p>
-            <h3>
-                White Board (Not yet implemented)
-            </h3>
-            <p>
-                Using the White Board app you can make simple notes and diagrams to quickly describe your task.
-            </p>
-            <h3>
-                File Upload
-            </h3>
-            <p>
-                The File Upload app allows for file sharing between you and your fellow team members. Just open it up
-                and choose any file you would like to upload.
-            </p>
+            </h1>
+
+            <p className="tutorial-p"> Click on a topic to know more</p>
+
+            <p className="tutorial-p"> How to handle Apps</p>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+                <span className="collapser">Create new App</span>
+
+                <div className="collapsed">
+                    Step 1: Click on + button to add a new tab <br/>
+
+                    Step 2: Select the app you wish to add
+
+                    <img src={createapp} alt="Step 2 screenshot" className="step-image-inside"/>
+
+
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    Move and resize app
+                </div>
+                <div className="collapsed">
+                    Move: Click on the App and move it around <br/>
+
+                    Resize: Hold and drag from the side you wish to resize
+
+                    <img src={moveresize} alt="Step 1 screenshot" className="step-image-inside"/>
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    Minimize and maximize
+                </div>
+
+                <div className="collapsed">
+                    Minimize: Click on the - icon on the top right of the app <br/>
+
+                    Maximize: Click on the minimized app from the sidebar
+
+                    <img src={minimize} alt="Step 1 screenshot" className="step-image-inside"/>
+                </div>
+
+
+            </label>
+
+            <br/>
+
+            <p className="tutorial-p"> How to use specific Apps</p>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+                <span className="collapser">Text editor</span>
+
+                <div className="collapsed">
+                    The text editor app is similar to any rich text editor you might be used to using.
+                    To use simply add it from the side bar.
+
+                    {/*<img src={createapp} className="step-image-inside" />*/}
+
+
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    Chat
+                </div>
+                <div className="collapsed">
+                    Chat app can be used to chat with other collaborators on the work space. <br>
+                </br>To access it, simply click on the chat icon on the bottom right of the workspace window and start
+                    typing your message!
+
+                    <img src={chatstep} alt="Step 1 screenshot" className="step-image-inside"/>
+                </div>
+            </label>
+
+            <label className="collapsible">
+                <input type="checkbox"/>
+
+                <div className="collapser">
+                    File Sharing
+                </div>
+
+                <div className="collapsed">
+                    The File Upload app allows for file sharing between you and your fellow team members. Just open it
+                    up
+                    and choose any file you would like to upload.
+                    {/*<img src={createapp} className="step-image-inside" />*/}
+                </div>
+
+            </label>
+
 
         </div>
+
 
     );
 }
 
 
+function refresh() {
+    sleep(125).then(() => {
+        window.location.reload(false);
+    })
+}
 
+const sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+}
 

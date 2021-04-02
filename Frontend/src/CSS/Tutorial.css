@@ -3,8 +3,9 @@ body {
     padding: 0;
     margin: 0;
 }
+
 h1 {
-    font-family: Arial;
+    font-family: Arial, serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -12,17 +13,8 @@ h1 {
 }
 
 h2 {
-    font-family: Arial;
+    font-family: Arial, serif;
     display: flex;
-}
-
-h3 {
-    font-family: Arial;
-    display: flex;
-}
-
-p {
-    font-family: Arial;
 }
 
 ul.header li {
@@ -30,17 +22,139 @@ ul.header li {
     list-style-type: none;
     margin: 0;
 }
+
 ul.header {
     background-color: #3f51b5;
     padding: 0;
 }
+
 ul.header li a {
-     color: #FFF;
-     font-weight: bold;
-     text-decoration: none;
-     padding: 20px;
-     display: inline-block;
- }
+    color: #FFF;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 20px;
+    display: inline-block;
+}
+
+ul.header li2 a {
+    color: #ffee41;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 20px;
+    display: inline-block;
+    margin-left: 47.5em
+
+
+}
+
+.content {
+    background-color: #FFF;
+    padding: 20px;
+}
+
+.content h2 {
+    padding: 0;
+    margin: 0;
+}
+
+.content li {
+    margin-bottom: 10px;
+}
+
+.tutorial-p {
+    font-size: large;
+}
+
+.steps {
+    font-size: large;
+    padding-left: 10%;
+}
+
+
+.step-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    border: 5px solid black;
+}
+
+.collapsible {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid black;
+    font-size: large;
+    margin-left: 5%;
+    margin-right: 5%;
+    padding-left: 10%;
+}
+
+input {
+    position: absolute;
+    left: -9999px;
+}
+
+input:focus ~ .collapser {
+    border-color: grey;
+}
+
+.collapser {
+    cursor: pointer;
+    border: 1px transparent dotted;
+}
+
+.arrow {
+    float: right;
+    margin-left: 0.5em;
+    display: inline-block;
+    transform: rotate(90deg);
+    transition: transform .25s ease-out;
+}
+
+input:checked ~ .arrow,
+input:checked ~ .collapser .arrow {
+    transform: rotate(270deg);
+}
+
+.collapsed {
+    font-size: 0;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+
+    /* fade out, then shrink */
+    transition: opacity .25s,
+    margin .5s 0.25s,
+    font-size .5s 0.25s,
+    padding .5s .25s;
+}
+
+.step-image-inside {
+    height: 0;
+    width: 0;
+}
+
+input:checked ~ .collapsed .step-image-inside {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    height: 70%;
+    border: 5px solid black;
+}
+
+input:checked ~ .collapsed {
+    font-size: large;
+    opacity: 1;
+    height: auto;
+    padding: 5px 0;
+
+    /* grow, then fade in */
+    transition: margin .25s,
+    padding .25s,
+    font-size .25s,
+    opacity .5s .25s;
+}
 
 button.a {
     background-color: #ff9100;
@@ -58,46 +172,4 @@ button.a {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
     position: absolute;
     right: 3px;
-
 }
-
-
-.content {
-    background-color: #FFF;
-    padding: 20px;
-}
-.content h2 {
-    padding: 0;
-    margin: 0;
-}
-.content li {
-    margin-bottom: 10px;
-}
-
-img.a {
-    text-align: center;
-    display: block;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
-}
-
-
-img.b {
-    text-align: center;
-    display: block;
-    justify-content: center;
-    align-items: center;
-    margin: auto;
-    position: absolute;
-    top: 111px;
-    left: 490px;
-
-
-}
-
-p {
-    z-index:999;
-    position: relative;
-}
-
