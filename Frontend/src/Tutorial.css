@@ -33,16 +33,25 @@ ul.header li a {
      display: inline-block;
  }
 
-ul.header li2 a {
-    color: #ffee41;
-    font-weight: bold;
+button.a {
+    background-color: #ff9100;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
     text-decoration: none;
-    padding: 20px;
     display: inline-block;
-    margin-left: 47.5em
-
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    float: right;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    position: absolute;
+    right: 3px;
 
 }
+
 
 .content {
     background-color: #FFF;

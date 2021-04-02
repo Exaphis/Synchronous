@@ -7,30 +7,17 @@ import s from './s.png';
 export default function Tutorial() {
     const history = useHistory();
 
-    console.log(window.location.href);
-    let url = JSON.stringify(window.location.href);
-    url = url.substring(url.lastIndexOf('/'), url.length - 1)
-    console.log(url)
-    console.log(url === '/Home')
-
-    if (url === '/Home') {
-        console.log('here');
-        history.push('/');
-        window.location.reload(false);
-        refresh()
-    }
-
     return (
         <HashRouter>
             <div>
-                <Avatar alt="s" src={s} />
+                <Avatar alt="s" src={s} onClick={() => history.push('/')}/>
                 <ul className="header">
                     <li><NavLink to="/Introduction">Introduction</NavLink></li>
                     <li><NavLink to="/Create">Create a Workspace</NavLink></li>
                     <li><NavLink to="/Open">Open a Workspace</NavLink></li>
                     <li><NavLink to="/Workspace">Using your Workspace</NavLink></li>
                     <li><NavLink to="/Apps">Apps</NavLink></li>
-                    <li2><NavLink to="/Home" onClick={refresh}>Return Home</NavLink> </li2>
+                    <button class="a" onClick={() => history.push('/')}>Return Home</button>
                 </ul>
 
                 <div className="content">
@@ -113,13 +100,4 @@ function Apps() {
 
 
 
-function refresh() {
-    sleep(125).then(() => {
-        window.location.reload(false);
-    })
-}
-
-const sleep = (milliseconds) => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
 
