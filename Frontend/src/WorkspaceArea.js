@@ -162,6 +162,9 @@ function WorkspaceApp(props) {
             // firefox would have problems with rendering iframes (i.e. etherpad) when display is none.
             // instead, visibility: hidden should work the same.
             visibility: props.minimized ? 'hidden': 'visible',
+            // change position so events can be fired on apps behind them
+            position: props.minimized ? 'absolute': 'static',
+            left: props.minimized ? '-5000px' : 'auto',
             flexDirection: 'column'
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
@@ -187,6 +190,9 @@ function WorkspaceTab(props) {
         setApps((prevApps) => {
             let apps = Object.assign({}, prevApps);
             apps[appId].minimized = minimizedUpdater(apps[appId].minimized);
+            if (!apps[appId].minimized) {
+                setTopAppUuid(appId);
+            }
             return apps;
         });
     }
@@ -291,6 +297,9 @@ function WorkspaceTab(props) {
         else if (type === APP_TYPE.FILE_SHARE) {
             name = "File share";
         }
+        else if (type === APP_TYPE.TEMPLATE) {
+            name = 'Template';
+        }
         else {
             console.log('Unknown app type: ' + type);
             return;
@@ -383,6 +392,9 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
                         Add pad
+                    </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
+                        Add test
                     </rps.MenuItem>
                     {
                         Object.values(apps).map((app) => (

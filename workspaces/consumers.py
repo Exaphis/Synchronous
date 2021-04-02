@@ -4,7 +4,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 
 from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
-from .serializers import WorkspaceTabSerializer, WorkspacePadAppSerializer, WorkspaceFileShareAppSerializer
+from .serializers import WorkspaceTabSerializer, WorkspacePadAppSerializer,\
+    WorkspaceFileShareAppSerializer, WorkspaceAppSerializer
 from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
 from tusdfileshare.models import TusdFileShare, TusdFile
@@ -55,9 +56,9 @@ def get_app_list(tab_unique_id):
             app_type = AppType.FILE_SHARE
             data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
         else:
-            print("Couldn't find child class of app!")
-            print(dir(app))
-            continue
+            print("Couldn't find child class of app, defaulting to example app")
+            app_type = AppType.TEMPLATE
+            data = WorkspaceAppSerializer(app).data
 
         app_list.append({
             'app_type': app_type,
@@ -328,11 +329,15 @@ class UserListConsumer(JsonWebsocketConsumer):
                 app.save()
             elif app_type == AppType.FILE_SHARE:
                 tusd_file_share, _ = TusdFileShare.objects.get_or_create(workspace=self.workspace)
+
                 WorkspaceFileShareApp.objects.create(
                     tab=tab,
                     name=name,
                     tusd_file_share=tusd_file_share
                 )
+            else:
+                print('App type not found, defaulting to template')
+                WorkspaceApp.objects.create(tab=tab, name=name)
 
             self.send_json({
                 'type': ServerMsgType.NEW_APP,
@@ -348,7 +353,12 @@ class UserListConsumer(JsonWebsocketConsumer):
             app_id = content['appId']
             tab_id = content['tabId']
 
-            app = WorkspaceApp.objects.get(unique_id=app_id)
+            try:
+                app = WorkspaceApp.objects.get(unique_id=app_id)
+            except WorkspaceApp.DoesNotExist:
+                print(f'App ID {app_id} does not exist')
+                return
+
             if hasattr(app, 'workspacepadapp'):
                 # TODO: check response success
                 etherpad_client.deletePad(padID=str(app.unique_id))

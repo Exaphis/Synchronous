@@ -1,175 +1,141 @@
-body {
-    background-color: #ffffff;
-    padding: 0;
-    margin: 0;
+.tutorial body {
+  background-color: #ffffff;
+  padding: 0;
+  margin: 0;
 }
-
-h1 {
-    font-family: Arial, serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #3f51b5;
+.tutorial h1 {
+  font-family: Arial, serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #3f51b5;
 }
-
-h2 {
-    font-family: Arial, serif;
-    display: flex;
+.tutorial h2 {
+  font-family: Arial, serif;
+  display: flex;
 }
-
-ul.header li {
-    display: inline;
-    list-style-type: none;
-    margin: 0;
+.tutorial ul.header li {
+  display: inline;
+  list-style-type: none;
+  margin: 0;
 }
-
-ul.header {
-    background-color: #3f51b5;
-    padding: 0;
+.tutorial ul.header {
+  background-color: #3f51b5;
+  padding: 0;
 }
-
-ul.header li a {
-    color: #FFF;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 20px;
-    display: inline-block;
+.tutorial ul.header li a {
+  color: #FFF;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: inline-block;
 }
-
-ul.header li2 a {
-    color: #ffee41;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 20px;
-    display: inline-block;
-    margin-left: 47.5em
-
-
+.tutorial ul.header li2 a {
+  color: #ffee41;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 20px;
+  display: inline-block;
+  margin-left: 47.5em;
 }
-
-.content {
-    background-color: #FFF;
-    padding: 20px;
+.tutorial .content {
+  background-color: #FFF;
+  padding: 20px;
 }
-
-.content h2 {
-    padding: 0;
-    margin: 0;
+.tutorial .content h2 {
+  padding: 0;
+  margin: 0;
 }
-
-.content li {
-    margin-bottom: 10px;
+.tutorial .content li {
+  margin-bottom: 10px;
 }
-
-.tutorial-p {
-    font-size: large;
+.tutorial .tutorial-p {
+  font-size: large;
 }
-
-.steps {
-    font-size: large;
-    padding-left: 10%;
+.tutorial .steps {
+  font-size: large;
+  padding-left: 10%;
 }
-
-
-.step-image {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 40%;
-    border: 5px solid black;
+.tutorial .step-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+  border: 5px solid black;
 }
-
-.collapsible {
-    display: block;
-    margin-bottom: 1rem;
-    border: 1px solid black;
-    font-size: large;
-    margin-left: 5%;
-    margin-right: 5%;
-    padding-left: 10%;
+.tutorial .collapsible {
+  display: block;
+  margin-bottom: 1rem;
+  border: 1px solid black;
+  font-size: large;
+  margin-left: 5%;
+  margin-right: 5%;
+  padding-left: 10%;
 }
-
-input {
-    position: absolute;
-    left: -9999px;
+.tutorial input {
+  position: absolute;
+  left: -9999px;
 }
-
-input:focus ~ .collapser {
-    border-color: grey;
+.tutorial input:focus ~ .collapser {
+  border-color: grey;
 }
-
-.collapser {
-    cursor: pointer;
-    border: 1px transparent dotted;
+.tutorial .collapser {
+  cursor: pointer;
+  border: 1px transparent dotted;
 }
-
-.arrow {
-    float: right;
-    margin-left: 0.5em;
-    display: inline-block;
-    transform: rotate(90deg);
-    transition: transform .25s ease-out;
+.tutorial .arrow {
+  float: right;
+  margin-left: 0.5em;
+  display: inline-block;
+  transform: rotate(90deg);
+  transition: transform 0.25s ease-out;
 }
-
-input:checked ~ .arrow,
-input:checked ~ .collapser .arrow {
-    transform: rotate(270deg);
+.tutorial input:checked ~ .arrow,
+.tutorial input:checked ~ .collapser .arrow {
+  transform: rotate(270deg);
 }
-
-.collapsed {
-    font-size: 0;
-    margin: 0;
-    opacity: 0;
-    padding: 0;
-
-    /* fade out, then shrink */
-    transition: opacity .25s,
-    margin .5s 0.25s,
-    font-size .5s 0.25s,
-    padding .5s .25s;
+.tutorial .collapsed {
+  font-size: 0;
+  margin: 0;
+  opacity: 0;
+  padding: 0;
+  /* fade out, then shrink */
+  transition: opacity 0.25s, margin 0.5s 0.25s, font-size 0.5s 0.25s, padding 0.5s 0.25s;
 }
-
-.step-image-inside {
-    height: 0;
-    width: 0;
+.tutorial .step-image-inside {
+  height: 0;
+  width: 0;
 }
-
-input:checked ~ .collapsed .step-image-inside {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;
-    height: 70%;
-    border: 5px solid black;
+.tutorial input:checked ~ .collapsed .step-image-inside {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  height: 70%;
+  border: 5px solid black;
 }
-
-input:checked ~ .collapsed {
-    font-size: large;
-    opacity: 1;
-    height: auto;
-    padding: 5px 0;
-
-    /* grow, then fade in */
-    transition: margin .25s,
-    padding .25s,
-    font-size .25s,
-    opacity .5s .25s;
+.tutorial input:checked ~ .collapsed {
+  font-size: large;
+  opacity: 1;
+  height: auto;
+  padding: 5px 0;
+  /* grow, then fade in */
+  transition: margin 0.25s, padding 0.25s, font-size 0.25s, opacity 0.5s 0.25s;
 }
-
-button.a {
-    background-color: #ff9100;
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    float: right;
-    border-radius: 8px;
-    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-    position: absolute;
-    right: 3px;
+.tutorial button.a {
+  background-color: #ff9100;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 20px;
+  cursor: pointer;
+  float: right;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  position: absolute;
+  right: 3px;
 }

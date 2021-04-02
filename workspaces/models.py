@@ -73,13 +73,16 @@ class WorkspaceApp(models.Model):
     # can't use an abstract class because we need to query all WorkspaceApps
     # of a tab
 
+    def __str__(self):
+        return f'WorkspaceApp({self.name}, {self.unique_id})'
+
 
 class WorkspacePadApp(WorkspaceApp):
     iframe_url = models.URLField()
 
 
 class WorkspaceFileShareApp(WorkspaceApp):
-    tusd_file_share = models.OneToOneField(
+    tusd_file_share = models.ForeignKey(
         TusdFileShare,
         on_delete=models.CASCADE,
         primary_key=True

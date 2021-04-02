@@ -43,7 +43,7 @@ export default function Tutorial() {
 
     return (
         <HashRouter>
-            <div>
+            <div className="tutorial">
                 <Avatar alt="s" src={s}/>
                 <ul className="header">
                     <li><NavLink to="/Introduction">Introduction</NavLink></li>
