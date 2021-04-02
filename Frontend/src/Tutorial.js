@@ -24,6 +24,8 @@ import createapp from './tutorial_images/Create-New-App.gif'
 import moveresize from './tutorial_images/Move-resize.gif'
 import minimize from './tutorial_images/Minimize.gif'
 import chatstep from './tutorial_images/Chat-Step.png';
+import padstep from './tutorial_images/Pad-Step.png';
+import filesharestep from './tutorial_images/FileShare-Step.png';
 
 export default function Tutorial() {
     const history = useHistory();
@@ -326,9 +328,7 @@ function Apps() {
                     The text editor app is similar to any rich text editor you might be used to using.
                     To use simply add it from the side bar.
 
-                    {/*<img src={createapp} className="step-image-inside" />*/}
-
-
+                    <img src={padstep} alt="Step 1 screenshot" className="step-image-inside"/>
                 </div>
             </label>
 
@@ -358,7 +358,7 @@ function Apps() {
                     The File Upload app allows for file sharing between you and your fellow team members. Just open it
                     up
                     and choose any file you would like to upload.
-                    {/*<img src={createapp} className="step-image-inside" />*/}
+                    <img src={filesharestep} alt="Step 1 screenshot" className="step-image-inside"/>
                 </div>
 
             </label>
