@@ -2,6 +2,7 @@ from django.utils import timezone
 from django.db import IntegrityError
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
+from rest_framework.authtoken.models import Token
 
 from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
 from .serializers import WorkspaceTabSerializer, WorkspacePadAppSerializer,\
@@ -44,38 +45,16 @@ class ServerMsgType:
     APP_LIST = 'app_list'
 
 
-def get_app_list(tab_unique_id):
-    tab = WorkspaceTab.objects.get(unique_id=tab_unique_id)
-    apps = WorkspaceApp.objects.filter(tab=tab)
-    app_list = []
-    for app in apps:
-        if hasattr(app, 'workspacepadapp'):
-            app_type = AppType.PAD
-            data = WorkspacePadAppSerializer(app.workspacepadapp).data
-        elif hasattr(app, 'workspacefileshareapp'):
-            app_type = AppType.FILE_SHARE
-            data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
-        else:
-            print("Couldn't find child class of app, defaulting to example app")
-            app_type = AppType.TEMPLATE
-            data = WorkspaceAppSerializer(app).data
-
-        app_list.append({
-            'app_type': app_type,
-            'unique_id': data['unique_id'],
-            'name': data['name'],
-            'data': data
-        })
-
-    return app_list
-
-
-# TODO: ensure that non-authed users cannot connect to the websocket
 class UserListConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         self.workspace_group_name = None
         self.workspace = None
-        self.user = None
+
+        # handling read only links
+        self.reject_unauthorized = False   # whether to reject unauthed users
+        self.is_read_only = False  # whether this connection should show read only links
+        self.authenticated = False
+
         super().__init__(*args, **kwargs)
 
     def connect(self):
@@ -87,6 +66,14 @@ class UserListConsumer(JsonWebsocketConsumer):
         except Workspace.DoesNotExist:
             self.close('Workspace does not exist')
             return
+
+        if self.workspace.user is not None:
+            print('pw protected workspace!')
+            self.is_read_only = self.workspace.anonymous_readable
+            if not self.is_read_only:
+                self.reject_unauthorized = True
+        else:
+            self.authenticated = True
 
         # add user to groups so they receive all messages
         async_to_sync(self.channel_layer.group_add)(
@@ -108,6 +95,35 @@ class UserListConsumer(JsonWebsocketConsumer):
             'type': ServerMsgType.TAB_LIST,
             'tab_list': self.get_tab_list()
         })
+
+    def get_app_list(self, tab_unique_id):
+        tab = WorkspaceTab.objects.get(unique_id=tab_unique_id)
+        apps = WorkspaceApp.objects.filter(tab=tab)
+        app_list = []
+        for app in apps:
+            if hasattr(app, 'workspacepadapp'):
+                app_type = AppType.PAD
+                data = WorkspacePadAppSerializer(app.workspacepadapp).data
+                if self.is_read_only:
+                    data['iframe_url'] = data['iframe_url_read_only']
+                print(data)
+
+            elif hasattr(app, 'workspacefileshareapp'):
+                app_type = AppType.FILE_SHARE
+                data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
+            else:
+                print("Couldn't find child class of app, defaulting to example app")
+                app_type = AppType.TEMPLATE
+                data = WorkspaceAppSerializer(app).data
+
+            app_list.append({
+                'app_type': app_type,
+                'unique_id': data['unique_id'],
+                'name': data['name'],
+                'data': data
+            })
+
+        return app_list
 
     def get_tab_list(self):
         return WorkspaceTabSerializer(
@@ -144,7 +160,7 @@ class UserListConsumer(JsonWebsocketConsumer):
             {
                 'type': 'app_list_changed',
                 'tab_id': tab_unique_id,
-                'app_list': get_app_list(tab_unique_id)
+                'app_list': self.get_app_list(tab_unique_id)
             }
         )
 
@@ -186,6 +202,21 @@ class UserListConsumer(JsonWebsocketConsumer):
             'tab_id': event['tab_id'],
             'app_list': event['app_list']
         })
+
+    def handle_auth(self, content):
+        if self.authenticated:
+            return
+
+        if 'Authorization' in content:
+            key = content['Authorization']
+            print(f'Authorizing with key {key}')
+            try:
+                self.authenticated = Token.objects.get(key=key).user == self.workspace.user
+            except Token.DoesNotExist:
+                print('Token object not found for key')
+
+        if self.authenticated:
+            self.is_read_only = False
 
     """
     Types of messages:
@@ -239,6 +270,17 @@ class UserListConsumer(JsonWebsocketConsumer):
         appId: UUID of the app to close.
     """
     def receive_json(self, content, **kwargs):
+        self.handle_auth(content)
+
+        if not self.authenticated and not self.is_read_only:
+            print('rejecting, unauthorized')
+            self.send_json({
+                'error': 'Not authorized.'
+            })
+            return
+
+        print(self.authenticated, self.is_read_only)
+
         # TODO: always send success/failure response
 
         msg_type = content['type']
@@ -299,6 +341,12 @@ class UserListConsumer(JsonWebsocketConsumer):
             self.send_tab_list_to_all()
         # TODO: ClientMsgType.TAB_NAME_CHANGE
         elif msg_type == ClientMsgType.NEW_APP:
+            if not self.authenticated:
+                self.send_json({
+                    'error': 'Not authorized.'
+                })
+                return
+
             tab_unique_id = content['tabId']
             try:
                 tab = WorkspaceTab.objects.get(unique_id=tab_unique_id)
@@ -325,7 +373,15 @@ class UserListConsumer(JsonWebsocketConsumer):
                 print('Created new pad, response:')
                 print(resp)
 
-                app.iframe_url = f'http://etherpad.synchronous.localhost/p/{app.unique_id}'
+                resp = etherpad_client.getReadOnlyID(
+                    padID=str(app.unique_id),
+                )
+                read_only_id = resp['readOnlyID']
+                print('getReadOnlyID response:')
+                print(read_only_id)
+
+                app.pad_id = str(app.unique_id)
+                app.read_only_id = read_only_id
                 app.save()
             elif app_type == AppType.FILE_SHARE:
                 tusd_file_share, _ = TusdFileShare.objects.get_or_create(workspace=self.workspace)
@@ -348,8 +404,14 @@ class UserListConsumer(JsonWebsocketConsumer):
             self.send_app_list_to_all(tab_unique_id)
         elif msg_type == ClientMsgType.APP_LIST_REQUEST:
             tab_id = content['tabId']
-            self.app_list_changed({'tab_id': tab_id, 'app_list': get_app_list(tab_id)})
+            self.app_list_changed({'tab_id': tab_id, 'app_list': self.get_app_list(tab_id)})
         elif msg_type == ClientMsgType.DELETE_APP:
+            if not self.authenticated:
+                self.send_json({
+                    'error': 'Not authorized.'
+                })
+                return
+
             app_id = content['appId']
             tab_id = content['tabId']
 

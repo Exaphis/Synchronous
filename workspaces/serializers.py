@@ -53,9 +53,18 @@ class WorkspaceAppSerializer(serializers.ModelSerializer):
 
 
 class WorkspacePadAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):
+    iframe_url = serializers.SerializerMethodField()
+    iframe_url_read_only = serializers.SerializerMethodField()
+
     class Meta:
         model = WorkspacePadApp
-        fields = WorkspaceAppSerializer.Meta.fields + ['iframe_url']
+        fields = WorkspaceAppSerializer.Meta.fields + ['iframe_url', 'iframe_url_read_only']
+
+    def get_iframe_url(self, obj):
+        return obj.get_iframe_url()
+
+    def get_iframe_url_read_only(self, obj):
+        return obj.get_iframe_url_read_only()
 
 
 class WorkspaceFileShareAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):

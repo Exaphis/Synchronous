@@ -78,14 +78,20 @@ class WorkspaceApp(models.Model):
 
 
 class WorkspacePadApp(WorkspaceApp):
-    iframe_url = models.URLField()
+    pad_id = models.CharField(max_length=255)
+    read_only_id = models.CharField(max_length=255)
+
+    def get_iframe_url(self):
+        return f'http://etherpad.synchronous.localhost/p/{self.pad_id}'
+
+    def get_iframe_url_read_only(self):
+        return f'http://etherpad.synchronous.localhost/p/{self.read_only_id}'
 
 
 class WorkspaceFileShareApp(WorkspaceApp):
     tusd_file_share = models.ForeignKey(
         TusdFileShare,
-        on_delete=models.CASCADE,
-        primary_key=True
+        on_delete=models.CASCADE
     )
 
 

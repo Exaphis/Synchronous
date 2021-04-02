@@ -300,6 +300,7 @@ function Workspace() {
     // why does it sometimes not refresh the user list when joining an already joined workspace?
     const userListConnect = () => {
         let wsUri = workspace['user_list_ws'];
+
         let ws = new WebSocket(
             getUrlFromEndpoint('ws', wsUri)
         );
@@ -312,6 +313,18 @@ function Workspace() {
                 console.error('Unexpected server msg type: ' + data.type);
             }
         };
+
+        ws.onopen = () => {
+            if (tokenRef.current !== null) {
+                const authPayload = {
+                    'type': 'auth',
+                    'Authorization': tokenRef.current
+                };
+
+                ws.send(JSON.stringify(authPayload));
+                console.log('sent authorization payload');
+            }
+        }
 
         setUserListWs(ws);
     }
