@@ -9,11 +9,11 @@ import 'react-pro-sidebar/dist/css/styles.css';
 import { BrowserRouter as Router, Link, Route, Switch, useHistory } from "react-router-dom";
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
-import './styles.css';
+import './CSS/styles.css';
 
-import logo from './logo.png';
-import s from './s.png';
-import './App.css';
+import logo from './Images/logo.png';
+import s from './Images/s.png';
+import './CSS/App.css';
 import Workspace from './Workspace';
 import { fetchAPI } from './api';
 import { WorkspaceArea } from './WorkspaceArea';

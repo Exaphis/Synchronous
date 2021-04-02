@@ -9,7 +9,7 @@ import {
     IconButton, Menu, Table, TableBody, TableCell, TableHead, TableRow,
     TextField, Toolbar, Typography
 } from "@material-ui/core";
-import s from "./s.png";
+import s from "./Images/s.png";
 import clsx from "clsx";
 import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
@@ -26,7 +26,7 @@ import { WorkspaceArea } from './WorkspaceArea';
 
 import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage } from 'react-chat-widget';
-import './styles.css';
+import './CSS/styles.css';
 
 const STREAM_API = 'n9utf8kxctuk'
 

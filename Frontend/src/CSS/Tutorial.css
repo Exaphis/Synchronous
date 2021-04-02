@@ -16,6 +16,15 @@ h2 {
     display: flex;
 }
 
+h3 {
+    font-family: Arial;
+    display: flex;
+}
+
+p {
+    font-family: Arial;
+}
+
 ul.header li {
     display: inline;
     list-style-type: none;
@@ -64,3 +73,31 @@ button.a {
 .content li {
     margin-bottom: 10px;
 }
+
+img.a {
+    text-align: center;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+}
+
+
+img.b {
+    text-align: center;
+    display: block;
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    position: absolute;
+    top: 111px;
+    left: 490px;
+
+
+}
+
+p {
+    z-index:999;
+    position: relative;
+}
+
