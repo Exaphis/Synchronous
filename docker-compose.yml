@@ -30,7 +30,7 @@ services:
     image: tusproject/tusd
     ports:
       - "1080:1080"
-    command: -hooks-http http://backend:8000/tusd/ -max-size 10485760 -hooks-http-forward-headers Authorization
+    command: -hooks-http http://backend:8000/tusd/ -max-size 10485760 -hooks-http-forward-headers Authorization -behind-proxy
   etherpad:
     build: etherpad-lite
     ports:

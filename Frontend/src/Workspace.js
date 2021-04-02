@@ -563,7 +563,6 @@ function Workspace() {
 
             {/*<h1>{JSON.stringify(workspace)}</h1>*/}
             {/*<p>{JSON.stringify(userList)}</p>*/}
-            { workspace_details }
             <Table>
                 <TableHead>
                     <TableRow>
@@ -584,6 +583,8 @@ function Workspace() {
                     )) }
                 </TableBody>
             </Table>
+
+            { workspace_details }
         </Container>
 
         </div>

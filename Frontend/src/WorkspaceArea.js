@@ -157,7 +157,11 @@ function WorkspaceApp(props) {
             height: '100%',
             border: '2px solid gray',
             borderRadius: '5px',
-            display: props.minimized ? 'none' : 'flex',
+            display: 'flex',
+            // fixes firefox rendering of iframes (vs. display: none)
+            // firefox would have problems with rendering iframes (i.e. etherpad) when display is none.
+            // instead, visibility: hidden should work the same.
+            visibility: props.minimized ? 'hidden': 'visible',
             flexDirection: 'column'
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
@@ -188,6 +192,13 @@ function WorkspaceTab(props) {
     }
 
     function getElementOffset(el) {
+        if (el === undefined) {
+            return {
+                left: 0,
+                top: 0
+            };
+        }
+
         // https://stackoverflow.com/a/28222246
         const rect = el.getBoundingClientRect();
         return {
@@ -196,9 +207,9 @@ function WorkspaceTab(props) {
         };
     }
 
-    React.useEffect(() => {
-        appAreaPosRef.current = getElementOffset(appAreaRef.current);
+    appAreaPosRef.current = getElementOffset(appAreaRef.current);
 
+    React.useEffect(() => {
         PubSub.publish(
             PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
             {
@@ -208,6 +219,10 @@ function WorkspaceTab(props) {
         );
 
         PubSub.subscribe(SERVER_MSG_TYPE.APP_LIST, (msg, data) => {
+            if (data['tab_id'] !== props.tabId) {
+                return;
+            }
+
             // data['app_list']:
             //     - list of apps
             //     - each app contains `type` (enum), `unique_id`, and `data`
@@ -357,7 +372,9 @@ function WorkspaceTab(props) {
             // use display: none instead of returning null so any embedded iframes do not
             // have to reload when switching tabs
             // use flex so the appComponents can resize to maximum width allowed
-            display: props.hidden ? 'none' : 'flex'
+            display: 'flex',
+            position: props.hidden ? 'absolute': 'static',
+            left: props.hidden ? '-5000px' : 'auto'
         }}>
             <rps.ProSidebar>
                 <rps.Menu>
