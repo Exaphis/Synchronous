@@ -138,7 +138,7 @@ dmypy.json
 cython_debug/
 
 .idea/
-.DS_STORE
+.DS_Store
 
 # ------ React .gitignore ------
 # # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
@@ -163,5 +163,4 @@ cython_debug/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.DS_Store
 .vscode/

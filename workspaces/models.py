@@ -77,6 +77,7 @@ class WorkspaceApp(models.Model):
         return f'WorkspaceApp({self.name}, {self.unique_id})'
 
 
+# TODO: catch pre_delete hook to delete pads
 class WorkspacePadApp(WorkspaceApp):
     pad_id = models.CharField(max_length=255)
     read_only_id = models.CharField(max_length=255)

@@ -1,0 +1,26 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 6 (Summary)
+3/29/21 2 hrs    012e017 Stop mutating state in the frontend to fix React re-rendering bugs
+3/29/21 2 hrs    609dbb7 Set up Dockerfiles and docker-compose.yml for service containerization
+3/30/21 2 hrs    e6a3abb Implement file upload backend using tusd and tusd hooks
+3/31/21 1 hr     25eb73f Add nginx reverse proxy in Docker to fix SameSite cookie issues
+                         in embedded Etherpad pads
+3/31/21 1 hr     9c8ce7a Merge Saksham's non-persistent text pad implementation in frontend
+3/31/21 1 hr     aa0411c Change Etherpad to export .docx by default instead of .doc
+4/01/21 5 hrs    1edb3cd Synchronize tab and app creation across clients, persist
+                         created Etherpad instances, show synchronized file list in frontend,
+                         delete shared files upon workspace deletion
+4/01/21 3 hrs    3d64de2 Convert Etherpad authorship colors into highlight selection
+4/02/21 3 hrs    cd60768 Fix old existing Etherpad plugin (ep_cristo_restore_revision)
+                         to allow users to restore certain revisions
+4/02/21 1 hr     77eff25 Fix tutorial CSS and minimized apps preventing open apps from being
+                         clickable, add template (test) app for moving
+4/02/21 1 hr     0cafabc Enable authentication in websockets, display read-only links for
+                         unauthenticated users in password-protected workspaces
+
+Week 7 (Plan)
+4/06/21 5 hrs    Research a good whiteboard app for embedding, think about creating a custom app
+4/08/21 2 hrs    Add previous workspace list
+4/10/21 3 hrs    Fix Etherpad selection deletion bug

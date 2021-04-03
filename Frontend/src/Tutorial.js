@@ -275,9 +275,11 @@ function Apps() {
                 <div className="collapsed">
                     Step 1: Click on + button to add a new tab <br/>
 
-                    Step 2: Select the app you wish to add
+                    Step 2: Select the app you wish to add <br/>
 
-                    <img src={createapp} alt="Step 2 screenshot" className="step-image-inside"/>
+                    Step 3: Open the app from the sidebar
+
+                    <img src={createapp} alt="Create app gif" className="step-image-inside"/>
 
 
                 </div>
