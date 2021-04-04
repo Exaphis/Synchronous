@@ -1,0 +1,20 @@
+Weekly Individual Report (Team 10: Synchronous)
+Name: Ryan Borzello
+
+Week 0 (Summary)
+3-18 2 Hours 69a1e0014ab27cc04bd1ef02a32307deae101452 Reorganized code
+3-20 4 Hours efb843354fd1cb75f6f0931804459b602548b32e Set up basic chat features
+
+
+Week 1 (Summary)
+3-26 3 Hours 75ac460442c391339d91922148391d2586b1e686 Allowed for storage of chat
+3-27 2 Hours 172dc6d634a7e3c114944d82f118e1f4c04bc687 Changed color scheme/design of chat
+3-28 3 Hours 9ec4134e78524769814174891636d2367a5ee078 Chat works but need to increase update speed of chat
+
+Week 2 (Summary)
+3-29 2 Hours 4c66c980fc82755e101fdfc583ea5b429e1010a4 Fixed update issues of chat
+3-30 5 Hours 417f9718fc0d5c5ccd4de2cc03b48adbcb86881d Finished Chat
+3-31 2 Hours 160f1732056098043e65e6f4188921854a4128bf Different Chat tests
+3-31 3 Hours 9e1c023cb61d0c9cdcd8eec2b3072b2e2aad3988 Created Tutorial Area
+4-1  1 Hour  a74de5e08bccb2724c61fe934faa0e52ae8995e1 Updated Tutorial Redirection
+4-2  3 Hours b81f5926d93a9c3c3152307ba7722770b8cada62 Finished Tutorial Area
