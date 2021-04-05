@@ -34,9 +34,9 @@ export default function Tutorial() {
     let url = JSON.stringify(window.location.href);
     url = url.substring(url.lastIndexOf('/'), url.length - 1)
     console.log(url)
-    console.log(url === '/Home')
+    console.log(url === '/home')
 
-    if (url === '/Home') {
+    if (url === '/home') {
         console.log('here');
         history.push('/');
         window.location.reload(false);
@@ -48,20 +48,20 @@ export default function Tutorial() {
             <div className="tutorial">
                 <Avatar alt="s" src={s}/>
                 <ul className="header">
-                    <li><NavLink to="/Introduction">Introduction</NavLink></li>
-                    <li><NavLink to="/Create">Create a Workspace</NavLink></li>
-                    <li><NavLink to="/Open">Open a Workspace</NavLink></li>
-                    <li><NavLink to="/Workspace">Using your Workspace</NavLink></li>
-                    <li><NavLink to="/Apps">Apps</NavLink></li>
+                    <li><NavLink to="/introduction">Introduction</NavLink></li>
+                    <li><NavLink to="/create">Create a Workspace</NavLink></li>
+                    <li><NavLink to="/open">Open a Workspace</NavLink></li>
+                    <li><NavLink to="/workspace">Using your Workspace</NavLink></li>
+                    <li><NavLink to="/apps">Apps</NavLink></li>
                     <button className="a" onClick={() => history.push('/')}>Return Home</button>
                 </ul>
 
                 <div className="content">
-                    <Route path="/Introduction" component={Introduction}/>
-                    <Route path="/Create" component={Create}/>
-                    <Route path="/Open" component={Open}/>
-                    <Route path="/Workspace" component={Workspace}/>
-                    <Route path="/Apps" component={Apps}/>
+                    <Route path="/introduction" component={Introduction}/>
+                    <Route path="/create" component={Create}/>
+                    <Route path="/open" component={Open}/>
+                    <Route path="/workspace" component={Workspace}/>
+                    <Route path="/apps" component={Apps}/>
                 </div>
             </div>
         </HashRouter>

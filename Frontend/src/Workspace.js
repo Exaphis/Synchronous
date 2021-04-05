@@ -95,7 +95,7 @@ function WorkspaceInfoBar(props) {
     const history = useHistory();
 
     const handleHelp = () => {
-        history.push('/Tutorial')
+        history.push('/tutorial')
     };
 
     const handleMenu = (event) => {
@@ -514,7 +514,7 @@ function Workspace() {
                     </Box>
                     <Button
                         component={ Link }
-                        to={"/Open"}
+                        to={"/open"}
                         size="large"
                         type="submit"
                         fullWidth

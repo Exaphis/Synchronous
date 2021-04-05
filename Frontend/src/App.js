@@ -30,25 +30,25 @@ export default function App() {
         <Router>
             <div>
                 <Switch>
-                    <Route exact path="/Create">
+                    <Route exact path="/create">
                         <Create/>
                     </Route>
-                    <Route exact path="/Open">
+                    <Route exact path="/open">
                         <Open/>
                     </Route>
-                    <Route exact path="/Upload">
+                    <Route exact path="/upload">
                         <Upload/>
                     </Route>
                     <Route exact path="/">
                         <SignIn/>
                     </Route>
-                    <Route exact path="/Test">
+                    <Route exact path="/test">
                         <Test/>
                     </Route>
-                    <Route exact path="/Workspace/:uniqueId">
+                    <Route exact path="/workspace/:uniqueId">
                         <Workspace/>
                     </Route>
-                    <Route exact path="/Tutorial">
+                    <Route exact path="/tutorial">
                         <Tutorial/>
                     </Route>
                 </Switch>
@@ -72,7 +72,7 @@ function SignIn() {
                             <div>
                                 <Button
                                     component={ Link }
-                                    to={"/Create"}
+                                    to={"/create"}
                                     type="submit"
                                     fullWidth
                                     variant="contained"
@@ -84,7 +84,7 @@ function SignIn() {
                                 </Button>
                                 <Button
                                     component={ Link }
-                                    to={"/Open"}
+                                    to={"/open"}
                                     type="submit"
                                     fullWidth
                                     variant="contained"
@@ -96,7 +96,7 @@ function SignIn() {
                                 </Button>
                                 <Button
                                     component={ Link }
-                                    to={"/Upload"}
+                                    to={"/upload"}
                                     type="submit"
                                     fullWidth
                                     variant="contained"
@@ -108,7 +108,7 @@ function SignIn() {
                                 </Button>
                                 <Button
                                     component={ Link }
-                                    to={"/Test"}
+                                    to={"/test"}
                                     type="submit"
                                     fullWidth
                                     variant="contained"
@@ -120,7 +120,7 @@ function SignIn() {
                                 </Button>
                                 <Button
                                     component={ Link }
-                                    to={"/Tutorial"}
+                                    to={"/tutorial"}
                                     type="submit"
                                     fullWidth
                                     variant="contained"
@@ -142,25 +142,6 @@ function SignIn() {
 
     );
 }
-
-// const Search = () => {
-//   const [showResults, setShowResults] = React.useState(false)
-//   const onClick = () => setShowResults(true)
-//   return (
-//     <div>
-//       <input type="submit" value="Search" onClick={onClick} />
-//       { showResults ? <Results /> : null }
-//     </div>
-//   )
-// }
-
-// const Results = () => (
-//   <div id="results" className="search-results">
-//     Some Results
-//   </div>
-// )
-
-// ReactDOM.render(<Search />, document.querySelector("#container"))
 
 function Test() {
     return (
@@ -239,7 +220,7 @@ function Create() {
                 <Grid container>
                     <Grid item xs>
                         <Link
-                            to="/Open"
+                            to="/open"
                             onClick={() => setWork(true)}
                         >
                             Existing Workspace?
@@ -286,7 +267,7 @@ async function HandleCreate(name, password, history, work, setWork, checked) {
 
         }
 
-        await history.push('/Workspace/' + resp.unique_id);
+        await history.push('/workspace/' + resp.unique_id);
     }
 }
 
@@ -362,7 +343,7 @@ function Open() {
                 <Grid container>
                     <Grid item xs>
                         <Link
-                            to="/Create"
+                            to="/create"
                             onClick={() => setWork(true)}
                         >
                             Need a new workspace?
@@ -429,7 +410,7 @@ async function openWith(uniqueID, resp, work, setWork, history) {
         setWork(true);
         localStorage.setItem(uniqueID, resp.token)
 
-        await history.push('/Workspace/' + resp.unique_id);
+        await history.push('/workspace/' + resp.unique_id);
     }
 }
 
@@ -444,7 +425,7 @@ async function openWithout(uniqueID, resp, work, setWork, history) {
         // alert(JSON.stringify(resp));
         setWork(true);
 
-        await history.push('/Workspace/' + resp.unique_id);
+        await history.push('/workspace/' + resp.unique_id);
     }
 }
 
