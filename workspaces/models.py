@@ -2,13 +2,14 @@ import datetime
 import uuid
 
 from django.db import models
-from django.db.models.signals import post_save, pre_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
 
 from tusdfileshare.models import TusdFileShare
+from . import etherpad_client
 
 
 class WorkspaceManager(models.Manager):
@@ -77,8 +78,39 @@ class WorkspaceApp(models.Model):
         return f'WorkspaceApp({self.name}, {self.unique_id})'
 
 
-# TODO: catch pre_delete hook to delete pads
+class WorkspacePadAppManager(models.Manager):
+    def create_pad(self, tab, name):
+        """
+        Create an Etherpad and return the model with a generated UUID.
+        """
+        app = self.model(tab=tab, name=name)
+
+        resp = etherpad_client.createPad(
+            padID=str(app.unique_id),
+            text='Welcome to Synchronous!'
+        )
+
+        print('Created new pad, response:')
+        print(resp)
+
+        resp = etherpad_client.getReadOnlyID(
+            padID=str(app.unique_id),
+        )
+        read_only_id = resp['readOnlyID']
+
+        print('getReadOnlyID response:')
+        print(read_only_id)
+
+        app.pad_id = str(app.unique_id)
+        app.read_only_id = read_only_id
+        app.save()
+
+        return app
+
+
 class WorkspacePadApp(WorkspaceApp):
+    objects = WorkspacePadAppManager()
+
     pad_id = models.CharField(max_length=255)
     read_only_id = models.CharField(max_length=255)
 
@@ -87,6 +119,16 @@ class WorkspacePadApp(WorkspaceApp):
 
     def get_iframe_url_read_only(self):
         return f'http://etherpad.synchronous.localhost/p/{self.read_only_id}'
+
+    def __str__(self):
+        return f'Etherpad({self.pad_id})'
+
+
+@receiver(pre_delete, sender=WorkspacePadApp)
+def delete_etherpad(sender, instance, **kwargs):
+    print(f'Deleting etherpad {instance}...')
+    etherpad_client.deletePad(padID=str(instance.unique_id))
+    print('Pad deleted from Etherpad.')
 
 
 class WorkspaceFileShareApp(WorkspaceApp):

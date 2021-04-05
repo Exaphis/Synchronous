@@ -11,7 +11,6 @@ from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
 from tusdfileshare.models import TusdFileShare, TusdFile
 from tusdfileshare.serializers import TusdFileSerializer
-from . import etherpad_client
 
 
 # don't use enum because JSON can't serialize it
@@ -49,6 +48,7 @@ class UserListConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         self.workspace_group_name = None
         self.workspace = None
+        self.user = None
 
         # handling read only links
         self.reject_unauthorized = False   # whether to reject unauthed users
@@ -106,7 +106,6 @@ class UserListConsumer(JsonWebsocketConsumer):
                 data = WorkspacePadAppSerializer(app.workspacepadapp).data
                 if self.is_read_only:
                     data['iframe_url'] = data['iframe_url_read_only']
-                print(data)
 
             elif hasattr(app, 'workspacefileshareapp'):
                 app_type = AppType.FILE_SHARE
@@ -279,8 +278,6 @@ class UserListConsumer(JsonWebsocketConsumer):
             })
             return
 
-        print(self.authenticated, self.is_read_only)
-
         # TODO: always send success/failure response
 
         msg_type = content['type']
@@ -362,27 +359,7 @@ class UserListConsumer(JsonWebsocketConsumer):
             name = content['name']
 
             if app_type == AppType.PAD:
-                app = WorkspacePadApp(tab=tab, name=name)
-
-                # TODO: assert resp is success
-                resp = etherpad_client.createPad(
-                    padID=str(app.unique_id),
-                    text='Welcome to Synchronous!'
-                )
-
-                print('Created new pad, response:')
-                print(resp)
-
-                resp = etherpad_client.getReadOnlyID(
-                    padID=str(app.unique_id),
-                )
-                read_only_id = resp['readOnlyID']
-                print('getReadOnlyID response:')
-                print(read_only_id)
-
-                app.pad_id = str(app.unique_id)
-                app.read_only_id = read_only_id
-                app.save()
+                WorkspacePadApp.objects.create_pad(tab=tab, name=name)
             elif app_type == AppType.FILE_SHARE:
                 tusd_file_share, _ = TusdFileShare.objects.get_or_create(workspace=self.workspace)
 
@@ -421,13 +398,7 @@ class UserListConsumer(JsonWebsocketConsumer):
                 print(f'App ID {app_id} does not exist')
                 return
 
-            if hasattr(app, 'workspacepadapp'):
-                # TODO: check response success
-                etherpad_client.deletePad(padID=str(app.unique_id))
-                print('pad deleted')
-
             app.delete()
-
             print('app deleted')
 
             self.send_app_list_to_all(tab_id)
