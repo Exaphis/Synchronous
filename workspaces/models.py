@@ -50,8 +50,8 @@ class Workspace(models.Model):
     def __str__(self):
         return str(self.unique_id)
 
-    def get_user_list_endpoint(self):
-        return f'ws/{self.unique_id}/user-list/'
+    def get_ws_endpoint(self):
+        return f'ws/{self.unique_id}/'
 
     def is_password_protected(self):
         return self.user is not None

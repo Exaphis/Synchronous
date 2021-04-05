@@ -44,7 +44,7 @@ class ServerMsgType:
     APP_LIST = 'app_list'
 
 
-class UserListConsumer(JsonWebsocketConsumer):
+class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         self.workspace_group_name = None
         self.workspace = None
@@ -59,7 +59,7 @@ class UserListConsumer(JsonWebsocketConsumer):
 
     def connect(self):
         unique_id = self.scope['url_route']['kwargs']['unique_id']
-        self.workspace_group_name = f'user-list_{unique_id}'
+        self.workspace_group_name = f'ws_{unique_id}'
 
         try:
             self.workspace = Workspace.objects.get(unique_id=unique_id)

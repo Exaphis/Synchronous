@@ -15,13 +15,13 @@ class WorkspaceSerializer(serializers.ModelSerializer):
     )
     nickname = serializers.CharField(allow_blank=True)
     expiration_date = serializers.DateTimeField(read_only=True)
-    user_list_ws = serializers.ReadOnlyField(source='get_user_list_endpoint')
+    ws = serializers.ReadOnlyField(source='get_ws_endpoint')
     is_password_protected = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Workspace
         fields = ('id', 'unique_id', 'nickname', 'created_at', 'anonymous_readable',
-                  'password', 'expiration_date', 'user_list_ws', 'is_password_protected')
+                  'password', 'expiration_date', 'ws', 'is_password_protected')
 
     def create(self, validated_data):
         # override default create method to use custom workspace manager create
@@ -53,18 +53,12 @@ class WorkspaceAppSerializer(serializers.ModelSerializer):
 
 
 class WorkspacePadAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):
-    iframe_url = serializers.SerializerMethodField()
-    iframe_url_read_only = serializers.SerializerMethodField()
+    iframe_url = serializers.ReadOnlyField(source='get_iframe_url')
+    iframe_url_read_only = serializers.ReadOnlyField(source='get_iframe_url_read_only')
 
     class Meta:
         model = WorkspacePadApp
         fields = WorkspaceAppSerializer.Meta.fields + ['iframe_url', 'iframe_url_read_only']
-
-    def get_iframe_url(self, obj):
-        return obj.get_iframe_url()
-
-    def get_iframe_url_read_only(self, obj):
-        return obj.get_iframe_url_read_only()
 
 
 class WorkspaceFileShareAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):

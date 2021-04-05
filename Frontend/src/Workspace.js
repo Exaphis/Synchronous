@@ -299,7 +299,7 @@ function Workspace() {
     // https://reactjs.org/docs/hooks-faq.html#why-am-i-seeing-stale-props-or-state-inside-my-function
     // why does it sometimes not refresh the user list when joining an already joined workspace?
     const userListConnect = () => {
-        let wsUri = workspace['user_list_ws'];
+        let wsUri = workspace['ws'];
 
         let ws = new WebSocket(
             getUrlFromEndpoint('ws', wsUri)
