@@ -17,8 +17,8 @@ git submodule update --recursive
 
 Download and install Docker (<https://www.docker.com/products/docker-desktop>).
 
-Edit your hosts (`/etc/hosts` on Linux/Mac, `C:\Windows\System32\drivers\etc\hosts`
-on Windows) file to include the following lines:
+Edit your hosts file (`/etc/hosts` on Linux/Mac,
+`C:\Windows\System32\drivers\etc\hosts` on Windows) to include the following lines:
 
 ```console
 # Synchronous
@@ -28,8 +28,9 @@ on Windows) file to include the following lines:
 127.0.0.1 etherpad.synchronous.localhost
 ```
 
-This allows you to access Synchronous and the necessary other services on
-`http://synchronous.localhost` and various subdomains, allowing SameSite cookies.
+This allows you to access Synchronous and all necessary other services on
+<http://synchronous.localhost> and its various subdomains, which allows for
+SameSite cookies.
 
 Start up Docker containers (the initial container build may take a long time!)
 
@@ -44,13 +45,13 @@ and re-running the command.
 
 ## Usage
 
-Visit `http://synchronous.localhost`.
+Visit <http://synchronous.localhost>.
 
 ## Troubleshooting
 
 ### I need to add a new dependency
 
-React dependencies can be installed normally using `npm install ... --save` within
+React dependencies can be installed as usual using `npm install ... --save` within
 the `Frontend/` directory.
 
 Django dependencies must be added to `requirements.txt`.
