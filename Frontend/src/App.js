@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from 'react';
 import {
     Grid, Box, Avatar, Button, CssBaseline,
     TextField, FormControlLabel, Checkbox,
@@ -21,7 +21,6 @@ import Tutorial from './Tutorial';
 
 
 LogRocket.init('a1vl8a/synchronous');
-
 setupLogRocketReact(LogRocket);
 
 
@@ -59,77 +58,70 @@ function SignIn() {
     const classes = useStyles();
 
     return (
-        <div>
-            <Container component="main" maxWidth="xs">
-                <CssBaseline />
-                <div className={classes.paper}>
-                    <img alt="" src={logo} width="400" height="400"/>
-                    <form className={classes.form} noValidate>
-                        <div>
-                            <Button
-                                component={ Link }
-                                to={"/create"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                            >
-                                Start a new workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/open"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                            >
-                                Reopen an existing workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/upload"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="primary"
-                                className={classes.submit}
-                            >
-                                Upload a workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/test"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                //color="primary"
-                                className={classes.submit}
-                            >
-                                Test Workspace
-                            </Button>
-                            <Button
-                                component={ Link }
-                                to={"/tutorial"}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                color="secondary"
-                                className={classes.submit}
-                            >
-                                Tutorial
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-                <Box mt={8}>
-                    <Copyright />
-                </Box>
-            </Container>
-        </div>
-
+        <Container component="main" maxWidth="xs">
+            <CssBaseline />
+            <div className={classes.paper}>
+                <img alt="Synchronous logo" src={logo} width="300" height="300"/>
+                <Button
+                    component={ Link }
+                    to={"/create"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                >
+                    Start a new workspace
+                </Button>
+                <Button
+                    component={ Link }
+                    to={"/open"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                >
+                    Reopen an existing workspace
+                </Button>
+                <Button
+                    component={ Link }
+                    to={"/upload"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    className={classes.submit}
+                >
+                    Upload a workspace
+                </Button>
+                <Button
+                    component={ Link }
+                    to={"/test"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    //color="primary"
+                    className={classes.submit}
+                >
+                    Test Workspace
+                </Button>
+                <Button
+                    component={ Link }
+                    to={"/tutorial"}
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="secondary"
+                    className={classes.submit}
+                >
+                    Tutorial
+                </Button>
+            </div>
+            <Box mt={8}>
+                <Copyright />
+            </Box>
+        </Container>
     );
 }
 
@@ -191,8 +183,8 @@ function CreateWorkspace() {
         <Container component="main" maxWidth="xs">
             <CssBaseline/>
             <div className={classes.paper}>
-                <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
-                <Box mt={4}>
+                <Box mb={4}>
+                    <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
                 </Box>
                 <Typography component="h2" variant="h5">
                     Create a Workspace
@@ -321,8 +313,8 @@ function OpenWorkspace() {
         <Container component="main" maxWidth="xs">
             <CssBaseline/>
             <div className={classes.paper}>
-                <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
-                <Box mt={4}>
+                <Box mb={4}>
+                    <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
                 </Box>
                 <Typography component="h2" variant="h5">
                     Open Existing Workspace

@@ -56,7 +56,6 @@ class WorkspaceCreateView(generics.CreateAPIView):
     serializer_class = WorkspaceSerializer
 
 
-# TODO: if readable but not authed, then return read-only links to the workspace apps
 class WorkspaceDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsReadableOrAuthenticated]
     queryset = Workspace.objects.all()

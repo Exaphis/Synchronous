@@ -1,72 +1,67 @@
 # Synchronous
 
-# Getting Started with Create React App
+## Cloning the repository
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```console
+git clone --recurse-submodules https://github.com/pinkslp/Synchronous.git
+```
 
-## Available Scripts
+## Retrieving new changes from the repository
 
-In the project directory, you can run:
+```console
+git pull origin main
+git submodule update --recursive
+```
 
-### `npm start`
+## Installation
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Download and install Docker (<https://www.docker.com/products/docker-desktop>).
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Edit your hosts (`/etc/hosts` on Linux/Mac, `C:\Windows\System32\drivers\etc\hosts`
+on Windows) file to include the following lines:
 
-### `npm test`
+```console
+# Synchronous
+127.0.0.1 synchronous.localhost
+127.0.0.1 tusd.synchronous.localhost
+127.0.0.1 api.synchronous.localhost
+127.0.0.1 etherpad.synchronous.localhost
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This allows you to access Synchronous and the necessary other services on
+`http://synchronous.localhost` and various subdomains, allowing SameSite cookies.
 
-### `npm run build`
+Start up Docker containers (the initial container build may take a long time!)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```console
+docker compose up
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Code changes for React and Django will be automatically detected, and the respective
+servers will automatically restart. However, any changes that would normally require
+a manual restart of the server would require you to stop all containers using Ctrl+C
+and re-running the command.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Usage
 
-### `npm run eject`
+Visit `http://synchronous.localhost`.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Troubleshooting
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### I need to add a new dependency
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+React dependencies can be installed normally using `npm install ... --save` within
+the `Frontend/` directory.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Django dependencies must be added to `requirements.txt`.
 
-## Learn More
+After installing, restart the containers.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+If it still doesn't work, enter the command line for the container using Docker
+Desktop and run the installation command from the container itself.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### A docker container is not showing the changes I made
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Try rebuilding the container using `docker compose build SERVICE_NAME` where
+SERVICE_NAME is the name of the service whose container you want to rebuild. The
+services can be found in `docker-compose.yml` (e.g. nginx, backend, frontend, etc.).

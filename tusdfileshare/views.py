@@ -12,7 +12,6 @@ from .serializers import TusdFileSerializer
 @api_view(['POST'])
 def hook(request):
     # TODO: deny requests not from tusd
-    # TODO: https://stackoverflow.com/a/53495618
     hook_name = request.headers.get('Hook-Name', '')
 
     print(hook_name)
