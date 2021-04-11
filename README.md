@@ -41,7 +41,7 @@ docker compose up
 Code changes for React and Django will be automatically detected, and the respective
 servers will automatically restart. However, any changes that would normally require
 a manual restart of the server would require you to stop all containers using Ctrl+C
-and re-running the command.
+and re-run the command.
 
 ## Usage
 
