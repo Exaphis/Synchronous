@@ -1,3 +1,6 @@
 [submodule "etherpad-lite"]
 	path = etherpad-lite
 	url = https://github.com/Exaphis/etherpad-lite.git
+[submodule "spacedeck-open"]
+	path = spacedeck-open
+	url = https://github.com/spacedeck/spacedeck-open.git

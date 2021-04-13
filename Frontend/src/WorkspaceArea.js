@@ -144,8 +144,10 @@ function PadAppContents(props) {
 
 function TemplateAppContents(props) {
     return (
+        // <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        //         title={props.uuid} src='https://google.com?igu=1' />
         <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-                title={props.uuid} src='https://google.com?igu=1' />
+                title={props.uuid} src='http://spacedeck.synchronous.localhost/spaces/bf4e63a6-ee2c-411b-aabe-d481ee558aa6?spaceAuth=762db34' />
     );
 }
 
@@ -329,10 +331,12 @@ function WorkspaceTab(props) {
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
         }
+        else if (app.type === APP_TYPE.TEMPLATE) {
+            appContents = <TemplateAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
+        }
         else {
             console.error('invalid app type: ' + app.type);
             console.error(typeof app.type);
-            appContents = <TemplateAppContents/>;
         }
 
         return (

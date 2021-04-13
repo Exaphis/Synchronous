@@ -26,6 +26,7 @@ Edit your hosts file (`/etc/hosts` on Linux/Mac,
 127.0.0.1 tusd.synchronous.localhost
 127.0.0.1 api.synchronous.localhost
 127.0.0.1 etherpad.synchronous.localhost
+127.0.0.1 spacedeck.synchronous.localhost
 ```
 
 This allows you to access Synchronous and all necessary other services on
@@ -63,6 +64,6 @@ Desktop and run the installation command from the container itself.
 
 ### A docker container is not showing the changes I made
 
-Try rebuilding the container using `docker compose build SERVICE_NAME` where
+Try rebuilding the container using `docker compose up SERVICE_NAME --build` where
 SERVICE_NAME is the name of the service whose container you want to rebuild. The
 services can be found in `docker-compose.yml` (e.g. nginx, backend, frontend, etc.).
