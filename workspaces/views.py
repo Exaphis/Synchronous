@@ -125,3 +125,8 @@ def send_message(request):
     send_mail_to(subject, message, [email])
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def heartbeat(request):
+    return Response()
