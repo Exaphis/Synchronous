@@ -13,7 +13,8 @@ export const PUBSUB_TOPIC = {
 export const APP_TYPE = {
     TEMPLATE: 0,
     PAD: 1,
-    FILE_SHARE: 2
+    FILE_SHARE: 2,
+    OFFLINE_PAD: 3
 };
 
 // possible type parameters of websocket messages sent by client

@@ -20,6 +20,7 @@ import { WorkspaceArea } from './WorkspaceArea';
 import Tutorial from './Tutorial';
 
 
+
 LogRocket.init('a1vl8a/synchronous');
 setupLogRocketReact(LogRocket);
 
@@ -57,7 +58,10 @@ export default function App() {
 function SignIn() {
     const classes = useStyles();
 
+
+
     return (
+
         <Container component="main" maxWidth="xs">
             <CssBaseline />
             <div className={classes.paper}>

@@ -149,6 +149,13 @@ function TemplateAppContents(props) {
     );
 }
 
+function OfflinePadAppContents(props) {
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src='http://justnotepad.com/' />
+    );
+}
+
 
 function WorkspaceApp(props) {
     return (
@@ -185,6 +192,12 @@ function WorkspaceTab(props) {
 
     // contains the states (i.e. position + size) of each app
     const appStatesRef = React.useRef({});
+
+
+    React.useEffect(()=> {
+        console.log(APP_TYPE.OFFLINE_PAD)
+        addApp(APP_TYPE.OFFLINE_PAD)
+    }, [])
 
     function setAppMinimized(appId, minimizedUpdater) {
         setApps((prevApps) => {
@@ -300,6 +313,9 @@ function WorkspaceTab(props) {
         else if (type === APP_TYPE.TEMPLATE) {
             name = 'Template';
         }
+        else if (type === APP_TYPE.OFFLINE_PAD) {
+            name = 'Offline Pad';
+        }
         else {
             console.log('Unknown app type: ' + type);
             return;
@@ -320,7 +336,7 @@ function WorkspaceTab(props) {
 
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
-
+        console.log('type ' + app.type)
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
             appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
@@ -328,6 +344,10 @@ function WorkspaceTab(props) {
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
+        }
+        else if (app.type === APP_TYPE.OFFLINE_PAD) {
+            console.log('here')
+            appContents = <OfflinePadAppContents/>
         }
         else {
             console.error('invalid app type: ' + app.type);
@@ -396,6 +416,7 @@ function WorkspaceTab(props) {
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
                         Add test
                     </rps.MenuItem>
+
                     {
                         Object.values(apps).map((app) => (
                             app.minimized &&
