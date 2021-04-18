@@ -431,6 +431,7 @@ function WorkspaceTab(props) {
 function WorkspaceArea() {
     const [tabs, setTabs] = React.useState([]);
     const [currTab, setCurrTab] = React.useState(-1);
+    const [work, setWork] = React.useState(false);
 
     React.useEffect(() => {
         PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {
@@ -444,6 +445,10 @@ function WorkspaceArea() {
             }
         });
     }, [currTab])
+
+    if (work) {
+        console.log('error');
+    }
 
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
