@@ -1,1 +1,1 @@
-web: cd Frontend && npm start
+web: bin/boot
