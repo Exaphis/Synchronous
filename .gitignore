@@ -140,6 +140,8 @@ cython_debug/
 .idea/
 .DS_Store
 
+docker/spacedeck/database.sqlite
+
 # ------ React .gitignore ------
 # # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
