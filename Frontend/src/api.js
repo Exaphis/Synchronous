@@ -13,7 +13,8 @@ export const PUBSUB_TOPIC = {
 export const APP_TYPE = {
     TEMPLATE: 0,
     PAD: 1,
-    FILE_SHARE: 2
+    FILE_SHARE: 2,
+    WHITEBOARD: 3
 };
 
 // possible type parameters of websocket messages sent by client
@@ -40,6 +41,30 @@ export const SERVER_MSG_TYPE = {
     NEW_APP: 'new_app',
     APP_LIST: 'app_list'
 };
+
+
+// https://stackoverflow.com/a/62916568
+export function appendQueryParameter(url, name, value) {
+    if (url.length === 0) {
+        return;
+    }
+
+    let rawURL = url;
+
+    // URL with `?` at the end and without query parameters
+    // leads to incorrect result.
+    if (rawURL.charAt(rawURL.length - 1) === "?") {
+        rawURL = rawURL.slice(0, rawURL.length - 1);
+    }
+
+    const parsedURL = new URL(rawURL);
+    let parameters = parsedURL.search;
+
+    parameters += (parameters.length === 0) ? "?" : "&";
+    parameters = `${parameters}${name}=${value}`;
+
+    return `${parsedURL.origin}${parsedURL.pathname}${parameters}`;
+}
 
 
 export function getUrlFromEndpoint(protocol, endpoint) {

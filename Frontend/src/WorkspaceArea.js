@@ -19,7 +19,10 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
-import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE} from "./api";
+import {
+    SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE,
+    appendQueryParameter
+} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -141,6 +144,17 @@ function PadAppContents(props) {
     );
 }
 
+function WhiteboardAppContents(props) {
+    const currUser = React.useContext(WorkspaceUserContext);
+    const nickname = encodeURIComponent(currUser.nickname);
+
+    let spaceUrl = appendQueryParameter(props.padUrl, 'nickname', nickname)
+
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src={spaceUrl}/>
+    );
+}
 
 function TemplateAppContents(props) {
     return (
@@ -302,6 +316,9 @@ function WorkspaceTab(props) {
         else if (type === APP_TYPE.TEMPLATE) {
             name = 'Template';
         }
+        else if (type === APP_TYPE.WHITEBOARD) {
+            name = 'Whiteboard'
+        }
         else {
             console.log('Unknown app type: ' + type);
             return;
@@ -330,6 +347,11 @@ function WorkspaceTab(props) {
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
+        }
+        else if (app.type === APP_TYPE.WHITEBOARD) {
+            const appData = app.data;
+            appContents = <WhiteboardAppContents pointerEventsEnabled={pointerEventsEnabled}
+                                                 padUrl={appData['iframe_url']} />;
         }
         else if (app.type === APP_TYPE.TEMPLATE) {
             appContents = <TemplateAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
@@ -396,6 +418,9 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
                         Add pad
+                    </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.WHITEBOARD)} >
+                        Add whiteboard
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
                         Add test

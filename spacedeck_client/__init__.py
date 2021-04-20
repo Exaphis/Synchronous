@@ -37,7 +37,19 @@ class Space:
 
 
 class SpacedeckClient:
-    def __init__(self, base_url='http://localhost:9666'):
+    _instance = None
+
+    @staticmethod
+    def __new__(cls):
+        """
+        Make SpacedeckClient into a singleton class
+        """
+        if cls._instance is None:
+            cls._instance = super(SpacedeckClient, cls).__new__(cls)
+
+        return cls._instance
+
+    def __init__(self, base_url='http://spacedeck:9666'):
         self.base_url = base_url
         self.session = requests.Session()
 
