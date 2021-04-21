@@ -112,7 +112,7 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
             elif hasattr(app, 'workspacefileshareapp'):
                 app_type = AppType.FILE_SHARE
                 data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
-            elif str(app).find('Offline'):
+            elif str(app).find('Offline') != -1:
                 app_type = AppType.OFFLINE_PAD
                 data = WorkspaceAppSerializer(app).data
             else:
