@@ -7,7 +7,8 @@ urlpatterns = [
     path('workspace/<uuid:unique_id>/password/', views.ChangePasswordView.as_view()),
     path('workspace/nickname/', views.nickname_to_unique_id),
     path('api-token-auth/', views.CustomAuthToken.as_view()),
-    path('send-mail/', views.send_message)
+    path('send-mail/', views.send_message),
+    path('heartbeat/', views.heartbeat)
 ]
 
 # POST api-token-auth with unique_id and password data to get token

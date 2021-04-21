@@ -704,8 +704,6 @@ async function updateMessages(messages, setMessages, channel, count, setCount) {
             }
 
             setCount(count + 1)
-
-
         }
 
         return async () => {
@@ -713,7 +711,5 @@ async function updateMessages(messages, setMessages, channel, count, setCount) {
         };
 
 }
-
-
 
 export default Workspace;

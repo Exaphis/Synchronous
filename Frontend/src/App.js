@@ -2,8 +2,9 @@ import * as React from 'react';
 import {
     Grid, Box, Avatar, Button, CssBaseline,
     TextField, FormControlLabel, Checkbox,
-    Typography, Container
+    Typography, Container, Menu, MenuItem, IconButton
 } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import 'react-pro-sidebar/dist/css/styles.css';
 import {BrowserRouter, Link, Route, Switch, useHistory} from "react-router-dom";
@@ -147,7 +148,7 @@ function CreateWorkspace() {
         setAllowReadOnly(event.target.checked);
     }
 
-    async function HandleCreateWorkspace(name, password, history, allowReadOnly) {
+    async function handleCreateWorkspace(name, password, history, allowReadOnly) {
         let resp = await fetchAPI('POST', 'workspace/',
             {
                 nickname: name,
@@ -173,7 +174,7 @@ function CreateWorkspace() {
     }
 
     function onCreateClick() {
-        HandleCreateWorkspace(
+        handleCreateWorkspace(
             nameRef.current.value,
             passwordRef.current.value,
             history,
@@ -261,14 +262,60 @@ function OpenWorkspace() {
     const history = useHistory();
     const [didOpenSucceed, setDidOpenSucceed] = React.useState(true);
     const [useId, setUseId] = React.useState(false);
-    const nameRef = React.useRef({'value': ''});
+    const [nameValue, setNameValue] = React.useState('');
     const passwordRef = React.useRef({'value': ''});
+    const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
+    const [previousWorkspaces, setPreviousWorkspaces] = React.useState(getPreviousWorkspaces());
 
     function onUseIdChange(event) {
         setUseId(event.target.checked);
     }
 
-    async function HandleOpen(name, password, history, useId) {
+    function getPreviousWorkspaces() {
+        const prevWorkspaces = localStorage.getItem('prevWorkspaces');
+        if (prevWorkspaces === null) {
+            return {};
+        }
+
+        const prevWorkspacesObj = JSON.parse(prevWorkspaces);
+
+        // all this to stop pycharm from showing an error later
+        // could just return the JSON.parse value
+        let out = {};
+        for (let workspaceName in prevWorkspacesObj) {
+            if (prevWorkspacesObj.hasOwnProperty(workspaceName)) {
+                out[workspaceName] = prevWorkspacesObj[workspaceName];
+            }
+        }
+        return out;
+    }
+
+    function addPreviousWorkspace(name, password, useId) {
+        const newPrev = Object.assign({}, previousWorkspaces);
+        newPrev[name] = {
+            name: name,
+            // password: password,
+            // don't store password in plaintext
+            useId: useId
+        };
+
+        setPreviousWorkspaces(newPrev);
+
+        localStorage.setItem('prevWorkspaces', JSON.stringify(newPrev));
+    }
+
+    function handlePrevWorkspaceDelete(event, name) {
+        event.stopPropagation();
+
+        if (name in previousWorkspaces) {
+            const newPrev = Object.assign({}, previousWorkspaces);
+            delete newPrev[name];
+            setPreviousWorkspaces(newPrev);
+            localStorage.setItem('prevWorkspaces', JSON.stringify(newPrev));
+        }
+    }
+
+    async function handleOpenWorkspace(name, password, history, useId) {
         let uniqueId = name;
         if (!useId) {
             let resp = await fetchAPI('GET', 'workspace/nickname/?nickname=' + name);
@@ -284,6 +331,7 @@ function OpenWorkspace() {
                 return false;
             }
 
+            addPreviousWorkspace(name, password, useId);
             await history.push('/workspace/' + resp.unique_id);
         }
         else {
@@ -297,7 +345,8 @@ function OpenWorkspace() {
                 return false;
             }
 
-            localStorage.setItem(uniqueId, resp.token)
+            localStorage.setItem(uniqueId, resp.token);
+            addPreviousWorkspace(name, password, useId);
             await history.push('/workspace/' + uniqueId);
         }
 
@@ -305,13 +354,57 @@ function OpenWorkspace() {
     }
 
     function onOpenClick() {
-        HandleOpen(
-            nameRef.current.value,
+        handleOpenWorkspace(
+            nameValue,
             passwordRef.current.value,
             history,
             useId
         ).then(success => setDidOpenSucceed(success));
     }
+
+    function handleMenuClick(event) {
+        setMenuAnchorEl(event.currentTarget);
+    }
+
+    function handleMenuClose() {
+        setMenuAnchorEl(null);
+    }
+
+    function handleMenuItemClick(workspaceObj) {
+        setNameValue(workspaceObj['name']);
+        setUseId(workspaceObj['useId']);
+        console.log(workspaceObj);
+        handleMenuClose();
+    }
+
+    const prevWorkspaceMenuBox = (
+        <Box mt={4} mb={4}>
+            <Button variant="contained" onClick={handleMenuClick}>
+                Open Previous Workspace
+            </Button>
+            <Menu
+                id="prev-workspace-menu"
+                anchorEl={menuAnchorEl}
+                keepMounted
+                open={Boolean(menuAnchorEl)}
+                onClose={handleMenuClose}
+            >
+                {
+                    Object.keys(previousWorkspaces).length === 0 ?
+                        <MenuItem onClick={handleMenuClose}>No previous workspaces</MenuItem> :
+                        Object.values(previousWorkspaces).map(workspaceObj =>
+                            <MenuItem key={workspaceObj['name']}
+                                      onClick={() => handleMenuItemClick(workspaceObj)}>
+                                {workspaceObj['name']}
+                                <IconButton onClick={event => handlePrevWorkspaceDelete(event, workspaceObj['name'])}>
+                                    <DeleteIcon />
+                                </IconButton>
+                            </MenuItem>
+                        )
+                }
+            </Menu>
+        </Box>
+    );
 
     return (
         <Container component="main" maxWidth="xs">
@@ -325,10 +418,11 @@ function OpenWorkspace() {
                 </Typography>
                 <Grid container >
                     <TextField
+                        value={nameValue}
+                        onChange={event => setNameValue(event.target.value)}
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        inputRef={nameRef}
                         label={useId ? "Workspace ID" : "Workspace Name"}
                         name="workspace"
                         autoComplete="workspace"
@@ -341,6 +435,7 @@ function OpenWorkspace() {
                         control={<Checkbox color="primary" />}
                         id="check"
                         label="Use ID?"
+                        checked={useId}
                         onChange={onUseIdChange}
                     />
                 </Grid>
@@ -354,8 +449,6 @@ function OpenWorkspace() {
                     type="password"
                     autoComplete="workspace"
                 />
-                <Box mt={2}>
-                </Box>
                 <Button
                     size="large"
                     type="submit"
@@ -367,6 +460,9 @@ function OpenWorkspace() {
                 >
                     Open
                 </Button>
+
+                {prevWorkspaceMenuBox}
+
                 <Grid container>
                     <Grid item xs>
                         <Link to="/create">

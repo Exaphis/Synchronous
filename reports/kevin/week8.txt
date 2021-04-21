@@ -1,0 +1,15 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 8 (Summary)
+4/13/21 3 hrs    abe333e Setup Spacedeck docker configuration, test embedding
+                         Spacedeck in iframe
+4/14/21 5 hrs    337ef08 Create Spacedeck API client
+4/17/21 2 hrs    N/A     Help Saksham with setting up Synchronous on Heroku
+
+Week 9 (Plan)
+4/19/21 2 hrs    Connect Spacedeck API to Frontend
+4/20/21 3 hrs    Allow workspace to be downloaded as ZIP containing data of all
+                 workspace apps
+4/21/21 3 hrs    Add ability to reupload workspace
+4/22/21 2 hrs    Polish UI for final presentation

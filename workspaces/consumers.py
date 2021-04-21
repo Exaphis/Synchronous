@@ -4,9 +4,10 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from rest_framework.authtoken.models import Token
 
-from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
+from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp,\
+    WorkspaceWhiteboardApp
 from .serializers import WorkspaceTabSerializer, WorkspacePadAppSerializer,\
-    WorkspaceFileShareAppSerializer, WorkspaceAppSerializer
+    WorkspaceFileShareAppSerializer, WorkspaceAppSerializer, WorkspaceWhiteboardAppSerializer
 from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
 from tusdfileshare.models import TusdFileShare, TusdFile
@@ -18,7 +19,8 @@ class AppType:
     TEMPLATE = 0
     PAD = 1
     FILE_SHARE = 2
-    OFFLINE_PAD = 3
+    WHITEBOARD = 3
+    OFFLINE_PAD = 4
 
 
 # Client and Server message types must be unique
@@ -108,13 +110,17 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
                 data = WorkspacePadAppSerializer(app.workspacepadapp).data
                 if self.is_read_only:
                     data['iframe_url'] = data['iframe_url_read_only']
-
             elif hasattr(app, 'workspacefileshareapp'):
                 app_type = AppType.FILE_SHARE
                 data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
             elif str(app).find('Offline') != -1:
                 app_type = AppType.OFFLINE_PAD
                 data = WorkspaceAppSerializer(app).data
+            elif hasattr(app, 'workspacewhiteboardapp'):
+                app_type = AppType.WHITEBOARD
+                data = WorkspaceWhiteboardAppSerializer(app.workspacewhiteboardapp).data
+                if self.is_read_only:
+                    data['iframe_url'] = data['iframe_url_read_only']
             else:
                 print("Couldn't find child class of app, defaulting to example app")
                 app_type = AppType.TEMPLATE
@@ -375,6 +381,8 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
                 )
             elif app_type == AppType.OFFLINE_PAD:
                 WorkspaceApp.objects.create(tab=tab, name=name)
+            elif app_type == AppType.WHITEBOARD:
+                WorkspaceWhiteboardApp.objects.create_whiteboard(tab=tab, name=name)
             else:
                 print('App type not found, defaulting to template')
                 WorkspaceApp.objects.create(tab=tab, name=name)

@@ -1,0 +1,18 @@
+Weekly Individual Report (Team 10: Synchronous)
+Name: Ryan Borzello
+
+Week 0 (Summary)
+4-10 2 Hours 451864ed5576d6c271a323ac88e7ea7255fb8820 Researched methods to handle offline editing
+4-11 2 Hours 7d84872a06d3c8751ac766d211f60226396d6e7d Added UI to create a new tab
+
+Week 1 (Plan)
+4-12 4 Hours Try to start implementing offline editing for text
+4-14 4 Hours Continue expanding offline editing
+4-17 4 Hours Start adding tabs
+
+
+
+Week 2 (Plan)
+4-26 6 Hours Start working on offline for drawing
+4-27 2 Hours Check offline editing works
+4-28 4 Hours Finish multiple tabs

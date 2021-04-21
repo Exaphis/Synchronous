@@ -43,3 +43,10 @@ services:
       DEFAULT_PAD_TEXT: "hello\n"
       SOFFICE: "/usr/bin/soffice"
       ADMIN_PASSWORD: "admin"
+  spacedeck:
+    build: spacedeck-open
+    ports:
+      - "9666:9666"
+    volumes:
+      - ./docker/spacedeck/storage:/app/storage
+      - ./docker/spacedeck/database.sqlite:/app/database.sqlite

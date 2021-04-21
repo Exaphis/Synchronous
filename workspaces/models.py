@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from tusdfileshare.models import TusdFileShare
 from . import etherpad_client
+from spacedeck_client import SpacedeckClient
 
 
 class WorkspaceManager(models.Manager):
@@ -136,6 +137,48 @@ class WorkspaceFileShareApp(WorkspaceApp):
         TusdFileShare,
         on_delete=models.CASCADE
     )
+
+
+class WorkspaceWhiteboardAppManager(models.Manager):
+    def create_whiteboard(self, tab, name):
+        """
+        Create an space in Spacedeck and return the model.
+        """
+        app = self.model(tab=tab, name=name)
+        print('Creating Spacedeck space...')
+
+        # SpacedeckClient is a singleton, so not much overhead
+        spacedeck = SpacedeckClient()
+        app.space_id = str(app.unique_id)
+        space = spacedeck.create_space(app.space_id)
+        app.edit_hash = space.edit_hash
+        print(space)
+        print('Space created.')
+        app.save()
+
+
+class WorkspaceWhiteboardApp(WorkspaceApp):
+    objects = WorkspaceWhiteboardAppManager()
+
+    space_id = models.CharField(max_length=255)
+    edit_hash = models.CharField(max_length=255)
+
+    def get_iframe_url(self):
+        return f'http://spacedeck.synchronous.localhost/spaces/{self.space_id}?spaceAuth={self.edit_hash}'
+
+    def get_iframe_url_read_only(self):
+        return f'http://spacedeck.synchronous.localhost/spaces/{self.space_id}'
+
+    def __str__(self):
+        return f'Whiteboard({self.space_id})'
+
+
+@receiver(pre_delete, sender=WorkspaceWhiteboardApp)
+def delete_etherpad(sender, instance, **kwargs):
+    spacedeck = SpacedeckClient()
+    print(f'Deleting space {instance}...')
+    spacedeck.delete_space(str(instance.unique_id))
+    print('Space deleted from spacedeck.')
 
 
 # catch post-save signal for user to generate its token

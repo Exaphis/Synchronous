@@ -10,6 +10,7 @@ import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
 
 import Uppy from '@uppy/core';
 import Tus from '@uppy/tus';
@@ -19,7 +20,10 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
-import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI} from "./api";
+import {
+    SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI,
+    appendQueryParameter
+} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -35,6 +39,9 @@ function AppTitleBar(props) {
             </span>
             <IconButton size="small" style={{ height: '100%'}} onClick={props.onMinimize}>
                 <MinimizeIcon fontSize="inherit" />
+            </IconButton>
+            <IconButton size="small" style={{ height: '100%'}} onClick={props.onMaximize}>
+                <ZoomOutMapIcon fontSize="inherit" />
             </IconButton>
             <IconButton size="small" style={{height: '100%'}} onClick={props.onClose}>
                 <CloseIcon fontSize="inherit"/>
@@ -142,11 +149,24 @@ function PadAppContents(props) {
     );
 }
 
+function WhiteboardAppContents(props) {
+    const currUser = React.useContext(WorkspaceUserContext);
+    const nickname = encodeURIComponent(currUser.nickname);
+
+    let spaceUrl = appendQueryParameter(props.padUrl, 'nickname', nickname)
+
+    return (
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src={spaceUrl}/>
+    );
+}
 
 function TemplateAppContents(props) {
     return (
-        <iframe style={{flexGrow: 1}}
-                title={props.uuid} src='https://google.com?igu=1' />
+        // <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        //         title={props.uuid} src='https://google.com?igu=1' />
+        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+                title={props.uuid} src='http://spacedeck.synchronous.localhost/spaces/bf4e63a6-ee2c-411b-aabe-d481ee558aa6?spaceAuth=762db34' />
     );
 }
 
@@ -172,11 +192,12 @@ function WorkspaceApp(props) {
             visibility: props.minimized ? 'hidden': 'visible',
             // change position so events can be fired on apps behind them
             position: props.minimized ? 'absolute': 'static',
-            left: props.minimized ? '-5000px' : 'auto',
+            top: props.minimized ? '-5000px' : 'auto',
             flexDirection: 'column'
         }}>
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
-                         onMinimize={props.onMinimize} title={props.name}/>
+                         onMinimize={props.onMinimize} onMaximize={props.onMaximize}
+                         title={props.name}/>
             {props.children}
 
         </div>
@@ -185,15 +206,12 @@ function WorkspaceApp(props) {
 
 
 function WorkspaceTab(props) {
+    // contains the info + states (i.e. position + size) of each app
     const [apps, setApps] = React.useState({});
     const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(true);
     const [topAppUuid, setTopAppUuid] = React.useState();
 
     const appAreaRef = React.useRef();
-    const appAreaPosRef = React.useRef({'left': 100, 'top': 100});
-
-    // contains the states (i.e. position + size) of each app
-    const appStatesRef = React.useRef({});
 
 
     // React.useEffect(()=> {
@@ -212,23 +230,22 @@ function WorkspaceTab(props) {
         });
     }
 
-    function getElementOffset(el) {
-        if (el === undefined) {
-            return {
-                left: 0,
-                top: 0
-            };
-        }
+    function setAppMaximized(appId, maximizedUpdater) {
+        setApps((prevApps) => {
+            let apps = Object.assign({}, prevApps);
+            apps[appId].maximized = maximizedUpdater(apps[appId].maximized);
 
-        // https://stackoverflow.com/a/28222246
-        const rect = el.getBoundingClientRect();
-        return {
-            left: rect.left + window.scrollX,
-            top: rect.top + window.scrollY
-        };
+            if (apps[appId].maximized) {
+                for (const diffAppId in prevApps) {
+                    if (diffAppId !== appId) {
+                        apps[diffAppId].minimized = true;
+                    }
+                }
+            }
+
+            return apps;
+        });
     }
-
-    appAreaPosRef.current = getElementOffset(appAreaRef.current);
 
     React.useEffect(() => {
         PubSub.publish(
@@ -250,52 +267,50 @@ function WorkspaceTab(props) {
             console.log('app list:');
             console.log(data['app_list']);
 
-            setApps(currApps => {
+            // must use function to avoid apps in the dependency array
+            setApps(oldApps => {
                 let newApps = {};
+
                 data['app_list'].forEach(serializedApp => {
                     const appId = serializedApp['unique_id'];
                     const appData = serializedApp['data'];
                     const appType = serializedApp['app_type'];
                     const appName = serializedApp['name'];
 
-                    if (appId in currApps) {
-                        newApps[appId] = currApps[appId];
-                    }
-                    else {
+                    if (appId in oldApps) {
+                        newApps[appId] = oldApps[appId];
+                    } else {
                         newApps[appId] = {
                             id: appId,
                             minimized: true,
+                            maximized: false,  // if true, app takes up as much space as possible
                             type: appType,
                             data: appData,
                             name: appName,
+                            x: 100,
+                            y: 100,
+                            width: 'auto',
+                            height: 'auto',
                             switchMinimized: () => {
+                                setPointerEventsEnabled(true);
                                 setAppMinimized(appId, minimized => !minimized);
                             },
                             onMinimize: () => {
+                                setPointerEventsEnabled(true);
                                 setAppMinimized(appId, () => true);
                             },
                             onClose: () => {
+                                setPointerEventsEnabled(true);
                                 PubSub.publish(
                                     PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
                                     {'type': CLIENT_MSG_TYPE.DELETE_APP, 'tabId': props.tabId, 'appId': appId}
                                 );
-                            }
+                            },
+                            switchMaximized: () => {
+                                setPointerEventsEnabled(true);
+                                setAppMaximized(appId, maximized => !maximized);
+                            },
                         }
-
-                        appStatesRef.current[appId] = {
-                            x: appAreaPosRef.current.left,
-                            y: appAreaPosRef.current.top,
-                            width: 'auto',
-                            height: 'auto'
-                        };
-                    }
-                });
-
-
-                // prune orphaned states
-                Object.keys(appStatesRef.current).forEach((appId) => {
-                    if (!(appId in newApps)) {
-                        delete appStatesRef.current[appId];
                     }
                 });
 
@@ -318,6 +333,9 @@ function WorkspaceTab(props) {
         else if (type === APP_TYPE.OFFLINE_PAD) {
             name = 'Offline Pad';
         }
+        else if (type === APP_TYPE.WHITEBOARD) {
+            name = 'Whiteboard';
+        }
         else {
             console.log('Unknown app type: ' + type);
             return;
@@ -334,8 +352,6 @@ function WorkspaceTab(props) {
         );
     }
 
-    // console.log(apps);
-
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
         if (app.type === APP_TYPE.PAD) {
@@ -349,44 +365,71 @@ function WorkspaceTab(props) {
         else if (app.type === APP_TYPE.OFFLINE_PAD) {
             appContents = <OfflinePadAppContents/>
         }
+        else if (app.type === APP_TYPE.WHITEBOARD) {
+            const appData = app.data;
+            appContents = <WhiteboardAppContents pointerEventsEnabled={pointerEventsEnabled}
+                                                 padUrl={appData['iframe_url']} />;
+        }
+        else if (app.type === APP_TYPE.TEMPLATE) {
+            appContents = <TemplateAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
+        }
         else {
             console.error('invalid app type: ' + app.type);
             console.error(typeof app.type);
-            appContents = <TemplateAppContents/>;
         }
 
         return (
             <Rnd
                 key={app.id}
-                bounds='.appArea'
+                bounds={`#appArea-${props.tabId}`}
+                size={{
+                    width: app.maximized ? appAreaRef.current.clientWidth : app.width,
+                    height: app.maximized ? appAreaRef.current.clientHeight : app.height,
+                }}
+                position={{
+                    x: app.maximized ? 0 : app.x,
+                    y: app.maximized ? 0 : app.y,
+                }}
                 onDragStart={() => {
                     setPointerEventsEnabled(false);
                     setTopAppUuid(app.id);
                 }}
                 onDragStop={(e, data) => {
                     setPointerEventsEnabled(true);
-                    const appState = appStatesRef.current[app.id];
-                    appState.x = data.x;
-                    appState.y = data.y;
+
+                    const newApps = Object.assign({}, apps);
+                    const newApp = newApps[app.id];
+                    newApp.x = data.x;
+                    newApp.y = data.y;
+                    setApps(newApps);
+                }}
+                onResizeStart={() => {
+                    setPointerEventsEnabled(false);
+                    setTopAppUuid(app.id);
                 }}
                 onResizeStop={(e, direction, ref, delta, position) => {
-                    const appState = appStatesRef.current[app.id];
-                    appState.width = ref.style.width;
-                    appState.height = ref.style.height;
+                    setPointerEventsEnabled(true);
+
+                    const newApps = Object.assign({}, apps);
+                    const newApp = newApps[app.id];
+                    newApp.width = ref.style.width;
+                    newApp.height = ref.style.height;
                     // position can also change in resizing when moving the top left corner
-                    appState.x = position.x;
-                    appState.y = position.y;
+                    newApp.x = position.x;
+                    newApp.y = position.y;
+                    setApps(newApps);
                 }}
-                default={appStatesRef.current[app.id]}
                 dragHandleClassName="handle"
                 minHeight='200px'  // how to not use magic constants?
                 minWidth='50px'
                 style={{     // change z index to prioritize recently selected app
+                    // TODO: set topAppUuid when anything is clicked, not just drag
                     zIndex: topAppUuid === app.id ? '1' : 'auto'
                 }}
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
-                              onMinimize={app.onMinimize} uuid={app.id} name={app.name}>
+                              onMinimize={app.onMinimize} onMaximize={app.switchMaximized}
+                              uuid={app.id} name={app.name}>
                     {appContents}
                 </WorkspaceApp>
             </Rnd>
@@ -412,6 +455,9 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
                         Add pad
+                    </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.WHITEBOARD)} >
+                        Add whiteboard
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
                         Add test
@@ -442,7 +488,7 @@ function WorkspaceTab(props) {
             </rps.ProSidebar>
 
             <div style={{flexGrow: 1}}
-                 className="appArea"
+                 id={`appArea-${props.tabId}`}
                  ref={appAreaRef}>
                 { appComponents }
             </div>

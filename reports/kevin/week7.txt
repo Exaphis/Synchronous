@@ -1,0 +1,13 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 7 (Summary)
+4/05/21 2 hrs    c7df120 Delete text pads when workspace is deleted
+4/05/21 3 hrs    b54dd7b Fix Etherpad selection deletion bug
+4/07/21 3 hrs    N/A     Researched Spacedeck and Excalidraw and how to make them collaborative
+                         and interact with them programmatically
+4/11/21 2 hrs    54f548e Add previous workspace list
+
+Week 8 (Plan)
+4/13/21 5 hrs    Test embedding Spacedeck
+4/15/21 5 hrs    Add ability to reupload workspace

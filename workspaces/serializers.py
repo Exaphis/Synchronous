@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.utils.translation import gettext_lazy as _
 
-from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
+from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp,\
+    WorkspaceWhiteboardApp
 
 
 class WorkspaceSerializer(serializers.ModelSerializer):
@@ -65,3 +66,12 @@ class WorkspaceFileShareAppSerializer(WorkspaceAppSerializer, serializers.ModelS
     class Meta:
         model = WorkspaceFileShareApp
         fields = WorkspaceAppSerializer.Meta.fields
+
+
+class WorkspaceWhiteboardAppSerializer(WorkspaceAppSerializer, serializers.ModelSerializer):
+    iframe_url = serializers.ReadOnlyField(source='get_iframe_url')
+    iframe_url_read_only = serializers.ReadOnlyField(source='get_iframe_url_read_only')
+
+    class Meta:
+        model = WorkspaceWhiteboardApp
+        fields = WorkspaceAppSerializer.Meta.fields + ['iframe_url', 'iframe_url_read_only']
