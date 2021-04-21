@@ -5,14 +5,14 @@ import {useIdleTimer} from "react-idle-timer";
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
-    IconButton, Menu, Table, TableBody, TableCell, TableHead, TableRow,
-    TextField, Toolbar, Typography
+    IconButton, Menu, TextField, Toolbar, Typography
 } from "@material-ui/core";
 import s from "./Images/s.png";
 import clsx from "clsx";
 import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
 import HelpIcon from '@material-ui/icons/Help';
+import PeopleIcon from '@material-ui/icons/People';
 import { useHistory } from "react-router-dom";
 
 
@@ -22,10 +22,10 @@ import {
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
-import { UserNicknameChangeDialog } from "./components/UserNicknameChangeDialog";
 
 import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage } from 'react-chat-widget';
+import {UserListDialog} from "./components/UserListDialog";
 import './CSS/styles.css';
 
 const STREAM_API = 'n9utf8kxctuk'
@@ -92,6 +92,8 @@ function WorkspaceInfoBar(props) {
     const userList = props.userList;
     const userIdRef = props.userIdRef;
 
+    const [isUserListDialogOpen, setUserListDialogOpen] = React.useState(false);
+
     const history = useHistory();
 
     const handleHelp = () => {
@@ -110,20 +112,16 @@ function WorkspaceInfoBar(props) {
     };
 
     if (workspace === undefined || workspace === null || userIdRef === null || userList === {}) {
-        return <div>
-
-        </div>
+        return <div/>
     }
-    let username;
 
+    let username;
     if (userList[userIdRef.current] !== null) {
         username = userList[userIdRef.current];
     }
 
     if (username === undefined) {
-        return <div>
-
-        </div>
+        return <div/>
     }
 
     return (
@@ -140,8 +138,6 @@ function WorkspaceInfoBar(props) {
                                                           durationFromNow/> }
                 </Typography>
 
-
-                <div>
                 <Button color="secondary" variant="contained" edge="end"
                         onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
                     Change nickname
@@ -152,12 +148,25 @@ function WorkspaceInfoBar(props) {
                     Change password
                     </Button>
                 )}
+
+                <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
+                    <PeopleIcon />
+                </IconButton>
+
+                <UserListDialog isOpen={isUserListDialogOpen}
+                                onRequestClose={() => setUserListDialogOpen(false)}
+                                userList={userList}
+                                currUserId={userIdRef.current}
+                />
+
                 <IconButton color="inherit" edge="end" onClick={handleMenu}>
                     <EmailIcon />
                 </IconButton>
+
                 <IconButton color="secondary" edge="end" onClick={handleHelp}>
                     <HelpIcon />
                 </IconButton>
+
                 <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}
@@ -217,7 +226,6 @@ function WorkspaceInfoBar(props) {
                         </div>
                     </Container>
                 </Menu>
-                </div>
 
             </Toolbar>
         </AppBar>
@@ -232,7 +240,6 @@ function Workspace() {
     const [userList, setUserList] = React.useState({});
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
-    const [isNameDialogOpen, setNameDialogOpen] = React.useState(false);
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -408,25 +415,6 @@ function Workspace() {
         }
     }
 
-    function NicknameCell(props) {
-        let user = props.user;
-        if (user.id === userIdRef.current) {
-            return <TableCell>
-                <Typography fontWeight={900}>{user.nickname}</Typography>
-                <Button variant="outlined" color="primary"
-                        onClick={() => setNameDialogOpen(true)}>
-                    Change name
-                </Button>
-            </TableCell>
-        }
-        else {
-            return <TableCell>
-                {user.nickname}
-            </TableCell>
-        }
-    }
-
-
     if (workspace !== null && workspace.error) {
         return (
             <Container component="main" maxWidth="xs">
@@ -462,27 +450,7 @@ function Workspace() {
         )
     }
 
-    let workspace_details;
-    if (workspace === null) {
-        workspace_details = <p>Null</p>
-    } else {
-        let view_status = <p>Workspace editable</p>
-        if (workspace.anonymous_readable && tokenRef.current === null) {
-            view_status = <p>Password empty, view only</p>
-        }
-
-        workspace_details = <div>
-            <p>Workspace unique_id: {workspace.unique_id}</p>
-            <p>Workspace nickname: {workspace.nickname}</p>
-            <p>Created at: {workspace.created_at}</p>
-            <p>Password protected: {workspace.is_password_protected.toString()}</p>
-            <p>Allow view only: {workspace.anonymous_readable.toString()}</p>
-            { view_status }
-        </div>
-    }
-
     return (
-        <div>
         <Container component="main" maxWidth="xl">
             <div style={{height: '64px' /* TODO: don't do this */ }}>
                 <WorkspaceInfoBar
@@ -495,42 +463,12 @@ function Workspace() {
                 />
             </div>
 
-            <UserNicknameChangeDialog
-                isOpen={isNameDialogOpen}
-                onRequestClose={() => setNameDialogOpen(false)}
-            />
-
             <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
                 <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
                     <WorkspaceArea/>
                 </WorkspaceUserContext.Provider>
             </WorkspaceUniqueIdContext.Provider>
-
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Nickname</TableCell>
-                        <TableCell>Activity</TableCell>
-                        <TableCell>Color</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    { Object.values(userList).map(user => (
-                        <TableRow key={user.id}>
-                            <NicknameCell user={user}/>
-                            <TableCell> {user.activity_text} </TableCell>
-                            <TableCell>
-                                <section style={{height: "50px", 'backgroundColor': user.color}} />
-                            </TableCell>
-                        </TableRow>
-                    )) }
-                </TableBody>
-            </Table>
-
-            { workspace_details }
         </Container>
-
-        </div>
     )
 }
 
