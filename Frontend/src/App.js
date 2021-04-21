@@ -10,6 +10,7 @@ import 'react-pro-sidebar/dist/css/styles.css';
 import {BrowserRouter, Link, Route, Switch, useHistory} from "react-router-dom";
 import LogRocket from 'logrocket';
 import setupLogRocketReact from 'logrocket-react';
+import {Helmet} from 'react-helmet';
 import './CSS/styles.css';
 
 import logo from './Images/logo.png';
@@ -60,6 +61,9 @@ function SignIn() {
 
     return (
         <Container component="main" maxWidth="xs">
+            <Helmet>
+                <title>Synchronous</title>
+            </Helmet>
             <CssBaseline />
             <div className={classes.paper}>
                 <img alt="Synchronous logo" src={logo} width="300" height="300"/>
