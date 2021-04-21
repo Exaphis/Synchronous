@@ -178,7 +178,7 @@ def delete_etherpad(sender, instance, **kwargs):
     spacedeck = SpacedeckClient()
     print(f'Deleting space {instance}...')
     spacedeck.delete_space(str(instance.unique_id))
-    print('Space deleted from spacedeck.')
+    print('Space deleted from Spacedeck.')
 
 
 # catch post-save signal for user to generate its token

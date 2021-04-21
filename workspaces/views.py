@@ -73,6 +73,13 @@ def nickname_to_unique_id(request):
     return Response({'unique_id': workspace.unique_id})
 
 
+@api_view(['GET'])
+def generate_workspace_zip(request, unique_id):
+    workspace = get_object_or_404(Workspace, unique_id=unique_id)
+    # TODO: generate zip for workspace
+    pass
+
+
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         data = request.data

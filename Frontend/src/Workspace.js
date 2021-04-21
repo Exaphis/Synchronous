@@ -5,7 +5,6 @@ import {useIdleTimer} from "react-idle-timer";
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
-    Dialog, DialogActions, DialogContent, DialogTitle,
     IconButton, Menu, Table, TableBody, TableCell, TableHead, TableRow,
     TextField, Toolbar, Typography
 } from "@material-ui/core";
@@ -23,6 +22,7 @@ import {
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
+import { UserNicknameChangeDialog } from "./components/UserNicknameChangeDialog";
 
 import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage } from 'react-chat-widget';
@@ -232,17 +232,7 @@ function Workspace() {
     const [userList, setUserList] = React.useState({});
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
-    // const [auth, setAuth] = React.useState(true);
-
-    // for changing nickname in NicknameCell
     const [isNameDialogOpen, setNameDialogOpen] = React.useState(false);
-    const [nameDialogError, setNameDialogError] = React.useState('');
-
-    const nicknameFieldValue = React.useRef('');
-
-    // const handleChange = (event) => {
-    //     setAuth(event.target.checked);
-    // };
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -370,11 +360,6 @@ function Workspace() {
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(SERVER_MSG_TYPE.NICKNAME_CHANGE, (msg, data) => {
-            onUserNicknameChangeResponse(data);
-        });
-        pubSubTokens.push(token);
-
         token = PubSub.subscribe(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, (msg, data) => {
             if (userListWs !== null) {
                 userListWs.send(JSON.stringify(data));
@@ -423,68 +408,13 @@ function Workspace() {
         }
     }
 
-    // -------- User Nickname Change Dialog
-
-    function openUserNicknameChangeDialog() {
-        setNameDialogOpen(true);
-        setNameDialogError('');
-    }
-
-    function sendUserNicknameChange() {
-        userListWs.send(JSON.stringify(
-            {
-                'type': CLIENT_MSG_TYPE.NICKNAME_CHANGE,
-                'nickname': nicknameFieldValue.current
-            }
-        ));
-    }
-
-    function onUserNicknameChangeResponse(resp) {
-        if (resp.success) {
-            setNameDialogOpen(false);
-        }
-        else {
-            setNameDialogError(resp.details);
-        }
-    }
-
-    const nameDialog = <Dialog key="dialog" open={isNameDialogOpen} onClose={() => setNameDialogOpen(false)}>
-        <DialogTitle id="form-dialog-title">Change name</DialogTitle>
-
-        <DialogContent>
-            <TextField
-                error={nameDialogError !== ''}
-                helperText={nameDialogError}
-                autoFocus
-                margin="dense"
-                id="name"
-                label="New Nickname"
-                type="text"
-                fullWidth
-                onChange={(ev) => (nicknameFieldValue.current = ev.target.value)}
-            />
-        </DialogContent>
-
-        <DialogActions>
-            <Button onClick={() => setNameDialogOpen(false)} color="primary">
-                Cancel
-            </Button>
-
-            <Button onClick={sendUserNicknameChange} color="primary">
-                Change name
-            </Button>
-        </DialogActions>
-    </Dialog>
-
-    // --------
-
     function NicknameCell(props) {
         let user = props.user;
         if (user.id === userIdRef.current) {
             return <TableCell>
                 <Typography fontWeight={900}>{user.nickname}</Typography>
-
-                <Button variant="outlined" color="primary" onClick={openUserNicknameChangeDialog}>
+                <Button variant="outlined" color="primary"
+                        onClick={() => setNameDialogOpen(true)}>
                     Change name
                 </Button>
             </TableCell>
@@ -551,7 +481,6 @@ function Workspace() {
         </div>
     }
 
-
     return (
         <div>
         <Container component="main" maxWidth="xl">
@@ -566,7 +495,10 @@ function Workspace() {
                 />
             </div>
 
-            { nameDialog }
+            <UserNicknameChangeDialog
+                isOpen={isNameDialogOpen}
+                onRequestClose={() => setNameDialogOpen(false)}
+            />
 
             <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
                 <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
@@ -574,8 +506,6 @@ function Workspace() {
                 </WorkspaceUserContext.Provider>
             </WorkspaceUniqueIdContext.Provider>
 
-            {/*<h1>{JSON.stringify(workspace)}</h1>*/}
-            {/*<p>{JSON.stringify(userList)}</p>*/}
             <Table>
                 <TableHead>
                     <TableRow>
