@@ -528,8 +528,9 @@ function WorkspaceArea() {
     }
 
     return (
-        <Container maxWidth="xl" disableGutters={true}>
-            <AppBar position="static">
+        <Container component="main" maxWidth="xl" disableGutters={true}
+                   style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
+            <AppBar position={"static"}>
                 <Toolbar>
                     <Tabs value={currTab} edge="start" onChange={handleTabChange}  variant="scrollable" scrollButtons="auto">
                         {
@@ -553,7 +554,7 @@ function WorkspaceArea() {
                     </IconButton>
                 </Toolbar>
             </AppBar>
-            <div style={{ height: "100vh" }}>
+            <div style={{flexGrow: 1}}>
                 { tabComponents }
             </div>
         </Container>

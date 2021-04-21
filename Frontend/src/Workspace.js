@@ -125,7 +125,7 @@ function WorkspaceInfoBar(props) {
     }
 
     return (
-        <AppBar position="absolute" className={clsx(classes.appBar)}>
+        <AppBar position={"static"} className={clsx(classes.appBar)}>
             <Chat workspace={workspace} username={username}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
@@ -451,17 +451,16 @@ function Workspace() {
     }
 
     return (
-        <Container component="main" maxWidth="xl">
-            <div style={{height: '64px' /* TODO: don't do this */ }}>
-                <WorkspaceInfoBar
-                    workspace={workspace}
-                    isLoggedIn={tokenRef.current !== null}
-                    onWorkspaceNicknameUpdate={updateNickname}
-                    onPasswordChange={changePassword}
-                    userList={userList}
-                    userIdRef={userIdRef}
-                />
-            </div>
+        <Container component="main" maxWidth="xl" disableGutters={true}
+                   style={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
+            <WorkspaceInfoBar
+                workspace={workspace}
+                isLoggedIn={tokenRef.current !== null}
+                onWorkspaceNicknameUpdate={updateNickname}
+                onPasswordChange={changePassword}
+                userList={userList}
+                userIdRef={userIdRef}
+            />
 
             <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
                 <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
