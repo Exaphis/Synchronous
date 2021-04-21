@@ -19,7 +19,7 @@ import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
-import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE} from "./api";
+import {SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI} from "./api";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -39,6 +39,7 @@ function AppTitleBar(props) {
             <IconButton size="small" style={{height: '100%'}} onClick={props.onClose}>
                 <CloseIcon fontSize="inherit"/>
             </IconButton>
+
         </Grid>
     );
 }
@@ -144,14 +145,14 @@ function PadAppContents(props) {
 
 function TemplateAppContents(props) {
     return (
-        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        <iframe style={{flexGrow: 1}}
                 title={props.uuid} src='https://google.com?igu=1' />
     );
 }
 
 function OfflinePadAppContents(props) {
     return (
-        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        <iframe style={{flexGrow: 1}}
                 title={props.uuid} src='http://justnotepad.com/' />
     );
 }
@@ -177,6 +178,7 @@ function WorkspaceApp(props) {
             <AppTitleBar minimized={props.minimized} onClose={props.onClose}
                          onMinimize={props.onMinimize} title={props.name}/>
             {props.children}
+
         </div>
     )
 }
@@ -194,10 +196,10 @@ function WorkspaceTab(props) {
     const appStatesRef = React.useRef({});
 
 
-    React.useEffect(()=> {
-        console.log(APP_TYPE.OFFLINE_PAD)
-        addApp(APP_TYPE.OFFLINE_PAD)
-    }, [])
+    // React.useEffect(()=> {
+    //     console.log(APP_TYPE.OFFLINE_PAD)
+    //     addApp(APP_TYPE.OFFLINE_PAD)
+    // }, [])
 
     function setAppMinimized(appId, minimizedUpdater) {
         setApps((prevApps) => {
@@ -336,7 +338,6 @@ function WorkspaceTab(props) {
 
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
-        console.log('type ' + app.type)
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
             appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
@@ -346,7 +347,6 @@ function WorkspaceTab(props) {
             appContents = <FileUploadAppContents/>;
         }
         else if (app.type === APP_TYPE.OFFLINE_PAD) {
-            console.log('here')
             appContents = <OfflinePadAppContents/>
         }
         else {
@@ -416,6 +416,9 @@ function WorkspaceTab(props) {
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
                         Add test
                     </rps.MenuItem>
+                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.OFFLINE_PAD)} >
+                        Add offline
+                    </rps.MenuItem>
 
                     {
                         Object.values(apps).map((app) => (
@@ -452,6 +455,7 @@ function WorkspaceTab(props) {
 function WorkspaceArea() {
     const [tabs, setTabs] = React.useState([]);
     const [currTab, setCurrTab] = React.useState(-1);
+    const [offline, setOffline] = React.useState(false);
 
     React.useEffect(() => {
         PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {
@@ -466,9 +470,21 @@ function WorkspaceArea() {
         });
     }, [currTab])
 
+    const status = async () => {
+        let response = await fetchAPI(
+            'GET', 'heartbeat/');
+        console.log('here')
+        console.log(response)
+    };
+
+    status()
+
+
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
     };
+
+
 
     function closeTab(event, uniqueId) {
         // https://stackoverflow.com/a/63277341
