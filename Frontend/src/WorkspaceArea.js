@@ -363,6 +363,7 @@ function WorkspaceTab(props) {
                 key={app.id}
                 bounds={`#appArea-${props.tabId}`}
                 size={{
+                    // apparearef should now contain the reference to the apparea element
                     width: app.maximized ? appAreaRef.current.clientWidth : app.width,
                     height: app.maximized ? appAreaRef.current.clientHeight : app.height,
                 }}
@@ -476,7 +477,7 @@ function WorkspaceTab(props) {
 
 function WorkspaceArea() {
     const [tabs, setTabs] = React.useState([]);
-    const [currTab, setCurrTab] = React.useState(-1);
+    const [currTab, setCurrTab] = React.useState(0);
 
     React.useEffect(() => {
         PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {

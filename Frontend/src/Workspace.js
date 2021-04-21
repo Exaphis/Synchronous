@@ -27,6 +27,8 @@ import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage } from 'react-chat-widget';
 import {UserListDialog} from "./components/UserListDialog";
 import './CSS/styles.css';
+import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChangeDialog";
+import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -93,6 +95,8 @@ function WorkspaceInfoBar(props) {
     const userIdRef = props.userIdRef;
 
     const [isUserListDialogOpen, setUserListDialogOpen] = React.useState(false);
+    const [isNicknameDialogOpen, setNicknameDialogOpen] = React.useState(false);
+    const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
 
     const history = useHistory();
 
@@ -124,6 +128,8 @@ function WorkspaceInfoBar(props) {
         return <div/>
     }
 
+    const canChangePassword = workspace.is_password_protected && isLoggedIn;
+
     return (
         <AppBar position={"static"} className={clsx(classes.appBar)}>
             <Chat workspace={workspace} username={username}/>
@@ -139,14 +145,24 @@ function WorkspaceInfoBar(props) {
                 </Typography>
 
                 <Button color="secondary" variant="contained" edge="end"
-                        onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
+                        onClick={() => setNicknameDialogOpen(true)}>
                     Change nickname
                 </Button>
-                {workspace.is_password_protected && isLoggedIn && (
-                    <Button color="secondary" variant="contained" edge="end"
-                            onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
-                    Change password
-                    </Button>
+
+                <WorkspaceNicknameChangeDialog isOpen={isNicknameDialogOpen}
+                                               onRequestClose={() => setNicknameDialogOpen(false)}
+                                               onNicknameUpdateAsync={updateNickname} />
+
+                {canChangePassword && (
+                    <div>
+                        <Button color="secondary" variant="contained" edge="end"
+                                onClick={() => setPasswordDialogOpen(true)}>
+                            Change password
+                        </Button>
+                        <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
+                                                       onRequestClose={() => setPasswordDialogOpen(false)}
+                                                       onPasswordChangeAsync={changePassword} />
+                    </div>
                 )}
 
                 <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
@@ -387,9 +403,10 @@ function Workspace() {
             tokenRef.current
         );
         if (resp === null) {
-            alert('Nickname failed to set, no response.');
+            throw new Error('Nickname failed to set, no response.');
         } else if ('error' in resp) {
-            alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
+            console.error(resp.details);
+            throw new Error('Nickname failed to set.');
         } else {
             await getWorkspace();
         }
@@ -403,9 +420,10 @@ function Workspace() {
             tokenRef.current
         );
         if (resp === null) {
-            alert('Password failed to set, no response.');
+            throw new Error('Password failed to set, no response.');
         } else if ('error' in resp) {
-            alert('Password failed to set, error: ' + JSON.stringify(resp));
+            console.error(resp.details);
+            throw new Error('Password failed to set.');
         } else {
             if (new_password === '') {
                 tokenRef.current = null;
@@ -502,7 +520,6 @@ function Chat(props) {
     if (channel !== null && channel.current !== null && count !== null) {
         updateMessages(messages, setMessages, channel, count, setCount);
     }
-
 
     const setUser = React.useCallback(async () => {
         await client.setUser(
