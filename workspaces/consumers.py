@@ -20,6 +20,7 @@ class AppType:
     PAD = 1
     FILE_SHARE = 2
     WHITEBOARD = 3
+    OFFLINE_PAD = 4
 
 
 # Client and Server message types must be unique
@@ -102,6 +103,7 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
         tab = WorkspaceTab.objects.get(unique_id=tab_unique_id)
         apps = WorkspaceApp.objects.filter(tab=tab)
         app_list = []
+
         for app in apps:
             if hasattr(app, 'workspacepadapp'):
                 app_type = AppType.PAD
@@ -111,6 +113,9 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
             elif hasattr(app, 'workspacefileshareapp'):
                 app_type = AppType.FILE_SHARE
                 data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
+            elif str(app).find('Offline') != -1:
+                app_type = AppType.OFFLINE_PAD
+                data = WorkspaceAppSerializer(app).data
             elif hasattr(app, 'workspacewhiteboardapp'):
                 app_type = AppType.WHITEBOARD
                 data = WorkspaceWhiteboardAppSerializer(app.workspacewhiteboardapp).data
@@ -374,6 +379,8 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
                     name=name,
                     tusd_file_share=tusd_file_share
                 )
+            elif app_type == AppType.OFFLINE_PAD:
+                WorkspaceApp.objects.create(tab=tab, name=name)
             elif app_type == AppType.WHITEBOARD:
                 WorkspaceWhiteboardApp.objects.create_whiteboard(tab=tab, name=name)
             else:
