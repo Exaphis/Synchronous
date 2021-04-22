@@ -1,6 +1,6 @@
 import {
     AppBar, Container, IconButton, Tab, Tabs,
-    Typography, Toolbar, Button, Box, Paper, Grid
+    Typography, Toolbar, Button, Box, Paper, Grid, Snackbar
 } from "@material-ui/core";
 import * as React from "react";
 import {Rnd} from "react-rnd";
@@ -11,6 +11,8 @@ import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
+import Alert from '@material-ui/lab/Alert';
+
 
 import Uppy from '@uppy/core';
 import Tus from '@uppy/tus';
@@ -19,9 +21,10 @@ import {useUppy} from '@uppy/react';
 import '@uppy/core/dist/style.css';
 import '@uppy/dashboard/dist/style.css';
 
+
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
 import {
-    SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE,
+    SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI,
     appendQueryParameter
 } from "./api";
 
@@ -46,6 +49,7 @@ function AppTitleBar(props) {
             <IconButton size="small" style={{height: '100%'}} onClick={props.onClose}>
                 <CloseIcon fontSize="inherit"/>
             </IconButton>
+
         </Grid>
     );
 }
@@ -169,6 +173,13 @@ function TemplateAppContents(props) {
     );
 }
 
+function OfflinePadAppContents(props) {
+    return (
+        <iframe style={{flexGrow: 1}}
+                title={props.uuid} src='http://justnotepad.com/' />
+    );
+}
+
 
 function WorkspaceApp(props) {
     return (
@@ -191,6 +202,7 @@ function WorkspaceApp(props) {
                          onMinimize={props.onMinimize} onMaximize={props.onMaximize}
                          title={props.name}/>
             {props.children}
+
         </div>
     )
 }
@@ -201,8 +213,59 @@ function WorkspaceTab(props) {
     const [apps, setApps] = React.useState({});
     const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(true);
     const [topAppUuid, setTopAppUuid] = React.useState();
-
+    const [open, setOpen] = React.useState(false);
+    const [open2, setOpen2] = React.useState(false);
     const appAreaRef = React.useRef();
+
+    const status = async () => {
+        let response = await fetchAPI(
+            'GET', 'heartbeat/');
+        if (response.details !== 200) {
+            if (localStorage.getItem('offline') === 'false') {
+                setOpen(true);
+                setOpen2(false);
+                localStorage.setItem('offline', 'true');
+                for (let app in apps) {
+                    if (apps[app].name === 'Offline Pad') {
+                        apps[app].minimized = false;
+                        break;
+                    }
+                }
+            }
+            // if (!hasOffline) {
+            //     console.log('add')
+            //     addApp(APP_TYPE.OFFLINE_PAD);
+            // }
+        } else if (localStorage.getItem('offline') === 'true') {
+            localStorage.setItem('offline', 'false');
+            console.log('regain')
+            setOpen2(true);
+            setOpen(false);
+        }
+    };
+
+
+
+    let date = new Date();
+    if (date.getSeconds() % 3 === 0) {
+        status();
+    }
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+    const handleClose2 = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen2(false);
+    };
 
     function setAppMinimized(appId, minimizedUpdater) {
         setApps((prevApps) => {
@@ -304,6 +367,27 @@ function WorkspaceTab(props) {
         });
     }, [props.tabId]);
 
+    let hasOffline;
+    for (let app in apps) {
+        if (apps[app].name === 'Offline Pad') {
+            if (!hasOffline) {
+                hasOffline = true;
+            } else {
+                PubSub.publish(
+                    PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+                    {'type': CLIENT_MSG_TYPE.DELETE_APP, 'tabId': props.tabId, 'appId': app}
+                );
+            }
+        }
+    }
+
+
+    React.useEffect(() => {
+        localStorage.setItem('offline', 'false');
+        addApp(APP_TYPE.OFFLINE_PAD);
+        // eslint-disable-next-line
+    }, [])
+
     function addApp(type) {
         let name;
         if (type === APP_TYPE.PAD) {
@@ -315,8 +399,17 @@ function WorkspaceTab(props) {
         else if (type === APP_TYPE.TEMPLATE) {
             name = 'Template';
         }
+        else if (type === APP_TYPE.OFFLINE_PAD) {
+            let app;
+            for (app in apps) {
+                if (apps[app].name === 'Offline Pad') {
+                    return;
+                }
+            }
+            name = 'Offline Pad';
+        }
         else if (type === APP_TYPE.WHITEBOARD) {
-            name = 'Whiteboard'
+            name = 'Whiteboard';
         }
         else {
             console.log('Unknown app type: ' + type);
@@ -336,7 +429,6 @@ function WorkspaceTab(props) {
 
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
-
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
             appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
@@ -344,6 +436,9 @@ function WorkspaceTab(props) {
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
+        }
+        else if (app.type === APP_TYPE.OFFLINE_PAD) {
+            appContents = <OfflinePadAppContents/>
         }
         else if (app.type === APP_TYPE.WHITEBOARD) {
             const appData = app.data;
@@ -357,6 +452,7 @@ function WorkspaceTab(props) {
             console.error('invalid app type: ' + app.type);
             console.error(typeof app.type);
         }
+
 
         return (
             <Rnd
@@ -417,6 +513,7 @@ function WorkspaceTab(props) {
         );
     });
 
+
     return (
         <div style={{
             backgroundColor: 'lightGray',
@@ -429,6 +526,23 @@ function WorkspaceTab(props) {
             position: props.hidden ? 'absolute': 'static',
             left: props.hidden ? '-5000px' : 'auto'
         }}>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="error">
+                    You have lost connection
+                </Alert>
+            </Snackbar>
+            <Snackbar open={open} autoHideDuration={7000} onClose={handleClose}
+                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity="info">
+                    Offline pad opened for continued support
+                </Alert>
+            </Snackbar>
+            <Snackbar open={open2} autoHideDuration={6000} onClose={handleClose2}
+                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose2} severity="success">
+                    You have regained connection
+                </Alert>
+            </Snackbar>
             <rps.ProSidebar>
                 <rps.Menu>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.FILE_SHARE)} >
@@ -443,6 +557,7 @@ function WorkspaceTab(props) {
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
                         Add test
                     </rps.MenuItem>
+
                     {
                         Object.values(apps).map((app) => (
                             app.minimized &&
@@ -492,9 +607,12 @@ function WorkspaceArea() {
         });
     }, [currTab])
 
+
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
     };
+
+
 
     function closeTab(event, uniqueId) {
         // https://stackoverflow.com/a/63277341
@@ -561,5 +679,6 @@ function WorkspaceArea() {
         </Container>
     )
 }
+
 
 export { WorkspaceArea };

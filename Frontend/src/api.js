@@ -14,7 +14,8 @@ export const APP_TYPE = {
     TEMPLATE: 0,
     PAD: 1,
     FILE_SHARE: 2,
-    WHITEBOARD: 3
+    WHITEBOARD: 3,
+    OFFLINE_PAD: 4
 };
 
 // possible type parameters of websocket messages sent by client
