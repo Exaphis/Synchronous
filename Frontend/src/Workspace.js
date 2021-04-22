@@ -13,6 +13,7 @@ import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
 import HelpIcon from '@material-ui/icons/Help';
 import PeopleIcon from '@material-ui/icons/People';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import { useHistory } from "react-router-dom";
 
 
@@ -115,6 +116,13 @@ function WorkspaceInfoBar(props) {
         setValidEmail(true);
     };
 
+    const exportWorkspace = () => {
+        const link = document.createElement("a");
+        link.href = getUrlFromEndpoint('http', `workspace/${workspace.unique_id}/zip/`);
+        link.target = "_blank"
+        link.click();
+    };
+
     if (workspace === undefined || workspace === null || userIdRef === null || userList === {}) {
         return <div/>
     }
@@ -135,9 +143,7 @@ function WorkspaceInfoBar(props) {
             <Chat workspace={workspace} username={username}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
-                    {(workspace.nickname !== null ?
-                        "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
-                        "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1))}
+                    {workspace.nickname !== null ? workspace.nickname : workspace.unique_id}
                 </Typography>
                 <Typography variant="h6" className={classes.title}>
                     &nbsp;&nbsp;&nbsp; Duration: {<Moment date={workspace.created_at} format="hh:mm:ss"
@@ -167,6 +173,10 @@ function WorkspaceInfoBar(props) {
 
                 <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
                     <PeopleIcon />
+                </IconButton>
+
+                <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
+                    <GetAppIcon />
                 </IconButton>
 
                 <UserListDialog isOpen={isUserListDialogOpen}

@@ -72,21 +72,29 @@ export function getUrlFromEndpoint(protocol, endpoint) {
     return protocol + '://' + BACKEND_URL + '/' + endpoint;
 }
 
-export function fetchAPI(methodType, endpoint, data=null, token=null) {
-    let headers = {
-        'Content-Type': 'application/json'
+export function fetchAPI(methodType, endpoint, data=null,
+                         token=null, headers={'Content-Type': 'application/json'}, stringify_data=true) {
+    let req_headers = {};
+    if (headers) {
+        req_headers = headers;
     }
+
     if (token !== null) {
-        headers['Authorization'] = 'Token ' + token.toString()
+        req_headers['Authorization'] = 'Token ' + token.toString()
     }
 
     let requestOptions = {
         method: methodType,
-        headers: headers
+        headers: req_headers
     };
 
     if (data !== null) {
-        requestOptions.body = JSON.stringify(data);
+        if (stringify_data) {
+            requestOptions.body = JSON.stringify(data);
+        }
+        else {
+            requestOptions.body = data;
+        }
     }
 
     return fetch(getUrlFromEndpoint('http', endpoint), requestOptions)

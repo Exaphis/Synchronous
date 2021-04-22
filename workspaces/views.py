@@ -1,14 +1,23 @@
+import os
+import json
+from zipfile import ZipFile
+from tempfile import TemporaryDirectory, NamedTemporaryFile
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404
+from django.core.files import File
+from django.http import HttpResponse
 from rest_framework import generics, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError, ParseError
 from rest_framework.response import Response
 
-from .models import Workspace
+from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspaceWhiteboardApp, WorkspacePadApp,\
+    iter_specific_apps, get_type_from_app
 from .serializers import WorkspaceSerializer, WorkspacePasswordChangeSerializer
+from .consumers import AppType
 from .permissions import IsReadableOrAuthenticated, IsAuthenticated
 from .inform_using_mail import send_mail_to
 
@@ -74,10 +83,75 @@ def nickname_to_unique_id(request):
 
 
 @api_view(['GET'])
+@permission_classes([IsReadableOrAuthenticated])
 def generate_workspace_zip(request, unique_id):
     workspace = get_object_or_404(Workspace, unique_id=unique_id)
-    # TODO: generate zip for workspace
-    pass
+
+    # TODO: cleanup temp_dir?
+    temp_dir = TemporaryDirectory()
+    zip_path = os.path.join(temp_dir.name, f'{workspace.unique_id}.zip')
+
+    with ZipFile(zip_path, 'w') as zip_file:
+        workspace_info = []
+        for tab in WorkspaceTab.objects.filter(workspace=workspace):
+            apps_info = []
+            for app in iter_specific_apps(WorkspaceApp.objects.filter(tab=tab)):
+                downloaded_path = app.download_data()
+                if downloaded_path is None:
+                    continue
+
+                base_name = os.path.basename(downloaded_path)
+                zip_file.write(downloaded_path, base_name)
+                apps_info.append({
+                    'type': get_type_from_app(app),
+                    'contents': base_name,
+                })
+                os.remove(downloaded_path)
+
+            workspace_info.append(apps_info)
+
+        zip_file.writestr('workspace.json', json.dumps(workspace_info))
+
+    with open(zip_path, 'rb') as zip_file:
+        response = HttpResponse(File(zip_file), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(zip_path)}"'
+        return response
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def import_workspace_zip(request, unique_id):
+    print('importing workspace zip...')
+    if not request.FILES['zip']:
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    workspace = get_object_or_404(Workspace, unique_id=unique_id)
+
+    import_data = request.FILES['zip']
+    with NamedTemporaryFile(delete=False) as out_file:
+        for chunk in import_data.chunks():
+            out_file.write(chunk)
+
+    with ZipFile(out_file.name) as import_zip:
+        with import_zip.open('workspace.json') as workspace_info_file:
+            workspace_info = json.loads(workspace_info_file.read().decode('utf-8'))
+            print(workspace_info)
+
+            for import_tab in workspace_info:
+                tab = WorkspaceTab.objects.create(workspace=workspace, name='Untitled tab')
+                for app in import_tab:
+                    app_type = app['type']
+                    if app_type == AppType.PAD:
+                        pad = WorkspacePadApp.objects.create_pad(tab=tab, name='Text pad')
+                        with import_zip.open(app['contents']) as contents:
+                            pad.import_data(contents.read())
+                    elif app_type == AppType.WHITEBOARD:
+                        board = WorkspaceWhiteboardApp.objects.create_whiteboard(tab=tab, name='Whiteboard')
+                        with import_zip.open(app['contents']) as artifacts:
+                            board.import_data(artifacts.read())
+
+    os.remove(out_file.name)
+    return Response(status=status.HTTP_201_CREATED)
 
 
 class CustomAuthToken(ObtainAuthToken):

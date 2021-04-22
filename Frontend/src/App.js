@@ -2,7 +2,7 @@ import * as React from 'react';
 import {
     Grid, Box, Avatar, Button, CssBaseline,
     TextField, FormControlLabel, Checkbox,
-    Typography, Container, Menu, MenuItem, IconButton
+    Typography, Container, Menu, MenuItem, IconButton, InputLabel, Input
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
@@ -21,8 +21,6 @@ import { fetchAPI } from './api';
 import { WorkspaceArea } from './WorkspaceArea';
 import Tutorial from './Tutorial';
 
-
-
 LogRocket.init('a1vl8a/synchronous');
 setupLogRocketReact(LogRocket);
 
@@ -36,9 +34,6 @@ export default function App() {
                 </Route>
                 <Route exact path="/open">
                     <OpenWorkspace/>
-                </Route>
-                <Route exact path="/upload">
-                    <Upload/>
                 </Route>
                 <Route exact path="/">
                     <SignIn/>
@@ -59,11 +54,7 @@ export default function App() {
 
 function SignIn() {
     const classes = useStyles();
-
-
-
     return (
-
         <Container component="main" maxWidth="xs">
             <Helmet>
                 <title>Synchronous</title>
@@ -92,17 +83,6 @@ function SignIn() {
                     className={classes.submit}
                 >
                     Reopen an existing workspace
-                </Button>
-                <Button
-                    component={ Link }
-                    to={"/upload"}
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    className={classes.submit}
-                >
-                    Upload a workspace
                 </Button>
                 <Button
                     component={ Link }
@@ -147,12 +127,13 @@ function CreateWorkspace() {
     const [allowReadOnly, setAllowReadOnly] = React.useState(false);
     const nameRef = React.useRef({value: ''});
     const passwordRef = React.useRef({value: ''});
+    const importZipRef = React.useRef({files: []});
 
     function onReadOnlyChange(event) {
         setAllowReadOnly(event.target.checked);
     }
 
-    async function handleCreateWorkspace(name, password, history, allowReadOnly) {
+    async function handleCreateWorkspace(name, password, history, allowReadOnly, importZipFile) {
         let resp = await fetchAPI('POST', 'workspace/',
             {
                 nickname: name,
@@ -164,13 +145,32 @@ function CreateWorkspace() {
             return false;
         }
         else {
+            const unique_id = resp.unique_id;
+
             if (password !== "") {
                 let auth = await fetchAPI('POST', 'api-token-auth/',
                     {
-                        unique_id: resp.unique_id,
+                        unique_id: unique_id,
                         password: password
                     });
                 localStorage.setItem(resp.unique_id, auth.token)
+            }
+
+            if (importZipFile !== null) {
+                const formData = new FormData();
+                formData.append('zip', importZipFile);
+
+                // must not include headers for uploading form because it will be rejected
+                // by nginx
+                let resp = await fetchAPI(
+                    'POST',
+                    `workspace/${unique_id}/import/`,
+                    formData,
+                    localStorage.getItem(unique_id),
+                    null,
+                    false
+                );
+                console.log(resp);
             }
 
             await history.push('/workspace/' + resp.unique_id);
@@ -182,7 +182,8 @@ function CreateWorkspace() {
             nameRef.current.value,
             passwordRef.current.value,
             history,
-            allowReadOnly
+            allowReadOnly,
+            importZipRef.current.files.length > 0 ? importZipRef.current.files[0] : null
         ).then(success => {
             setDidCreateSucceed(success);
         });
@@ -210,27 +211,39 @@ function CreateWorkspace() {
                     error={!didCreateSucceed}
                     helperText={didCreateSucceed ? "" : "Workspace name is invalid/taken"}
                 />
-                <Grid container >
-                    <TextField
-                        inputRef={passwordRef}
-                        variant="outlined"
-                        margin="normal"
-                        fullWidth
-                        id="password"
-                        label="Password (Optional)"
-                        name="workspace"
-                        type="password"
-                        autoComplete="workspace"
-                    />
+                <TextField
+                    inputRef={passwordRef}
+                    variant="outlined"
+                    margin="normal"
+                    fullWidth
+                    id="password"
+                    label="Password (Optional)"
+                    name="workspace"
+                    type="password"
+                    autoComplete="workspace"
+                />
+                <Grid container direction="column">
                     <FormControlLabel
                         control={<Checkbox color="primary" />}
                         id="check"
                         label="Allow View Only?"
                         onChange={onReadOnlyChange}
                     />
+                    <Box mt={2} />
+                    <InputLabel htmlFor="import-button">
+                        Import with ZIP (optional)
+                        <Input
+                            inputRef={importZipRef}
+                            id="import-button"
+                            inputProps={{
+                              accept: "application/zip"
+                            }}
+                            type="file"
+                            disableUnderline={true}
+                        />
+                    </InputLabel>
                 </Grid>
-                <Box mt={2}>
-                </Box>
+                <Box mt={2} />
                 <Button
                     size="large"
                     type="submit"
@@ -481,10 +494,6 @@ function OpenWorkspace() {
         </Container>
     );
 
-}
-
-function Upload() {
-    return <h2>Upload: TODO</h2>
 }
 
 function Copyright() {

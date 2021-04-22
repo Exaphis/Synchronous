@@ -1,6 +1,9 @@
+import io
 import datetime
 import uuid
+from tempfile import NamedTemporaryFile
 
+import requests
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
@@ -9,6 +12,7 @@ from rest_framework.authtoken.models import Token
 from django.utils import timezone
 
 from tusdfileshare.models import TusdFileShare
+from .api_types import AppType
 from . import etherpad_client
 from spacedeck_client import SpacedeckClient
 
@@ -68,6 +72,28 @@ class WorkspaceTab(models.Model):
         ordering = ['created_at']
 
 
+def iter_specific_apps(app_iterable):
+    for app in app_iterable:
+        if hasattr(app, 'workspacepadapp'):
+            yield app.workspacepadapp
+        elif hasattr(app, 'workspacefileshareapp'):
+            yield app.workspacefileshareapp
+        elif hasattr(app, 'workspacewhiteboardapp'):
+            yield app.workspacewhiteboardapp
+        else:
+            yield app
+
+
+def get_type_from_app(app):
+    if isinstance(app, WorkspacePadApp):
+        return AppType.PAD
+    elif isinstance(app, WorkspaceFileShareApp):
+        return AppType.FILE_SHARE
+    elif isinstance(app, WorkspaceWhiteboardApp):
+        return AppType.WHITEBOARD
+    return AppType.TEMPLATE
+
+
 class WorkspaceApp(models.Model):
     tab = models.ForeignKey(WorkspaceTab, on_delete=models.CASCADE)
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -77,6 +103,20 @@ class WorkspaceApp(models.Model):
 
     def __str__(self):
         return f'WorkspaceApp({self.name}, {self.unique_id})'
+
+    def download_data(self):
+        """
+        Download an importable version of the app, whose contents can be passed to import_data().
+        Return the file path to the downloaded data.
+        """
+        return None
+
+    def import_data(self, data: bytes):
+        """
+        Set the content of the given app using the bytes given.
+        Returns whether or not the import succeeded.
+        """
+        pass
 
 
 class WorkspacePadAppManager(models.Manager):
@@ -121,6 +161,23 @@ class WorkspacePadApp(WorkspaceApp):
     def get_iframe_url_read_only(self):
         return f'http://etherpad.synchronous.localhost/p/{self.read_only_id}'
 
+    def download_data(self):
+        with NamedTemporaryFile(delete=False) as out_file:
+            resp = requests.get(f'http://etherpad:9001/p/{self.pad_id}/export/etherpad')
+            out_file.write(resp.content)
+            return out_file.name
+
+    def import_data(self, data: bytes):
+        print('importing pad...')
+        file_stream = io.BytesIO(data)
+        file_stream.name = 'stream.etherpad'  # must add .etherpad so it recognizes format
+        resp = requests.post(
+            f'http://etherpad:9001/p/{self.pad_id}/import',
+            files={'file': file_stream}
+        )
+        print(resp.text)
+        return resp.ok
+
     def __str__(self):
         return f'Etherpad({self.pad_id})'
 
@@ -156,6 +213,8 @@ class WorkspaceWhiteboardAppManager(models.Manager):
         print('Space created.')
         app.save()
 
+        return app
+
 
 class WorkspaceWhiteboardApp(WorkspaceApp):
     objects = WorkspaceWhiteboardAppManager()
@@ -168,6 +227,18 @@ class WorkspaceWhiteboardApp(WorkspaceApp):
 
     def get_iframe_url_read_only(self):
         return f'http://spacedeck.synchronous.localhost/spaces/{self.space_id}'
+
+    def download_data(self):
+        client = SpacedeckClient()
+        artifacts = client.get_artifacts(self.space_id)
+
+        with NamedTemporaryFile(delete=False) as out_file:
+            out_file.write(artifacts.encode('utf-8'))
+            return out_file.name
+
+    def import_data(self, data: bytes):
+        client = SpacedeckClient()
+        return client.set_artifacts(self.unique_id, data)
 
     def __str__(self):
         return f'Whiteboard({self.space_id})'

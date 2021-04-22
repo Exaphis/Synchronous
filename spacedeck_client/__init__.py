@@ -8,6 +8,9 @@ SPACEDECK_PASSWORD = 'y(@#"}T6d65B!v?V'  # TODO: change this
 SPACEDECK_INVITE_CODE = 'top-sekrit'  # TODO: change this in spacedeck config
 
 
+class SpacedeckAPIException(Exception):
+    pass
+
 @dataclass
 class Space:
     def __post_init__(self):
@@ -120,6 +123,16 @@ class SpacedeckClient:
         )
 
         return resp.ok
+
+    def get_artifacts(self, space_id):
+        resp = self.session.get(
+            self.BASE_URL + f'/api/spaces/{space_id}/artifacts'
+        )
+
+        if not resp.ok:
+            raise SpacedeckAPIException(resp.text)
+
+        return resp.text
 
 
 def main():
