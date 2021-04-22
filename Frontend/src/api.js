@@ -3,22 +3,12 @@ export let TUSD_URL;
 export let BACKEND_URL;
 
 const protocol = window.location.protocol;
-if (window.location.hostname === 'synchronous.localhost') {
-    // we're under a reverse proxy for localhost
-    TUSD_URL = `${protocol}//tusd.synchronous.localhost/files/`;
-    BACKEND_URL = 'api.synchronous.localhost';
-    APP_URL_MAPPING = {
-        'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.synchronous.localhost`,
-        'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.synchronous.localhost`
-    }
-}
-else {
-    TUSD_URL = `${protocol}//tusd.synchronous.localhost/files/`;
-    BACKEND_URL = 'api.synchronous.localhost';
-    APP_URL_MAPPING = {
-        'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.synchronous.localhost`,
-        'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.synchronous.localhost`
-    }
+const hostname = window.location.hostname
+TUSD_URL = `${protocol}//tusd.${hostname}/files/`;
+BACKEND_URL = `api.${hostname}`;
+APP_URL_MAPPING = {
+    'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.${hostname}`,
+    'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.${hostname}`
 }
 
 // pubsub topics used for communication within the frontend

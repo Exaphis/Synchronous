@@ -1,16 +1,14 @@
-version: "3.9"
+version: "3"
 
 services:
   nginx:
     image: nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "30000:80"
     volumes:
       - ./nginx-production.conf:/etc/nginx/nginx.conf
     depends_on:
       - backend
-      - frontend
       - tusd
   backend:
     build:

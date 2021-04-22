@@ -222,12 +222,12 @@ function WorkspaceTab(props) {
                 setOpen(true);
                 setOpen2(false);
                 localStorage.setItem('offline', 'true');
-                for (let app in apps) {
-                    if (apps[app].name === 'Offline Pad') {
-                        apps[app].minimized = false;
-                        break;
-                    }
-                }
+                // for (let app in apps) {
+                //     if (apps[app].name === 'Offline Pad') {
+                //         apps[app].minimized = false;
+                //         break;
+                //     }
+                // }
             }
             // if (!hasOffline) {
             //     console.log('add')
@@ -525,17 +525,18 @@ function WorkspaceTab(props) {
             position: props.hidden ? 'absolute': 'static',
             left: props.hidden ? '-5000px' : 'auto'
         }}>
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleClose} severity="error">
                     You have lost connection
                 </Alert>
             </Snackbar>
-            <Snackbar open={open} autoHideDuration={7000} onClose={handleClose}
-                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert onClose={handleClose} severity="info">
-                    Offline pad opened for continued support
-                </Alert>
-            </Snackbar>
+            {/*<Snackbar open={open} autoHideDuration={7000} onClose={handleClose}*/}
+            {/*          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>*/}
+            {/*    <Alert onClose={handleClose} severity="info">*/}
+            {/*        Offline pad opened for continued support*/}
+            {/*    </Alert>*/}
+            {/*</Snackbar>*/}
             <Snackbar open={open2} autoHideDuration={6000} onClose={handleClose2}
                       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleClose2} severity="success">
