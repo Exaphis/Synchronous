@@ -5,15 +5,15 @@ import {useIdleTimer} from "react-idle-timer";
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
-    Dialog, DialogActions, DialogContent, DialogTitle,
-    IconButton, Menu, Table, TableBody, TableCell, TableHead, TableRow,
-    TextField, Toolbar, Typography
+    IconButton, Menu, TextField, Toolbar, Typography
 } from "@material-ui/core";
 import s from "./Images/s.png";
 import clsx from "clsx";
 import Moment from "react-moment";
 import EmailIcon from "@material-ui/icons/Email";
 import HelpIcon from '@material-ui/icons/Help';
+import PeopleIcon from '@material-ui/icons/People';
+import GetAppIcon from '@material-ui/icons/GetApp';
 import { useHistory } from "react-router-dom";
 
 
@@ -26,7 +26,10 @@ import { WorkspaceArea } from './WorkspaceArea';
 
 import { StreamChat } from 'stream-chat';
 import { Widget, addResponseMessage } from 'react-chat-widget';
+import {UserListDialog} from "./components/UserListDialog";
 import './CSS/styles.css';
+import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChangeDialog";
+import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -92,6 +95,10 @@ function WorkspaceInfoBar(props) {
     const userList = props.userList;
     const userIdRef = props.userIdRef;
 
+    const [isUserListDialogOpen, setUserListDialogOpen] = React.useState(false);
+    const [isNicknameDialogOpen, setNicknameDialogOpen] = React.useState(false);
+    const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
+
     const history = useHistory();
 
     const handleHelp = () => {
@@ -109,55 +116,83 @@ function WorkspaceInfoBar(props) {
         setValidEmail(true);
     };
 
+    const exportWorkspace = () => {
+        const link = document.createElement("a");
+        link.href = getUrlFromEndpoint('http', `workspace/${workspace.unique_id}/zip/`);
+        link.target = "_blank"
+        link.click();
+    };
+
     if (workspace === undefined || workspace === null || userIdRef === null || userList === {}) {
-        return <div>
-
-        </div>
+        return <div/>
     }
-    let username;
 
+    let username;
     if (userList[userIdRef.current] !== null) {
         username = userList[userIdRef.current];
     }
 
     if (username === undefined) {
-        return <div>
-
-        </div>
+        return <div/>
     }
 
+    const canChangePassword = workspace.is_password_protected && isLoggedIn;
+
     return (
-        <AppBar position="absolute" className={clsx(classes.appBar)}>
+        <AppBar position={"static"} className={clsx(classes.appBar)}>
             <Chat workspace={workspace} username={username}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
-                    {(workspace.nickname !== null ?
-                        "Workspace: " + JSON.stringify(workspace.nickname).substring(1, JSON.stringify(workspace.nickname).length - 1) :
-                        "Workspace: " + JSON.stringify(workspace.unique_id).substring(1, JSON.stringify(workspace.unique_id).length - 1))}
+                    {workspace.nickname !== null ? workspace.nickname : workspace.unique_id}
                 </Typography>
                 <Typography variant="h6" className={classes.title}>
                     &nbsp;&nbsp;&nbsp; Duration: {<Moment date={workspace.created_at} format="hh:mm:ss"
                                                           durationFromNow/> }
                 </Typography>
 
-
-                <div>
                 <Button color="secondary" variant="contained" edge="end"
-                        onClick={() => updateNickname(prompt("Enter the new nickname")).then()}>
+                        onClick={() => setNicknameDialogOpen(true)}>
                     Change nickname
                 </Button>
-                {workspace.is_password_protected && isLoggedIn && (
-                    <Button color="secondary" variant="contained" edge="end"
-                            onClick={() => changePassword(prompt("Enter the new password (empty to remove)")).then()}>
-                    Change password
-                    </Button>
+
+                <WorkspaceNicknameChangeDialog isOpen={isNicknameDialogOpen}
+                                               onRequestClose={() => setNicknameDialogOpen(false)}
+                                               onNicknameUpdateAsync={updateNickname} />
+
+                {canChangePassword && (
+                    <div>
+                        <Button color="secondary" variant="contained" edge="end"
+                                onClick={() => setPasswordDialogOpen(true)}>
+                            Change password
+                        </Button>
+                        <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
+                                                       onRequestClose={() => setPasswordDialogOpen(false)}
+                                                       onPasswordChangeAsync={changePassword} />
+                    </div>
                 )}
+
+                <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
+                    <PeopleIcon />
+                </IconButton>
+
+                <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
+                    <GetAppIcon />
+                </IconButton>
+
+                <UserListDialog isOpen={isUserListDialogOpen}
+                                onRequestClose={() => setUserListDialogOpen(false)}
+                                userList={userList}
+                                currUserId={userIdRef.current}
+                />
+
                 <IconButton color="inherit" edge="end" onClick={handleMenu}>
                     <EmailIcon />
                 </IconButton>
+
                 <IconButton color="secondary" edge="end" onClick={handleHelp}>
                     <HelpIcon />
                 </IconButton>
+
                 <Menu
                     id="menu-appbar"
                     anchorEl={anchorEl}
@@ -217,7 +252,6 @@ function WorkspaceInfoBar(props) {
                         </div>
                     </Container>
                 </Menu>
-                </div>
 
             </Toolbar>
         </AppBar>
@@ -232,17 +266,6 @@ function Workspace() {
     const [userList, setUserList] = React.useState({});
     const userIdRef = React.useRef(null);
     const tokenRef = React.useRef(null);
-    // const [auth, setAuth] = React.useState(true);
-
-    // for changing nickname in NicknameCell
-    const [isNameDialogOpen, setNameDialogOpen] = React.useState(false);
-    const [nameDialogError, setNameDialogError] = React.useState('');
-
-    const nicknameFieldValue = React.useRef('');
-
-    // const handleChange = (event) => {
-    //     setAuth(event.target.checked);
-    // };
 
     // see https://stackoverflow.com/a/57856876 for async data retrieval
     const getWorkspace = async () => {
@@ -370,11 +393,6 @@ function Workspace() {
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(SERVER_MSG_TYPE.NICKNAME_CHANGE, (msg, data) => {
-            onUserNicknameChangeResponse(data);
-        });
-        pubSubTokens.push(token);
-
         token = PubSub.subscribe(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, (msg, data) => {
             if (userListWs !== null) {
                 userListWs.send(JSON.stringify(data));
@@ -395,9 +413,10 @@ function Workspace() {
             tokenRef.current
         );
         if (resp === null) {
-            alert('Nickname failed to set, no response.');
+            throw new Error('Nickname failed to set, no response.');
         } else if ('error' in resp) {
-            alert('Nickname failed to set, error: ' + JSON.stringify(resp.details));
+            console.error(resp.details);
+            throw new Error('Nickname failed to set.');
         } else {
             await getWorkspace();
         }
@@ -411,9 +430,10 @@ function Workspace() {
             tokenRef.current
         );
         if (resp === null) {
-            alert('Password failed to set, no response.');
+            throw new Error('Password failed to set, no response.');
         } else if ('error' in resp) {
-            alert('Password failed to set, error: ' + JSON.stringify(resp));
+            console.error(resp.details);
+            throw new Error('Password failed to set.');
         } else {
             if (new_password === '') {
                 tokenRef.current = null;
@@ -422,80 +442,6 @@ function Workspace() {
             await getWorkspace();
         }
     }
-
-    // -------- User Nickname Change Dialog
-
-    function openUserNicknameChangeDialog() {
-        setNameDialogOpen(true);
-        setNameDialogError('');
-    }
-
-    function sendUserNicknameChange() {
-        userListWs.send(JSON.stringify(
-            {
-                'type': CLIENT_MSG_TYPE.NICKNAME_CHANGE,
-                'nickname': nicknameFieldValue.current
-            }
-        ));
-    }
-
-    function onUserNicknameChangeResponse(resp) {
-        if (resp.success) {
-            setNameDialogOpen(false);
-        }
-        else {
-            setNameDialogError(resp.details);
-        }
-    }
-
-    const nameDialog = <Dialog key="dialog" open={isNameDialogOpen} onClose={() => setNameDialogOpen(false)}>
-        <DialogTitle id="form-dialog-title">Change name</DialogTitle>
-
-        <DialogContent>
-            <TextField
-                error={nameDialogError !== ''}
-                helperText={nameDialogError}
-                autoFocus
-                margin="dense"
-                id="name"
-                label="New Nickname"
-                type="text"
-                fullWidth
-                onChange={(ev) => (nicknameFieldValue.current = ev.target.value)}
-            />
-        </DialogContent>
-
-        <DialogActions>
-            <Button onClick={() => setNameDialogOpen(false)} color="primary">
-                Cancel
-            </Button>
-
-            <Button onClick={sendUserNicknameChange} color="primary">
-                Change name
-            </Button>
-        </DialogActions>
-    </Dialog>
-
-    // --------
-
-    function NicknameCell(props) {
-        let user = props.user;
-        if (user.id === userIdRef.current) {
-            return <TableCell>
-                <Typography fontWeight={900}>{user.nickname}</Typography>
-
-                <Button variant="outlined" color="primary" onClick={openUserNicknameChangeDialog}>
-                    Change name
-                </Button>
-            </TableCell>
-        }
-        else {
-            return <TableCell>
-                {user.nickname}
-            </TableCell>
-        }
-    }
-
 
     if (workspace !== null && workspace.error) {
         return (
@@ -532,75 +478,24 @@ function Workspace() {
         )
     }
 
-    let workspace_details;
-    if (workspace === null) {
-        workspace_details = <p>Null</p>
-    } else {
-        let view_status = <p>Workspace editable</p>
-        if (workspace.anonymous_readable && tokenRef.current === null) {
-            view_status = <p>Password empty, view only</p>
-        }
-
-        workspace_details = <div>
-            <p>Workspace unique_id: {workspace.unique_id}</p>
-            <p>Workspace nickname: {workspace.nickname}</p>
-            <p>Created at: {workspace.created_at}</p>
-            <p>Password protected: {workspace.is_password_protected.toString()}</p>
-            <p>Allow view only: {workspace.anonymous_readable.toString()}</p>
-            { view_status }
-        </div>
-    }
-
-
     return (
-        <div>
-        <Container component="main" maxWidth="xl">
-            <div style={{height: '64px' /* TODO: don't do this */ }}>
-                <WorkspaceInfoBar
-                    workspace={workspace}
-                    isLoggedIn={tokenRef.current !== null}
-                    onWorkspaceNicknameUpdate={updateNickname}
-                    onPasswordChange={changePassword}
-                    userList={userList}
-                    userIdRef={userIdRef}
-                />
-            </div>
-
-            { nameDialog }
+        <Container component="main" maxWidth="xl" disableGutters={true}
+                   style={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
+            <WorkspaceInfoBar
+                workspace={workspace}
+                isLoggedIn={tokenRef.current !== null}
+                onWorkspaceNicknameUpdate={updateNickname}
+                onPasswordChange={changePassword}
+                userList={userList}
+                userIdRef={userIdRef}
+            />
 
             <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
                 <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
                     <WorkspaceArea/>
                 </WorkspaceUserContext.Provider>
             </WorkspaceUniqueIdContext.Provider>
-
-            {/*<h1>{JSON.stringify(workspace)}</h1>*/}
-            {/*<p>{JSON.stringify(userList)}</p>*/}
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Nickname</TableCell>
-                        <TableCell>Activity</TableCell>
-                        <TableCell>Color</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    { Object.values(userList).map(user => (
-                        <TableRow key={user.id}>
-                            <NicknameCell user={user}/>
-                            <TableCell> {user.activity_text} </TableCell>
-                            <TableCell>
-                                <section style={{height: "50px", 'backgroundColor': user.color}} />
-                            </TableCell>
-                        </TableRow>
-                    )) }
-                </TableBody>
-            </Table>
-
-            { workspace_details }
         </Container>
-
-        </div>
     )
 }
 
@@ -635,7 +530,6 @@ function Chat(props) {
     if (channel !== null && channel.current !== null && count !== null) {
         updateMessages(messages, setMessages, channel, count, setCount);
     }
-
 
     const setUser = React.useCallback(async () => {
         await client.setUser(

@@ -13,7 +13,9 @@ export const PUBSUB_TOPIC = {
 export const APP_TYPE = {
     TEMPLATE: 0,
     PAD: 1,
-    FILE_SHARE: 2
+    FILE_SHARE: 2,
+    WHITEBOARD: 3,
+    OFFLINE_PAD: 4
 };
 
 // possible type parameters of websocket messages sent by client
@@ -42,25 +44,57 @@ export const SERVER_MSG_TYPE = {
 };
 
 
+// https://stackoverflow.com/a/62916568
+export function appendQueryParameter(url, name, value) {
+    if (url.length === 0) {
+        return;
+    }
+
+    let rawURL = url;
+
+    // URL with `?` at the end and without query parameters
+    // leads to incorrect result.
+    if (rawURL.charAt(rawURL.length - 1) === "?") {
+        rawURL = rawURL.slice(0, rawURL.length - 1);
+    }
+
+    const parsedURL = new URL(rawURL);
+    let parameters = parsedURL.search;
+
+    parameters += (parameters.length === 0) ? "?" : "&";
+    parameters = `${parameters}${name}=${value}`;
+
+    return `${parsedURL.origin}${parsedURL.pathname}${parameters}`;
+}
+
+
 export function getUrlFromEndpoint(protocol, endpoint) {
     return protocol + '://' + BACKEND_URL + '/' + endpoint;
 }
 
-export function fetchAPI(methodType, endpoint, data=null, token=null) {
-    let headers = {
-        'Content-Type': 'application/json'
+export function fetchAPI(methodType, endpoint, data=null,
+                         token=null, headers={'Content-Type': 'application/json'}, stringify_data=true) {
+    let req_headers = {};
+    if (headers) {
+        req_headers = headers;
     }
+
     if (token !== null) {
-        headers['Authorization'] = 'Token ' + token.toString()
+        req_headers['Authorization'] = 'Token ' + token.toString()
     }
 
     let requestOptions = {
         method: methodType,
-        headers: headers
+        headers: req_headers
     };
 
     if (data !== null) {
-        requestOptions.body = JSON.stringify(data);
+        if (stringify_data) {
+            requestOptions.body = JSON.stringify(data);
+        }
+        else {
+            requestOptions.body = data;
+        }
     }
 
     return fetch(getUrlFromEndpoint('http', endpoint), requestOptions)

@@ -4,44 +4,16 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from rest_framework.authtoken.models import Token
 
-from .models import Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp
+# separate these into a separate file to avoid circular importing in consumers/models
+from .api_types import AppType, ClientMsgType, ServerMsgType
+from .models import iter_specific_apps, Workspace, WorkspaceTab, WorkspaceApp, WorkspacePadApp, WorkspaceFileShareApp,\
+    WorkspaceWhiteboardApp
 from .serializers import WorkspaceTabSerializer, WorkspacePadAppSerializer,\
-    WorkspaceFileShareAppSerializer, WorkspaceAppSerializer
+    WorkspaceFileShareAppSerializer, WorkspaceAppSerializer, WorkspaceWhiteboardAppSerializer
 from users.models import WorkspaceUser
 from users.serializers import WorkspaceUserSerializer
 from tusdfileshare.models import TusdFileShare, TusdFile
 from tusdfileshare.serializers import TusdFileSerializer
-
-
-# don't use enum because JSON can't serialize it
-class AppType:
-    TEMPLATE = 0
-    PAD = 1
-    FILE_SHARE = 2
-
-
-# Client and Server message types must be unique
-# to avoid pubsub topic mixups in the frontend
-class ClientMsgType:
-    ACTIVITY = 'activity'
-    NICKNAME_CHANGE = 'nicknameChange'
-    FILE_LIST_REQUEST = 'fileListRequest'
-    NEW_TAB = 'newTab'
-    DELETE_TAB = 'deleteTab'
-    TAB_NAME_CHANGE = 'tabNameChange'
-    NEW_APP = 'newApp'
-    APP_LIST_REQUEST = 'appListRequest'
-    DELETE_APP = 'deleteApp'
-
-
-class ServerMsgType:
-    USER_LIST = 'user_list'
-    CURRENT_USER = 'current_user'
-    NICKNAME_CHANGE = 'nickname_change'
-    FILE_LIST = 'file_list'
-    TAB_LIST = 'tab_list'
-    NEW_APP = 'new_app'
-    APP_LIST = 'app_list'
 
 
 class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
@@ -99,17 +71,25 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
     def get_app_list(self, tab_unique_id):
         tab = WorkspaceTab.objects.get(unique_id=tab_unique_id)
         apps = WorkspaceApp.objects.filter(tab=tab)
+
         app_list = []
-        for app in apps:
-            if hasattr(app, 'workspacepadapp'):
+        for app in iter_specific_apps(apps):
+            if isinstance(app, WorkspacePadApp):
                 app_type = AppType.PAD
-                data = WorkspacePadAppSerializer(app.workspacepadapp).data
+                data = WorkspacePadAppSerializer(app).data
                 if self.is_read_only:
                     data['iframe_url'] = data['iframe_url_read_only']
-
-            elif hasattr(app, 'workspacefileshareapp'):
+            elif isinstance(app, WorkspaceFileShareApp):
                 app_type = AppType.FILE_SHARE
-                data = WorkspaceFileShareAppSerializer(app.workspacefileshareapp).data
+                data = WorkspaceFileShareAppSerializer(app).data
+            elif isinstance(app, WorkspaceWhiteboardApp):
+                app_type = AppType.WHITEBOARD
+                data = WorkspaceWhiteboardAppSerializer(app).data
+                if self.is_read_only:
+                    data['iframe_url'] = data['iframe_url_read_only']
+            elif str(app).find('Offline') != -1:
+                app_type = AppType.OFFLINE_PAD
+                data = WorkspaceAppSerializer(app).data
             else:
                 print("Couldn't find child class of app, defaulting to example app")
                 app_type = AppType.TEMPLATE
@@ -368,6 +348,10 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
                     name=name,
                     tusd_file_share=tusd_file_share
                 )
+            elif app_type == AppType.OFFLINE_PAD:
+                WorkspaceApp.objects.create(tab=tab, name=name)
+            elif app_type == AppType.WHITEBOARD:
+                WorkspaceWhiteboardApp.objects.create_whiteboard(tab=tab, name=name)
             else:
                 print('App type not found, defaulting to template')
                 WorkspaceApp.objects.create(tab=tab, name=name)
