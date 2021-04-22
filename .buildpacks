@@ -1,1 +1,3 @@
+https://github.com/heroku/heroku-buildpack-multi-procfile
+https://github.com/heroku/python-getting-started.git
 Frontend=https://github.com/mars/create-react-app-buildpack
