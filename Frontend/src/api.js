@@ -1,8 +1,25 @@
-const REVERSE_PROXY = window.location.hostname === 'synchronous.localhost';
+let APP_URL_MAPPING;
+export let TUSD_URL;
+export let BACKEND_URL;
 
-export const TUSD_URL = REVERSE_PROXY ? 'http://tusd.synchronous.localhost/files/' : 'http://0.0.0.0:1080/files/';
-export const BACKEND_URL = REVERSE_PROXY ? 'api.synchronous.localhost' : 'localhost:8000';
-export const ETHERPAD_URL = 'etherpad.synchronous.localhost';
+const protocol = window.location.protocol;
+if (window.location.hostname === 'synchronous.localhost') {
+    // we're under a reverse proxy for localhost
+    TUSD_URL = `${protocol}//tusd.synchronous.localhost/files/`;
+    BACKEND_URL = 'api.synchronous.localhost';
+    APP_URL_MAPPING = {
+        'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.synchronous.localhost`,
+        'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.synchronous.localhost`
+    }
+}
+else {
+    TUSD_URL = `${protocol}//tusd.synchronous.localhost/files/`;
+    BACKEND_URL = 'api.synchronous.localhost';
+    APP_URL_MAPPING = {
+        'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.synchronous.localhost`,
+        'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.synchronous.localhost`
+    }
+}
 
 // pubsub topics used for communication within the frontend
 // pubsub topics and msg types must be unique!!
@@ -43,6 +60,14 @@ export const SERVER_MSG_TYPE = {
     APP_LIST: 'app_list'
 };
 
+
+export function translateAppUrl(url) {
+    for (const [key, value] of Object.entries(APP_URL_MAPPING)) {
+        url = url.replace(key, value);
+    }
+
+    return url;
+}
 
 // https://stackoverflow.com/a/62916568
 export function appendQueryParameter(url, name, value) {

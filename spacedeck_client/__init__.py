@@ -11,6 +11,7 @@ SPACEDECK_INVITE_CODE = 'top-sekrit'  # TODO: change this in spacedeck config
 class SpacedeckAPIException(Exception):
     pass
 
+
 @dataclass
 class Space:
     def __post_init__(self):

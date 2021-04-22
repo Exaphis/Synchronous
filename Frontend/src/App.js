@@ -18,7 +18,6 @@ import logoIcon from './Images/s.png';
 import './CSS/App.css';
 import Workspace from './Workspace';
 import { fetchAPI } from './api';
-import { WorkspaceArea } from './WorkspaceArea';
 import Tutorial from './Tutorial';
 
 LogRocket.init('a1vl8a/synchronous');
@@ -37,9 +36,6 @@ export default function App() {
                 </Route>
                 <Route exact path="/">
                     <SignIn/>
-                </Route>
-                <Route exact path="/test">
-                    <Test/>
                 </Route>
                 <Route exact path="/workspace/:uniqueId">
                     <Workspace/>
@@ -86,17 +82,6 @@ function SignIn() {
                 </Button>
                 <Button
                     component={ Link }
-                    to={"/test"}
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    //color="primary"
-                    className={classes.submit}
-                >
-                    Test Workspace
-                </Button>
-                <Button
-                    component={ Link }
                     to={"/tutorial"}
                     type="submit"
                     fullWidth
@@ -111,12 +96,6 @@ function SignIn() {
                 <Copyright />
             </Box>
         </Container>
-    );
-}
-
-function Test() {
-    return (
-        <WorkspaceArea/>
     );
 }
 

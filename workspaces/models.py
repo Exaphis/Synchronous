@@ -156,10 +156,10 @@ class WorkspacePadApp(WorkspaceApp):
     read_only_id = models.CharField(max_length=255)
 
     def get_iframe_url(self):
-        return f'http://etherpad.synchronous.localhost/p/{self.pad_id}'
+        return f'ETHERPAD_PLACEHOLDER/p/{self.pad_id}'
 
     def get_iframe_url_read_only(self):
-        return f'http://etherpad.synchronous.localhost/p/{self.read_only_id}'
+        return f'ETHERPAD_PLACEHOLDER/p/{self.read_only_id}'
 
     def download_data(self):
         with NamedTemporaryFile(delete=False) as out_file:
@@ -223,10 +223,10 @@ class WorkspaceWhiteboardApp(WorkspaceApp):
     edit_hash = models.CharField(max_length=255)
 
     def get_iframe_url(self):
-        return f'http://spacedeck.synchronous.localhost/spaces/{self.space_id}?spaceAuth={self.edit_hash}'
+        return f'SPACEDECK_PLACEHOLDER/spaces/{self.space_id}?spaceAuth={self.edit_hash}'
 
     def get_iframe_url_read_only(self):
-        return f'http://spacedeck.synchronous.localhost/spaces/{self.space_id}'
+        return f'SPACEDECK_PLACEHOLDER/spaces/{self.space_id}'
 
     def download_data(self):
         client = SpacedeckClient()

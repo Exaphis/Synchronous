@@ -13,7 +13,6 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
 import Alert from '@material-ui/lab/Alert';
 
-
 import Uppy from '@uppy/core';
 import Tus from '@uppy/tus';
 import DashboardModal from '@uppy/react/lib/DashboardModal';
@@ -25,7 +24,7 @@ import '@uppy/dashboard/dist/style.css';
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
 import {
     SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI,
-    appendQueryParameter
+    appendQueryParameter, translateAppUrl
 } from "./api";
 
 function AppTitleBar(props) {
@@ -166,10 +165,8 @@ function WhiteboardAppContents(props) {
 
 function TemplateAppContents(props) {
     return (
-        // <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-        //         title={props.uuid} src='https://google.com?igu=1' />
         <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
-                title={props.uuid} src='http://spacedeck.synchronous.localhost/spaces/bf4e63a6-ee2c-411b-aabe-d481ee558aa6?spaceAuth=762db34' />
+                title={props.uuid} src='https://google.com?igu=1' />
     );
 }
 
@@ -431,8 +428,9 @@ function WorkspaceTab(props) {
         let appContents;
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
+            const iframeUrl = translateAppUrl(appData['iframe_url'])
             appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
-                                          padUrl={appData['iframe_url']} />;
+                                          padUrl={iframeUrl} />;
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
@@ -442,8 +440,9 @@ function WorkspaceTab(props) {
         }
         else if (app.type === APP_TYPE.WHITEBOARD) {
             const appData = app.data;
+            const iframeUrl = translateAppUrl(appData['iframe_url'])
             appContents = <WhiteboardAppContents pointerEventsEnabled={pointerEventsEnabled}
-                                                 padUrl={appData['iframe_url']} />;
+                                                 padUrl={iframeUrl} />;
         }
         else if (app.type === APP_TYPE.TEMPLATE) {
             appContents = <TemplateAppContents pointerEventsEnabled={pointerEventsEnabled}/>;

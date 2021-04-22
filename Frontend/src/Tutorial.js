@@ -26,25 +26,16 @@ import minimize from './tutorial_images/Minimize.gif'
 import chatstep from './tutorial_images/Chat-Step.png';
 import padstep from './tutorial_images/Pad-Step.png';
 import filesharestep from './tutorial_images/FileShare-Step.png';
+import {Redirect} from "react-router";
 
 export default function Tutorial() {
     const history = useHistory();
 
-    console.log(window.location.href);
-    let url = JSON.stringify(window.location.href);
-    url = url.substring(url.lastIndexOf('/'), url.length - 1)
-    console.log(url)
-    console.log(url === '/home')
-
-    if (url === '/home') {
-        console.log('here');
-        history.push('/');
-        window.location.reload(false);
-        refresh()
-    }
-
     return (
         <HashRouter>
+            <Route exact path="/">
+                <Redirect to="/introduction" />
+            </Route>
             <div className="tutorial">
                 <Avatar alt="s" src={s}/>
                 <ul className="header">
@@ -371,15 +362,3 @@ function Apps() {
 
     );
 }
-
-
-function refresh() {
-    sleep(125).then(() => {
-        window.location.reload(false);
-    })
-}
-
-const sleep = (milliseconds) => {
-    return new Promise(resolve => setTimeout(resolve, milliseconds))
-}
-
