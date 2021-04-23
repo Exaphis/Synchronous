@@ -44,9 +44,31 @@ servers will automatically restart. However, any changes that would normally req
 a manual restart of the server would require you to stop all containers using Ctrl+C
 and re-run the command.
 
+## Deploying
+
+### Frontend
+
+`cd Frontend && npm run build` will build a production-ready version of the
+frontend React app. This can be deployed using Netlify.
+
+To prevent a 404 when refreshing a page that is not the root, you must follow the
+steps in <https://answers.netlify.com/t/support-guide-direct-links-to-my-single-page-app-spa-dont-work/126>.
+
+### Backend
+
+Clone the repository (see [Cloning the repository](#cloning-the-repository)).
+
+Then, start the production-ready Docker containers using the following command:
+
+```console
+docker-compose -f production.yml up -d
+```
+
+HTTPS must be enabled.
+
 ## Usage
 
-Visit <http://synchronous.localhost>.
+Visit <https://synchronous.codes>.
 
 ## Troubleshooting
 
