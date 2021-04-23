@@ -33,7 +33,8 @@ function AppTitleBar(props) {
         <Grid style={{
             height: '2em',
             backgroundColor: 'darkGray',
-            display: 'flex'
+            display: 'flex',
+            pointerEvents: 'auto'  // idk why this is needed, but if not minimize button doesn't work anymore
         }} className="handle">
             <span style={{flexGrow: 1, height: '100%', display: 'inline-flex',
                 alignItems: 'center', overflow: 'hidden'}}>
@@ -146,7 +147,7 @@ function PadAppContents(props) {
     let padUrl = props.padUrl + `?showChat=false&userName=${nickname}&userColor=${color}`;
 
     return (
-        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        <iframe style={{flexGrow: 1}}
                 title={props.uuid} src={padUrl}/>
     );
 }
@@ -158,14 +159,14 @@ function WhiteboardAppContents(props) {
     let spaceUrl = appendQueryParameter(props.padUrl, 'nickname', nickname)
 
     return (
-        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        <iframe style={{flexGrow: 1}}
                 title={props.uuid} src={spaceUrl}/>
     );
 }
 
 function TemplateAppContents(props) {
     return (
-        <iframe style={{flexGrow: 1, pointerEvents: props.pointerEventsEnabled ? 'auto' : 'none'}}
+        <iframe style={{flexGrow: 1}}
                 title={props.uuid} src='https://google.com?igu=1' />
     );
 }
@@ -179,8 +180,28 @@ function OfflinePadAppContents(props) {
 
 
 function WorkspaceApp(props) {
+    const {
+        minimized, onClose, onMinimize, onMaximize, name, children,
+        requestTop, pointerEventsEnabled
+    } = props;
+    const appContainerRef = React.useRef();
+
+    React.useEffect(() => {
+        function onBlur(e) {
+            if (appContainerRef.current && appContainerRef.current.contains(document.activeElement)) {
+                requestTop();
+            }
+        }
+
+        window.addEventListener('blur', onBlur)
+
+        return function cleanup() {
+            window.removeEventListener('blur', onBlur);
+        }
+    }, [requestTop]);
+
     return (
-        <div id={props.uuid} style={{
+        <div id={props.uuid} ref={appContainerRef} style={{
             backgroundColor: 'white',
             height: '100%',
             border: '2px solid gray',
@@ -189,17 +210,17 @@ function WorkspaceApp(props) {
             // fixes firefox rendering of iframes (vs. display: none)
             // firefox would have problems with rendering iframes (i.e. etherpad) when display is none.
             // instead, visibility: hidden should work the same.
-            visibility: props.minimized ? 'hidden': 'visible',
+            visibility: minimized ? 'hidden': 'visible',
             // change position so events can be fired on apps behind them
-            position: props.minimized ? 'absolute': 'static',
-            top: props.minimized ? '-5000px' : 'auto',
-            flexDirection: 'column'
+            position: minimized ? 'absolute': 'static',
+            top: minimized ? '-5000px' : 'auto',
+            flexDirection: 'column',
+            pointerEvents: pointerEventsEnabled ? 'auto' : 'none',
         }}>
-            <AppTitleBar minimized={props.minimized} onClose={props.onClose}
-                         onMinimize={props.onMinimize} onMaximize={props.onMaximize}
-                         title={props.name}/>
-            {props.children}
-
+            <AppTitleBar minimized={minimized} onClose={onClose}
+                         onMinimize={onMinimize} onMaximize={onMaximize}
+                         title={name}/>
+            {children}
         </div>
     )
 }
@@ -241,8 +262,6 @@ function WorkspaceTab(props) {
         }
     };
 
-
-
     let date = new Date();
     if (date.getSeconds() % 3 === 0) {
         status();
@@ -280,13 +299,13 @@ function WorkspaceTab(props) {
             let apps = Object.assign({}, prevApps);
             apps[appId].maximized = maximizedUpdater(apps[appId].maximized);
 
-            if (apps[appId].maximized) {
-                for (const diffAppId in prevApps) {
-                    if (diffAppId !== appId) {
-                        apps[diffAppId].minimized = true;
-                    }
-                }
-            }
+            // if (apps[appId].maximized) {
+            //     for (const diffAppId in prevApps) {
+            //         if (diffAppId !== appId) {
+            //             apps[diffAppId].minimized = true;
+            //         }
+            //     }
+            // }
 
             return apps;
         });
@@ -341,6 +360,7 @@ function WorkspaceTab(props) {
                                 setAppMinimized(appId, minimized => !minimized);
                             },
                             onMinimize: () => {
+                                console.log('minimize');
                                 setPointerEventsEnabled(true);
                                 setAppMinimized(appId, () => true);
                             },
@@ -377,7 +397,6 @@ function WorkspaceTab(props) {
             }
         }
     }
-
 
     React.useEffect(() => {
         localStorage.setItem('offline', 'false');
@@ -429,8 +448,7 @@ function WorkspaceTab(props) {
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
             const iframeUrl = translateAppUrl(appData['iframe_url'])
-            appContents = <PadAppContents pointerEventsEnabled={pointerEventsEnabled}
-                                          padUrl={iframeUrl} />;
+            appContents = <PadAppContents padUrl={iframeUrl} />;
         }
         else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents/>;
@@ -441,24 +459,26 @@ function WorkspaceTab(props) {
         else if (app.type === APP_TYPE.WHITEBOARD) {
             const appData = app.data;
             const iframeUrl = translateAppUrl(appData['iframe_url'])
-            appContents = <WhiteboardAppContents pointerEventsEnabled={pointerEventsEnabled}
-                                                 padUrl={iframeUrl} />;
+            appContents = <WhiteboardAppContents padUrl={iframeUrl} />;
         }
         else if (app.type === APP_TYPE.TEMPLATE) {
-            appContents = <TemplateAppContents pointerEventsEnabled={pointerEventsEnabled}/>;
+            appContents = <TemplateAppContents/>;
         }
         else {
             console.error('invalid app type: ' + app.type);
             console.error(typeof app.type);
         }
 
+        function sendToTop() {
+            setTopAppUuid(app.id);
+        }
 
         return (
             <Rnd
                 key={app.id}
                 bounds={`#appArea-${props.tabId}`}
                 size={{
-                    // apparearef should now contain the reference to the apparea element
+                    // appAreaRef should now contain the reference to the apparea element
                     width: app.maximized ? appAreaRef.current.clientWidth : app.width,
                     height: app.maximized ? appAreaRef.current.clientHeight : app.height,
                 }}
@@ -468,7 +488,7 @@ function WorkspaceTab(props) {
                 }}
                 onDragStart={() => {
                     setPointerEventsEnabled(false);
-                    setTopAppUuid(app.id);
+                    sendToTop();
                 }}
                 onDragStop={(e, data) => {
                     setPointerEventsEnabled(true);
@@ -481,7 +501,7 @@ function WorkspaceTab(props) {
                 }}
                 onResizeStart={() => {
                     setPointerEventsEnabled(false);
-                    setTopAppUuid(app.id);
+                    sendToTop();
                 }}
                 onResizeStop={(e, direction, ref, delta, position) => {
                     setPointerEventsEnabled(true);
@@ -500,12 +520,16 @@ function WorkspaceTab(props) {
                 minWidth='50px'
                 style={{     // change z index to prioritize recently selected app
                     // TODO: set topAppUuid when anything is clicked, not just drag
-                    zIndex: topAppUuid === app.id ? '1' : 'auto'
+                    zIndex: topAppUuid === app.id ? '1' : 'auto',
+                    // allow pointer events to pass through if it is minimized as the element
+                    // will still be on top
+                    pointerEvents: app.minimized ? 'none' : 'auto',
                 }}
             >
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
                               onMinimize={app.onMinimize} onMaximize={app.switchMaximized}
-                              uuid={app.id} name={app.name}>
+                              uuid={app.id} name={app.name} requestTop={sendToTop}
+                              pointerEventsEnabled={pointerEventsEnabled} >
                     {appContents}
                 </WorkspaceApp>
             </Rnd>
@@ -607,12 +631,9 @@ function WorkspaceArea() {
         });
     }, [currTab])
 
-
     const handleTabChange = (event, newValue) => {
         setCurrTab(newValue);
     };
-
-
 
     function closeTab(event, uniqueId) {
         // https://stackoverflow.com/a/63277341
@@ -646,12 +667,13 @@ function WorkspaceArea() {
         });
     }
 
+    // TODO: ability to hide sidebar
     return (
         <Container component="main" maxWidth="xl" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
             <AppBar position={"static"}>
-                <Toolbar>
-                    <Tabs value={currTab} edge="start" onChange={handleTabChange}  variant="scrollable" scrollButtons="auto">
+                <Toolbar variant="dense">
+                    <Tabs value={currTab} edge="start" onChange={handleTabChange}>
                         {
                             tabs.length === 0 ? null : tabs.map((tab) => {
                                 return (

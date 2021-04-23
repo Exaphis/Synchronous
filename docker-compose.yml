@@ -12,6 +12,8 @@ services:
       - backend
       - frontend
       - tusd
+  redis:
+    image: redis
   backend:
     build: .
     command: >
@@ -20,7 +22,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/code
+      - .:/app
   frontend:
     build: ./Frontend
     command: npm start

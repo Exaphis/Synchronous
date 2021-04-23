@@ -22,6 +22,8 @@ services:
       - "PRODUCTION=1"
     ports:
       - "8000:8000"
+  redis:
+    image: redis
   tusd:
     image: tusproject/tusd
     ports:

@@ -8,18 +8,9 @@ export function WorkspacePasswordChangeDialog(props) {
         onPasswordChangeAsync
     } = props;
 
-    function setNewPassword(password) {
-        onPasswordChangeAsync(password)
-            .then(() => {
-                onRequestClose();
-            }, e => {
-                throw e
-            });
-    }
-
     return (
         <GenericFieldChangeDialog isOpen={isOpen} onRequestClose={onRequestClose}
-                                  onChangeField={setNewPassword}
+                                  onChangeField={onPasswordChangeAsync}
                                   fieldName={'password'}
                                   caption={'Empty to remove'}
         />

@@ -8,18 +8,9 @@ export function WorkspaceNicknameChangeDialog(props) {
         onNicknameUpdateAsync
     } = props;
 
-    function setNewNickname(nicknameFieldValue) {
-        onNicknameUpdateAsync(nicknameFieldValue)
-            .then(() => {
-                onRequestClose();
-            }, e => {
-                throw e
-            });
-    }
-
     return (
         <GenericFieldChangeDialog isOpen={isOpen} onRequestClose={onRequestClose}
-                                  onChangeField={setNewNickname}
+                                  onChangeField={onNicknameUpdateAsync}
                                   fieldName={'workspace nickname'} />
     );
 }

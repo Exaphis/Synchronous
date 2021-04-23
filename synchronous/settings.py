@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
+import channels_redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +30,6 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'backend',  # used when docker containers are talking to each other
     'docker-backend',
-    'localhost',
     'api.synchronous.localhost',
     'api.synchronous.codes'
 ]
@@ -145,7 +145,6 @@ REST_FRAMEWORK = {
     ]
 }
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
     "http://synchronous.localhost",
     "http://synchronous.codes"
 ]
@@ -154,11 +153,10 @@ CORS_ALLOWED_ORIGINS = [
 ASGI_APPLICATION = 'synchronous.asgi.application'
 CHANNEL_LAYERS = {
     'default': {
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',  # TODO: change this in prod!
-        # 'CONFIG': {
-        #     "hosts": [('127.0.0.1', 6379)],
-        # },
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
     },
 }
 

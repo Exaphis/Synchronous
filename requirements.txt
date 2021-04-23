@@ -8,3 +8,4 @@ coolname
 celery
 etherpad_lite
 requests
+channels_redis

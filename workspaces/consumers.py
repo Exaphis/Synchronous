@@ -114,7 +114,9 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
         users = {}
         for user in WorkspaceUser.objects.filter(workspace=self.workspace):
             user_data = WorkspaceUserSerializer(user).data
-            users[user_data['id']] = user_data
+
+            # redis does not like ints as keys
+            users[str(user_data['id'])] = user_data
 
         async_to_sync(self.channel_layer.group_send)(
             self.workspace_group_name,

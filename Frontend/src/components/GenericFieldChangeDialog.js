@@ -17,9 +17,9 @@ export function GenericFieldChangeDialog(props) {
         caption
     } = props;
 
-    let fieldLabel = props.fieldLabel;
-    if (!fieldLabel) {
-        fieldLabel = fieldName;
+    let fieldLabel = fieldName;
+    if ('fieldLabel' in props) {
+        fieldLabel = props.fieldLabel;
     }
 
     const [dialogError, setDialogError] = React.useState('');
@@ -29,9 +29,10 @@ export function GenericFieldChangeDialog(props) {
         setDialogError('');
     }
 
-    function changeField() {
+    async function changeField() {
         try {
-            onChangeField(fieldValueRef.current);
+            await onChangeField(fieldValueRef.current);
+            onRequestClose();
         } catch (e) {
             setDialogError(e.message);
         }

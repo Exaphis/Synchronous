@@ -87,8 +87,6 @@ function WorkspaceInfoBar(props) {
     const open = Boolean(anchorEl);
     const classes = useStyles();
 
-    const workspace = props.workspace;
-    const isLoggedIn = props.isLoggedIn;
     const updateNickname = props.onWorkspaceNicknameUpdate;
     const changePassword = props.onPasswordChange;
 
@@ -141,57 +139,58 @@ function WorkspaceInfoBar(props) {
     return (
         <AppBar position={"static"} className={clsx(classes.appBar)}>
             <Chat workspace={workspace} username={username}/>
-            <Toolbar className={classes.toolbar}>
-                <Typography variant="h4" className={classes.title}>
-                    {workspace.nickname !== null ? workspace.nickname : workspace.unique_id}
-                </Typography>
-                <Typography variant="h6" className={classes.title}>
+            <Toolbar className={classes.toolbar} style={{justifyContent: 'space-between'}}>
+                <Typography variant="h6">
                     &nbsp;&nbsp;&nbsp; Duration: {<Moment date={workspace.created_at} format="hh:mm:ss"
                                                           durationFromNow/> }
                 </Typography>
 
-                <Button color="secondary" variant="contained" edge="end"
-                        onClick={() => setNicknameDialogOpen(true)}>
-                    Change nickname
+                <Button color="secondary" onClick={() => setNicknameDialogOpen(true)}
+                        style={{textTransform: 'none', color: 'white'}}>
+                    <Typography variant="h4" className={classes.title}>
+                        {workspace.nickname !== null ? workspace.nickname : workspace.unique_id}
+                    </Typography>
                 </Button>
 
                 <WorkspaceNicknameChangeDialog isOpen={isNicknameDialogOpen}
                                                onRequestClose={() => setNicknameDialogOpen(false)}
                                                onNicknameUpdateAsync={updateNickname} />
 
-                {canChangePassword && (
-                    <div>
-                        <Button color="secondary" variant="contained" edge="end"
-                                onClick={() => setPasswordDialogOpen(true)}>
-                            Change password
-                        </Button>
-                        <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
-                                                       onRequestClose={() => setPasswordDialogOpen(false)}
-                                                       onPasswordChangeAsync={changePassword} />
-                    </div>
-                )}
+                <div>
+                    {canChangePassword && (
+                        <div>
+                            <Button color="secondary" variant="contained" edge="end"
+                                    onClick={() => setPasswordDialogOpen(true)}>
+                                Change password
+                            </Button>
+                            <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
+                                                           onRequestClose={() => setPasswordDialogOpen(false)}
+                                                           onPasswordChangeAsync={changePassword} />
+                        </div>
+                    )}
 
-                <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
-                    <PeopleIcon />
-                </IconButton>
+                    <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
+                        <PeopleIcon />
+                    </IconButton>
 
-                <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
-                    <GetAppIcon />
-                </IconButton>
+                    <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
+                        <GetAppIcon />
+                    </IconButton>
 
-                <UserListDialog isOpen={isUserListDialogOpen}
-                                onRequestClose={() => setUserListDialogOpen(false)}
-                                userList={userList}
-                                currUserId={userIdRef.current}
-                />
+                    <UserListDialog isOpen={isUserListDialogOpen}
+                                    onRequestClose={() => setUserListDialogOpen(false)}
+                                    userList={userList}
+                                    currUserId={userIdRef.current}
+                    />
 
-                <IconButton color="inherit" edge="end" onClick={handleMenu}>
-                    <EmailIcon />
-                </IconButton>
+                    <IconButton color="inherit" edge="end" onClick={handleMenu}>
+                        <EmailIcon />
+                    </IconButton>
 
-                <IconButton color="secondary" edge="end" onClick={handleHelp}>
-                    <HelpIcon />
-                </IconButton>
+                    <IconButton color="secondary" edge="end" onClick={handleHelp}>
+                        <HelpIcon />
+                    </IconButton>
+                </div>
 
                 <Menu
                     id="menu-appbar"
@@ -252,7 +251,6 @@ function WorkspaceInfoBar(props) {
                         </div>
                     </Container>
                 </Menu>
-
             </Toolbar>
         </AppBar>
     );

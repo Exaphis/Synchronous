@@ -9,3 +9,12 @@ body {
 ol, ul {
   padding-left: 30px;
 }
+
+/* stop react chat widget from blocking clicks if window resized */
+.rcw-widget-container {
+  pointer-events: none;
+}
+
+.rcw-launcher, .rcw-conversation-container {
+  pointer-events: auto;
+}
