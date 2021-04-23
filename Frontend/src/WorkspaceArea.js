@@ -398,11 +398,11 @@ function WorkspaceTab(props) {
         }
     }
 
-    React.useEffect(() => {
-        localStorage.setItem('offline', 'false');
-        addApp(APP_TYPE.OFFLINE_PAD);
-        // eslint-disable-next-line
-    }, [])
+    // React.useEffect(() => {
+    //     localStorage.setItem('offline', 'false');
+    //     addApp(APP_TYPE.OFFLINE_PAD);
+    //     // eslint-disable-next-line
+    // }, [])
 
     function addApp(type) {
         let name;
@@ -577,9 +577,6 @@ function WorkspaceTab(props) {
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.WHITEBOARD)} >
                         Add whiteboard
-                    </rps.MenuItem>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.TEMPLATE)} >
-                        Add test
                     </rps.MenuItem>
 
                     {

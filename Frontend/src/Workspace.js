@@ -109,6 +109,14 @@ function WorkspaceInfoBar(props) {
         setSent(false);
     };
 
+    const handleSnack2 = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setValidEmail(true);
+    };
+
     const history = useHistory();
 
     const handleHelp = () => {
@@ -123,7 +131,7 @@ function WorkspaceInfoBar(props) {
         setAnchorEl(null);
         document.getElementById('email').value = "";
         document.getElementById('message').value = "";
-        setValidEmail(true);
+        //etValidEmail(true);
     };
 
     const exportWorkspace = () => {
@@ -154,6 +162,12 @@ function WorkspaceInfoBar(props) {
                       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleSnack} severity="success">
                     Email Sent
+                </Alert>
+            </Snackbar>
+            <Snackbar open={!validEmail} autoHideDuration={6000} onClose={handleSnack2}
+                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleSnack2} severity="error">
+                    Email failed to send
                 </Alert>
             </Snackbar>
             <Chat workspace={workspace} username={username}/>
