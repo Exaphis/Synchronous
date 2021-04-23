@@ -88,6 +88,8 @@ function WorkspaceInfoBar(props) {
     const open = Boolean(anchorEl);
     const classes = useStyles();
 
+    const workspace = props.workspace;
+    const isLoggedIn = props.isLoggedIn;
     const updateNickname = props.onWorkspaceNicknameUpdate;
     const changePassword = props.onPasswordChange;
 
