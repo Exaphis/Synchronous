@@ -5,7 +5,7 @@ import {useIdleTimer} from "react-idle-timer";
 import useInterval from "@use-it/interval";
 import {
     AppBar, Avatar, Box, Button, Container, CssBaseline,
-    IconButton, Menu, TextField, Toolbar, Typography
+    IconButton, Menu, Snackbar, TextField, Toolbar, Typography
 } from "@material-ui/core";
 import s from "./Images/s.png";
 import clsx from "clsx";
@@ -30,6 +30,7 @@ import {UserListDialog} from "./components/UserListDialog";
 import './CSS/styles.css';
 import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChangeDialog";
 import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
+import Alert from "@material-ui/lab/Alert";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -37,7 +38,7 @@ export const WorkspaceUniqueIdContext = React.createContext(undefined);
 export const WorkspaceUserContext = React.createContext(undefined);
 
 
-async function emailHandler(email, message, workspace, validEmail, setValidEmail) {
+async function emailHandler(email, message, workspace, validEmail, setValidEmail, sent, setSent) {
     // eslint-disable-next-line
     let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -63,6 +64,7 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
         if (resp.error) {
             if (JSON.stringify(resp.details).includes("200")) {
                 alert('Email Sent');
+                setSent(true);
                 setValidEmail(true)
             } else {
                 alert('error!');
@@ -71,6 +73,7 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
             }
         } else {
             alert('Email Sent');
+            setSent(true)
             setValidEmail(true)
         }
 
@@ -84,6 +87,7 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
 function WorkspaceInfoBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [validEmail, setValidEmail] = React.useState(true)
+    const [sent, setSent] = React.useState(false);
     const open = Boolean(anchorEl);
     const classes = useStyles();
 
@@ -98,6 +102,17 @@ function WorkspaceInfoBar(props) {
     const [isUserListDialogOpen, setUserListDialogOpen] = React.useState(false);
     const [isNicknameDialogOpen, setNicknameDialogOpen] = React.useState(false);
     const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
+
+
+    const handleSnack = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setSent(false);
+    };
+
+
 
     const history = useHistory();
 
@@ -140,6 +155,12 @@ function WorkspaceInfoBar(props) {
 
     return (
         <AppBar position={"static"} className={clsx(classes.appBar)}>
+            <Snackbar open={sent} autoHideDuration={6000} onClose={handleClose}
+                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                <Alert onClose={handleClose} severity="success">
+                    Email Sent
+                </Alert>
+            </Snackbar>
             <Chat workspace={workspace} username={username}/>
             <Toolbar className={classes.toolbar}>
                 <Typography variant="h4" className={classes.title}>
@@ -242,7 +263,9 @@ function WorkspaceInfoBar(props) {
                                         document.getElementById('message'),
                                         workspace,
                                         validEmail,
-                                        setValidEmail
+                                        setValidEmail,
+                                        sent,
+                                        setSent
                                     ).then();
                                     handleClose();
                                 }}
