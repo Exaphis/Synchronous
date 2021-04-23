@@ -63,23 +63,20 @@ async function emailHandler(email, message, workspace, validEmail, setValidEmail
 
         if (resp.error) {
             if (JSON.stringify(resp.details).includes("200")) {
-                alert('Email Sent');
                 setSent(true);
                 setValidEmail(true)
             } else {
-                alert('error!');
-                alert(JSON.stringify(resp.details))
+                console.log(JSON.stringify(resp.details))
                 setValidEmail(false)
             }
         } else {
-            alert('Email Sent');
             setSent(true)
             setValidEmail(true)
         }
 
     } else {
-        alert("Invalid Email")
         setValidEmail(false)
+        console.log('invalid email address');
     }
 }
 
@@ -111,8 +108,6 @@ function WorkspaceInfoBar(props) {
 
         setSent(false);
     };
-
-
 
     const history = useHistory();
 
@@ -155,9 +150,9 @@ function WorkspaceInfoBar(props) {
 
     return (
         <AppBar position={"static"} className={clsx(classes.appBar)}>
-            <Snackbar open={sent} autoHideDuration={6000} onClose={handleClose}
+            <Snackbar open={sent} autoHideDuration={6000} onClose={handleSnack}
                       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-                <Alert onClose={handleClose} severity="success">
+                <Alert onClose={handleSnack} severity="success">
                     Email Sent
                 </Alert>
             </Snackbar>
