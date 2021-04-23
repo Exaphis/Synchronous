@@ -146,7 +146,7 @@ REST_FRAMEWORK = {
 }
 CORS_ALLOWED_ORIGINS = [
     "http://synchronous.localhost",
-    "http://synchronous.codes"
+    "https://synchronous.codes"
 ]
 
 # channels setup

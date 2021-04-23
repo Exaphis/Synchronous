@@ -19,7 +19,7 @@ import { useHistory } from "react-router-dom";
 
 import {
     fetchAPI, getUrlFromEndpoint, PUBSUB_TOPIC,
-    CLIENT_MSG_TYPE, SERVER_MSG_TYPE
+    CLIENT_MSG_TYPE, SERVER_MSG_TYPE, PROTOCOL_HTTP, PROTOCOL_WS
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
@@ -128,7 +128,7 @@ function WorkspaceInfoBar(props) {
 
     const exportWorkspace = () => {
         const link = document.createElement("a");
-        link.href = getUrlFromEndpoint('http', `workspace/${workspace.unique_id}/zip/`);
+        link.href = getUrlFromEndpoint(PROTOCOL_HTTP, `workspace/${workspace.unique_id}/zip/`);
         link.target = "_blank"
         link.click();
     };
@@ -343,7 +343,7 @@ function Workspace() {
         let wsUri = workspace['ws'];
 
         let ws = new WebSocket(
-            getUrlFromEndpoint('ws', wsUri)
+            getUrlFromEndpoint(PROTOCOL_WS, wsUri)
         );
 
         ws.onmessage = (event) => {

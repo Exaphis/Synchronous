@@ -1,15 +1,16 @@
-let APP_URL_MAPPING;
-export let TUSD_URL;
-export let BACKEND_URL;
-
 const protocol = window.location.protocol;
+const isInsecure = protocol === 'http:';
+
 const hostname = window.location.hostname
-TUSD_URL = `${protocol}//tusd.${hostname}/files/`;
-BACKEND_URL = `api.${hostname}`;
-APP_URL_MAPPING = {
+export const TUSD_URL = `${protocol}//tusd.${hostname}/files/`;
+export const BACKEND_URL = `api.${hostname}`;
+export const APP_URL_MAPPING = {
     'ETHERPAD_PLACEHOLDER': `${protocol}//etherpad.${hostname}`,
     'SPACEDECK_PLACEHOLDER': `${protocol}//spacedeck.${hostname}`
 }
+
+export const PROTOCOL_HTTP = protocol;
+export const PROTOCOL_WS = isInsecure ? 'ws:' : 'wss:';
 
 // pubsub topics used for communication within the frontend
 // pubsub topics and msg types must be unique!!
@@ -84,7 +85,7 @@ export function appendQueryParameter(url, name, value) {
 
 
 export function getUrlFromEndpoint(protocol, endpoint) {
-    return protocol + '://' + BACKEND_URL + '/' + endpoint;
+    return protocol + '//' + BACKEND_URL + '/' + endpoint;
 }
 
 export function fetchAPI(methodType, endpoint, data=null,
@@ -112,7 +113,7 @@ export function fetchAPI(methodType, endpoint, data=null,
         }
     }
 
-    return fetch(getUrlFromEndpoint('http', endpoint), requestOptions)
+    return fetch(getUrlFromEndpoint(PROTOCOL_HTTP, endpoint), requestOptions)
     .then(async response => {
         let data;
 
