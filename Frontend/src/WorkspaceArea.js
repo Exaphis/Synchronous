@@ -11,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
+import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import Alert from '@material-ui/lab/Alert';
 
 import Uppy from '@uppy/core';
@@ -26,6 +27,8 @@ import {
     SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI,
     appendQueryParameter, translateAppUrl
 } from "./api";
+import MaxWidthContainer from "./components/MaxWidthContainer";
+import {Sidebar} from "./components/Sidebar";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -555,50 +558,14 @@ function WorkspaceTab(props) {
                     You have lost connection
                 </Alert>
             </Snackbar>
-            {/*<Snackbar open={open} autoHideDuration={7000} onClose={handleClose}*/}
-            {/*          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>*/}
-            {/*    <Alert onClose={handleClose} severity="info">*/}
-            {/*        Offline pad opened for continued support*/}
-            {/*    </Alert>*/}
-            {/*</Snackbar>*/}
             <Snackbar open={open2} autoHideDuration={6000} onClose={handleClose2}
                       anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
                 <Alert onClose={handleClose2} severity="success">
                     You have regained connection
                 </Alert>
             </Snackbar>
-            <rps.ProSidebar>
-                <rps.Menu>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.FILE_SHARE)} >
-                        Add file share
-                    </rps.MenuItem>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
-                        Add pad
-                    </rps.MenuItem>
-                    <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.WHITEBOARD)} >
-                        Add whiteboard
-                    </rps.MenuItem>
 
-                    {
-                        Object.values(apps).map((app) => (
-                            app.minimized &&
-                            <rps.MenuItem key={app.id} onClick={app.switchMinimized}
-                                icon={
-                                    <IconButton component="div"
-                                                onClick={(event) => {
-                                                    event.stopPropagation();
-                                                    app.onClose();
-                                                }}
-                                                color="inherit">
-                                        <CloseIcon />
-                                    </IconButton>
-                                } >
-                                {app.name}
-                            </rps.MenuItem>
-                        ))
-                    }
-                </rps.Menu>
-            </rps.ProSidebar>
+            <Sidebar apps={apps} addApp={addApp} />
 
             <div style={{flexGrow: 1}}
                  id={`appArea-${props.tabId}`}
@@ -666,7 +633,7 @@ function WorkspaceArea() {
 
     // TODO: ability to hide sidebar
     return (
-        <Container component="main" maxWidth="xl" disableGutters={true}
+        <MaxWidthContainer component="main" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
             <AppBar position={"static"}>
                 <Toolbar variant="dense">
@@ -675,14 +642,16 @@ function WorkspaceArea() {
                             tabs.length === 0 ? null : tabs.map((tab) => {
                                 return (
                                     <Tab key={tab.unique_id} label={
-                                        <span> {tab.name}
+                                        <div style={{display: 'flex'}}>
+                                            <span>{tab.name}</span>
                                             <IconButton component="div"  // https://stackoverflow.com/a/63277341
                                                         onClick={(event) => closeTab(event, tab.unique_id)}
-                                                        color="inherit">
+                                                        color="inherit"
+                                                        style={{padding: '0px'}}>
                                                <CloseIcon />
                                             </IconButton>
-                                        </span>
-                                    }/>
+                                        </div>
+                                    } />
                                 );
                             })
                         }
@@ -695,7 +664,7 @@ function WorkspaceArea() {
             <div style={{flexGrow: 1}}>
                 { tabComponents }
             </div>
-        </Container>
+        </MaxWidthContainer>
     )
 }
 

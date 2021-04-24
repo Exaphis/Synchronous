@@ -20,8 +20,8 @@ import Workspace from './Workspace';
 import { fetchAPI } from './api';
 import Tutorial from './Tutorial';
 
-LogRocket.init('a1vl8a/synchronous');
-setupLogRocketReact(LogRocket);
+// LogRocket.init('a1vl8a/synchronous');
+// setupLogRocketReact(LogRocket);
 
 
 export default function App() {

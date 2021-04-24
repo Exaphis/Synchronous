@@ -10,6 +10,11 @@ ol, ul {
   padding-left: 30px;
 }
 
+.sidebar-minimized {
+  width: 2em;
+  min-width: 0;
+}
+
 /* stop react chat widget from blocking clicks if window resized */
 .rcw-widget-container {
   pointer-events: none;

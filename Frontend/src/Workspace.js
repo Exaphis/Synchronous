@@ -31,6 +31,7 @@ import './CSS/styles.css';
 import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChangeDialog";
 import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
 import Alert from "@material-ui/lab/Alert";
+import MaxWidthContainer from "./components/MaxWidthContainer";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -357,6 +358,7 @@ function Workspace() {
     const userListConnect = () => {
         let wsUri = workspace['ws'];
 
+        // TODO: try to reconnect automatically
         let ws = new WebSocket(
             getUrlFromEndpoint(PROTOCOL_WS, wsUri)
         );
@@ -512,7 +514,7 @@ function Workspace() {
     }
 
     return (
-        <Container component="main" maxWidth="xl" disableGutters={true}
+        <MaxWidthContainer component="main" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw'}}>
             <WorkspaceInfoBar
                 workspace={workspace}
@@ -528,7 +530,7 @@ function Workspace() {
                     <WorkspaceArea/>
                 </WorkspaceUserContext.Provider>
             </WorkspaceUniqueIdContext.Provider>
-        </Container>
+        </MaxWidthContainer>
     )
 }
 
