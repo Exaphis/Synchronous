@@ -189,17 +189,18 @@ function WorkspaceInfoBar(props) {
                                                onNicknameUpdateAsync={updateNickname} />
 
                 <div>
-                    {canChangePassword && (
-                        <div>
-                            <Button color="secondary" variant="contained" edge="end"
-                                    onClick={() => setPasswordDialogOpen(true)}>
-                                Change password
-                            </Button>
-                            <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
-                                                           onRequestClose={() => setPasswordDialogOpen(false)}
-                                                           onPasswordChangeAsync={changePassword} />
-                        </div>
-                    )}
+                    {canChangePassword &&
+                        <Button color="secondary" variant="contained" edge="end"
+                                onClick={() => setPasswordDialogOpen(true)}>
+                            Change password
+                        </Button>
+                    }
+
+                    {canChangePassword &&
+                        <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
+                                                       onRequestClose={() => setPasswordDialogOpen(false)}
+                                                       onPasswordChangeAsync={changePassword} />
+                    }
 
                     <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
                         <PeopleIcon />
@@ -512,7 +513,7 @@ function Workspace() {
 
     return (
         <Container component="main" maxWidth="xl" disableGutters={true}
-                   style={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
+                   style={{display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw'}}>
             <WorkspaceInfoBar
                 workspace={workspace}
                 isLoggedIn={tokenRef.current !== null}
