@@ -33,6 +33,7 @@ import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChang
 import Alert from "@material-ui/lab/Alert";
 import MaxWidthContainer from "./components/MaxWidthContainer";
 import {Helmet} from "react-helmet";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -362,8 +363,10 @@ function Workspace() {
         let wsUri = workspace['ws'];
 
         // TODO: try to reconnect automatically
-        let ws = new WebSocket(
-            getUrlFromEndpoint(PROTOCOL_WS, wsUri)
+        let ws = new ReconnectingWebSocket(
+            getUrlFromEndpoint(PROTOCOL_WS, wsUri),
+            null,
+            {debug: true, reconnectInterval: 500}
         );
 
         ws.onmessage = (event) => {

@@ -32,7 +32,7 @@ export function Sidebar(props) {
                         Add file share
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.PAD)} >
-                        Add pad
+                        Add text pad
                     </rps.MenuItem>
                     <rps.MenuItem icon={<AddIcon />} onClick={() => addApp(APP_TYPE.WHITEBOARD)} >
                         Add whiteboard
