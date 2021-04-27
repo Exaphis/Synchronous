@@ -43,6 +43,7 @@ import {
 } from "./api";
 import MaxWidthContainer from "./components/MaxWidthContainer";
 import {Sidebar} from "./components/Sidebar";
+import {useResizeDetector} from "react-resize-detector";
 
 function AppTitleBar(props) {
     const title = props.title !== undefined ? props.title : "Untitled Window";
@@ -52,7 +53,7 @@ function AppTitleBar(props) {
             backgroundColor: 'darkGray',
             display: 'flex',
             pointerEvents: 'auto'  // idk why this is needed, but if not minimize button doesn't work anymore
-        }} className="handle">
+        }} className="handle" ref={props.handleRef}>
             <span style={{flexGrow: 1, height: '100%', display: 'inline-flex',
                 alignItems: 'center', overflow: 'hidden'}}>
                 { title }
@@ -213,7 +214,7 @@ function OfflinePadAppContents(props) {
 function WorkspaceApp(props) {
     const {
         minimized, onClose, onMinimize, onMaximize, name, children,
-        requestTop, pointerEventsEnabled
+        requestTop, pointerEventsEnabled, handleRef
     } = props;
     const appContainerRef = React.useRef();
 
@@ -250,7 +251,7 @@ function WorkspaceApp(props) {
         }}>
             <AppTitleBar minimized={minimized} onClose={onClose}
                          onMinimize={onMinimize} onMaximize={onMaximize}
-                         title={name}/>
+                         title={name} handleRef={handleRef}/>
             {children}
         </div>
     )
@@ -264,11 +265,14 @@ function WorkspaceTab(props) {
     const [topAppUuid, setTopAppUuid] = React.useState();
     const [open, setOpen] = React.useState(false);
     const [open2, setOpen2] = React.useState(false);
-    const appAreaRef = React.useRef();
+    const appHandleRefs = React.useRef({});
 
     const status = async () => {
-        let response = await fetchAPI(
-            'GET', 'heartbeat/');
+        // TODO: use websocket status instead
+        // let response = await fetchAPI(
+        //     'GET', 'heartbeat/');
+        let response = {};
+        response.details = 200;
         if (response.details !== 200) {
             if (localStorage.getItem('offline') === 'false') {
                 setOpen(true);
@@ -319,14 +323,6 @@ function WorkspaceTab(props) {
         setApps((prevApps) => {
             let apps = Object.assign({}, prevApps);
             apps[appId].maximized = maximizedUpdater(apps[appId].maximized);
-
-            // if (apps[appId].maximized) {
-            //     for (const diffAppId in prevApps) {
-            //         if (diffAppId !== appId) {
-            //             apps[diffAppId].minimized = true;
-            //         }
-            //     }
-            // }
 
             return apps;
         });
@@ -419,12 +415,6 @@ function WorkspaceTab(props) {
         }
     }
 
-    // React.useEffect(() => {
-    //     localStorage.setItem('offline', 'false');
-    //     addApp(APP_TYPE.OFFLINE_PAD);
-    //     // eslint-disable-next-line
-    // }, [])
-
     function addApp(type) {
         let name;
         if (type === APP_TYPE.PAD) {
@@ -464,6 +454,42 @@ function WorkspaceTab(props) {
         );
     }
 
+    const onAppAreaResize = React.useCallback((width, height) => {
+        function triggerMouseEvent(node, evtType) {
+            const evt = new MouseEvent(evtType, {
+                bubbles: true,
+                cancelable: true,
+            });
+            node.dispatchEvent(evt);
+        }
+
+        const oldTopAppUuid = topAppUuid;
+        Object.keys(appHandleRefs.current).forEach(appId => {
+            if (appId in apps && !apps[appId].minimized) {
+                const appHandleRef = appHandleRefs.current[appId];
+                // simulate handler click in order to force react-draggable to update bounds check
+                // needed to update pos x,y=0 to the top left
+                // mousemove needed when expanding to not go past end of screen
+                // causes some lag when having many (3+) windows on screen when resizing
+                triggerMouseEvent(appHandleRef, 'mousedown');
+                triggerMouseEvent(appHandleRef, 'mousemove');
+                triggerMouseEvent(appHandleRef, 'mouseup');
+            }
+            else {
+                delete appHandleRefs.current[appId];
+            }
+        });
+
+        // ensure top app is not messed up by mouse events
+        setTopAppUuid(oldTopAppUuid);
+    }, [apps, topAppUuid, setTopAppUuid]);
+
+    const {
+        width: appAreaWidth,
+        height: appAreaHeight,
+        ref: appAreaRef
+    } = useResizeDetector({ onResize: onAppAreaResize });
+
     const appComponents = Object.values(apps).map((app) => {
         let appContents;
         if (app.type === APP_TYPE.PAD) {
@@ -500,8 +526,8 @@ function WorkspaceTab(props) {
                 bounds={`#appArea-${props.tabId}`}
                 size={{
                     // appAreaRef should now contain the reference to the apparea element
-                    width: app.maximized ? appAreaRef.current.clientWidth : app.width,
-                    height: app.maximized ? appAreaRef.current.clientHeight : app.height,
+                    width: app.maximized ? appAreaWidth : app.width,
+                    height: app.maximized ? appAreaHeight : app.height,
                 }}
                 position={{
                     x: app.maximized ? 0 : app.x,
@@ -549,15 +575,13 @@ function WorkspaceTab(props) {
                 <WorkspaceApp minimized={app.minimized} onClose={app.onClose}
                               onMinimize={app.onMinimize} onMaximize={app.switchMaximized}
                               uuid={app.id} name={app.name} requestTop={sendToTop}
-                              pointerEventsEnabled={pointerEventsEnabled} >
+                              pointerEventsEnabled={pointerEventsEnabled}
+                              handleRef={c => {appHandleRefs.current[app.id] = c;}} >
                     {appContents}
                 </WorkspaceApp>
             </Rnd>
         );
     });
-
-    function clampApps() {
-    }
 
     return (
         <div style={{
