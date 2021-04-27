@@ -47,7 +47,7 @@ def hook(request):
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f'user-list_{workspace_uuid}',
+            f'ws_{workspace.unique_id}',
             {'type': 'file_list_changed', 'file_list': files}
         )
         return Response()

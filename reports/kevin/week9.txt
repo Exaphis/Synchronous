@@ -1,0 +1,12 @@
+=== Weekly Individual Report (Team 10: Synchronous) ===
+Name: Kevin Wu
+
+Week 9 (Summary)
+4/20/21 3 hrs    bfa404e Connect Spacedeck API with app creation on sidebar
+4/21/21 3 hrs    d10779e Allow export of space as PDF/JPG/PNG (in spacedeck-open repo)
+4/21/21 2 hrs    2f5220c Replace alert in workspaceUI with proper dialogs
+4/21/21 2 hrs    e178ea2 Allow POSTing array of artifacts to a space for use in importing
+                         deleted spaces (in spacedeck-open repo)
+4/22/21 4 hrs    46cd9cc Allow for import and export of workspaces to/from ZIPs
+4/22/21 3 hrs    71536c5 Host Synchronous on remote server for remote access
+4/23/21 1 hr     baf07f4 Clean up workspace UI

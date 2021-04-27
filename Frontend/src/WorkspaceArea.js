@@ -1,17 +1,25 @@
 import {
-    AppBar, Container, IconButton, Tab, Tabs,
-    Typography, Toolbar, Button, Box, Paper, Grid, Snackbar
+    AppBar,
+    Box,
+    Button,
+    Container,
+    Grid,
+    IconButton,
+    Paper,
+    Snackbar,
+    Tab,
+    Tabs,
+    Toolbar,
+    Typography
 } from "@material-ui/core";
 import * as React from "react";
 import {Rnd} from "react-rnd";
-import * as rps from "react-pro-sidebar";
 import {PubSub} from "pubsub-js";
 import AddIcon from "@material-ui/icons/Add";
 import CloseIcon from '@material-ui/icons/Close';
 import MinimizeIcon from '@material-ui/icons/Minimize';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
-import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
 import Alert from '@material-ui/lab/Alert';
 
 import Uppy from '@uppy/core';
@@ -24,8 +32,14 @@ import '@uppy/dashboard/dist/style.css';
 
 import {WorkspaceUniqueIdContext, WorkspaceUserContext} from "./Workspace";
 import {
-    SERVER_MSG_TYPE, PUBSUB_TOPIC, TUSD_URL, APP_TYPE, CLIENT_MSG_TYPE, fetchAPI,
-    appendQueryParameter, translateAppUrl
+    APP_TYPE,
+    appendQueryParameter,
+    CLIENT_MSG_TYPE,
+    fetchAPI,
+    PUBSUB_TOPIC,
+    SERVER_MSG_TYPE,
+    translateAppUrl,
+    TUSD_URL
 } from "./api";
 import MaxWidthContainer from "./components/MaxWidthContainer";
 import {Sidebar} from "./components/Sidebar";
@@ -69,6 +83,19 @@ function FileUploadAppContents() {
             },
             meta: {
                 workspaceUniqueId: workspaceUniqueId
+            },
+            onBeforeUpload: (files) => {
+                // modify all file ids in order to allow for duplicate file uploads
+                // segregated by workspace ID
+                const updatedFiles = {};
+                Object.keys(files).forEach(fileId => {
+                    const newFileId = fileId + `/${workspaceUniqueId}`;
+                    updatedFiles[newFileId] = {
+                        ...files[fileId],
+                        id: newFileId
+                    }
+                })
+                return updatedFiles;
             }
         }).use(Tus, {endpoint: TUSD_URL});
     })
@@ -82,10 +109,12 @@ function FileUploadAppContents() {
          * @param {string} data.file_list[].created_at - Timestamp of when the file was uploaded.
          */
         let token = PubSub.subscribe(SERVER_MSG_TYPE.FILE_LIST, (msg, data) => {
+            console.log('file list received:');
+            console.log(data);
             setFileComponents(
                 data.file_list.map((file) => {
                     return (
-                        <Box my={5}>
+                        <Box my={5} key={file.file_id}>
                             <Paper>
                                 <Grid container style={{display: "flex"}}>
                                     <Grid item style={{display: "flex", flexGrow: 1,
@@ -129,7 +158,6 @@ function FileUploadAppContents() {
                 <Button variant="contained" color="primary" onClick={() => setModalOpen(true)}>
                     Share a file
                 </Button>
-                {/* Portal to root needed for modal? */}
                 <DashboardModal
                     uppy={uppy}
                     closeModalOnClickOutside
@@ -246,17 +274,7 @@ function WorkspaceTab(props) {
                 setOpen(true);
                 setOpen2(false);
                 localStorage.setItem('offline', 'true');
-                // for (let app in apps) {
-                //     if (apps[app].name === 'Offline Pad') {
-                //         apps[app].minimized = false;
-                //         break;
-                //     }
-                // }
             }
-            // if (!hasOffline) {
-            //     console.log('add')
-            //     addApp(APP_TYPE.OFFLINE_PAD);
-            // }
         } else if (localStorage.getItem('offline') === 'true') {
             localStorage.setItem('offline', 'false');
             console.log('regain')
@@ -522,7 +540,6 @@ function WorkspaceTab(props) {
                 minHeight='200px'  // how to not use magic constants?
                 minWidth='50px'
                 style={{     // change z index to prioritize recently selected app
-                    // TODO: set topAppUuid when anything is clicked, not just drag
                     zIndex: topAppUuid === app.id ? '1' : 'auto',
                     // allow pointer events to pass through if it is minimized as the element
                     // will still be on top
@@ -539,6 +556,8 @@ function WorkspaceTab(props) {
         );
     });
 
+    function clampApps() {
+    }
 
     return (
         <div style={{
@@ -565,14 +584,14 @@ function WorkspaceTab(props) {
                 </Alert>
             </Snackbar>
 
-            <Sidebar apps={apps} addApp={addApp} />
+            <Sidebar apps={apps} addApp={addApp}/>
 
-            <div style={{flexGrow: 1}}
+            <div
+                 style={{flexGrow: 1}}
                  id={`appArea-${props.tabId}`}
                  ref={appAreaRef}>
                 { appComponents }
             </div>
-
         </div>
     )
 }
@@ -631,12 +650,11 @@ function WorkspaceArea() {
         });
     }
 
-    // TODO: ability to hide sidebar
     return (
         <MaxWidthContainer component="main" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
             <AppBar position={"static"}>
-                <Toolbar variant="dense">
+                <Toolbar variant={"regular"/*"dense"*/}>
                     <Tabs value={currTab} edge="start" onChange={handleTabChange}>
                         {
                             tabs.length === 0 ? null : tabs.map((tab) => {

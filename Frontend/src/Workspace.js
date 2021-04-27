@@ -4,7 +4,7 @@ import * as React from "react";
 import {useIdleTimer} from "react-idle-timer";
 import useInterval from "@use-it/interval";
 import {
-    AppBar, Avatar, Box, Button, Container, CssBaseline,
+    AppBar, Avatar, Badge, Box, Button, Container, CssBaseline,
     IconButton, Menu, Snackbar, TextField, Toolbar, Typography
 } from "@material-ui/core";
 import s from "./Images/s.png";
@@ -32,6 +32,7 @@ import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChang
 import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
 import Alert from "@material-ui/lab/Alert";
 import MaxWidthContainer from "./components/MaxWidthContainer";
+import {Helmet} from "react-helmet";
 
 const STREAM_API = 'n9utf8kxctuk'
 
@@ -204,7 +205,9 @@ function WorkspaceInfoBar(props) {
                     }
 
                     <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
-                        <PeopleIcon />
+                        <Badge badgeContent={Object.keys(userList).length}>
+                            <PeopleIcon />
+                        </Badge>
                     </IconButton>
 
                     <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
@@ -388,7 +391,7 @@ function Workspace() {
     }
 
     const sendActivityMessage = (active) => {
-        if (userListWs !== null) {
+        if (userListWs !== null && userListWs.readyState === WebSocket.OPEN) {
             userListWs.send(JSON.stringify(
                 {
                     'type': CLIENT_MSG_TYPE.ACTIVITY,
@@ -481,6 +484,9 @@ function Workspace() {
     if (workspace !== null && workspace.error) {
         return (
             <Container component="main" maxWidth="xs">
+                <Helmet>
+                    <title>Workspace</title>
+                </Helmet>
                 <CssBaseline/>
                 <Box mt={4}>
                 </Box>
@@ -516,6 +522,9 @@ function Workspace() {
     return (
         <MaxWidthContainer component="main" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw'}}>
+            <Helmet>
+                <title>Workspace</title>
+            </Helmet>
             <WorkspaceInfoBar
                 workspace={workspace}
                 isLoggedIn={tokenRef.current !== null}

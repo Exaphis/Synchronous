@@ -27,12 +27,17 @@ import chatstep from './tutorial_images/Chat-Step.png';
 import padstep from './tutorial_images/Pad-Step.png';
 import filesharestep from './tutorial_images/FileShare-Step.png';
 import {Redirect} from "react-router";
+import {Helmet} from "react-helmet";
+import * as React from "react";
 
 export default function Tutorial() {
     const history = useHistory();
 
     return (
         <HashRouter>
+            <Helmet>
+                <title>Tutorial</title>
+            </Helmet>
             <Route exact path="/">
                 <Redirect to="/introduction" />
             </Route>

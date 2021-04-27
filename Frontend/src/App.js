@@ -8,8 +8,6 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import 'react-pro-sidebar/dist/css/styles.css';
 import {BrowserRouter, Link, Route, Switch, useHistory} from "react-router-dom";
-import LogRocket from 'logrocket';
-import setupLogRocketReact from 'logrocket-react';
 import {Helmet} from 'react-helmet';
 import './CSS/styles.css';
 
@@ -170,6 +168,9 @@ function CreateWorkspace() {
 
     return (
         <Container component="main" maxWidth="xs">
+            <Helmet>
+                <title>Create Workspace</title>
+            </Helmet>
             <CssBaseline/>
             <div className={classes.paper}>
                 <Box mb={4}>
@@ -375,6 +376,9 @@ function OpenWorkspace() {
 
     const prevWorkspaceMenuBox = (
         <Box mt={4} mb={4}>
+            <Helmet>
+                <title>Open Workspace</title>
+            </Helmet>
             <Button variant="contained" onClick={handleMenuClick}>
                 Open Previous Workspace
             </Button>
