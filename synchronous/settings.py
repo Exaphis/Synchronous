@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'g00v#yyz4r_^p1fhv5am%i(w!!^k4tqnp^p_e(o+rh@5#&9q4p'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -181,8 +181,9 @@ CELERYBEAT_SCHEDULE = {
 
 # Email settings for auto delete
 MAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# TODO: setup mail api
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'synchronous307@gmail.com'
-EMAIL_HOST_PASSWORD = 'Teslasucks'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
