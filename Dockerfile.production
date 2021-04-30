@@ -5,4 +5,3 @@ RUN pip install -r requirements.txt
 COPY . /app
 
 WORKDIR /app
-RUN python3 manage.py migrate
