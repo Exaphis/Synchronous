@@ -139,6 +139,9 @@ cython_debug/
 
 .idea/
 .DS_Store
+secrets.env
+db-data/*
+*.swp
 
 # ------ React .gitignore ------
 # # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.

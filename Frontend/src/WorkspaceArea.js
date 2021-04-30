@@ -35,7 +35,6 @@ import {
     APP_TYPE,
     appendQueryParameter,
     CLIENT_MSG_TYPE,
-    fetchAPI,
     PUBSUB_TOPIC,
     SERVER_MSG_TYPE,
     translateAppUrl,
@@ -625,6 +624,9 @@ function WorkspaceArea() {
     const [tabs, setTabs] = React.useState([]);
     const [currTab, setCurrTab] = React.useState(0);
 
+    // if true, go to the end of the tab list once the a tab list is received
+    const goToEndAfterCreation = React.useRef(false);
+
     React.useEffect(() => {
         PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {
             // console.log('set tab list:');
@@ -632,8 +634,15 @@ function WorkspaceArea() {
 
             const tabList = data['tab_list'];
             setTabs(tabList);
-            if (tabList.length > 0 && (currTab < 0 || currTab >= tabList.length)) {
+
+            if (goToEndAfterCreation.current) {
                 setCurrTab(tabList.length - 1);
+                goToEndAfterCreation.current = false;
+            }
+            else {
+                if (tabList.length > 0 && (currTab < 0 || currTab >= tabList.length)) {
+                    setCurrTab(tabList.length - 1);
+                }
             }
         });
     }, [currTab])
@@ -649,7 +658,7 @@ function WorkspaceArea() {
 
         // use function to avoid capturing the current value of currTab
         // within closure
-        setCurrTab(currTab => Math.min(currTab, tabs.length - 2));
+        setCurrTab(currTab => Math.max(0, Math.min(currTab, tabs.length - 2)));
 
         PubSub.publish(
             PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
@@ -658,14 +667,21 @@ function WorkspaceArea() {
     }
 
     function createNewTab() {
-        setCurrTab(tabs.length);  // new tab will be appended to the end (hopefully!)
+        goToEndAfterCreation.current = true;
         PubSub.publish(
             PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
             {'type': CLIENT_MSG_TYPE.NEW_TAB, 'name': 'Unnamed tab'}
         );
     }
 
-    let tabComponents = <p>You have no tabs. How about creating one?</p>;
+    let tabComponents = (
+        <div style={{backgroundColor: 'lightGray', height: '100%', display: 'flex',
+            justifyContent: 'center', alignItems: 'center'}}>
+            {/*<Typography variant={"h4"}>*/}
+            {/*    Create a new tab using <AddIcon />*/}
+            {/*</Typography>*/}
+        </div>
+    );
     if (tabs.length > 0) {
         tabComponents = tabs.map((tab, tabIdx) => {
             return <WorkspaceTab key={tab.unique_id}
@@ -678,7 +694,7 @@ function WorkspaceArea() {
         <MaxWidthContainer component="main" disableGutters={true}
                    style={{display: 'flex', flexDirection: 'column', flexGrow: 1}}>
             <AppBar position={"static"}>
-                <Toolbar variant={"regular"/*"dense"*/}>
+                <Toolbar variant={"dense"}>
                     <Tabs value={currTab} edge="start" onChange={handleTabChange}>
                         {
                             tabs.length === 0 ? null : tabs.map((tab) => {

@@ -1,5 +1,5 @@
 from django.apps import AppConfig
-from django.db.utils import OperationalError
+from django.db.utils import OperationalError, ProgrammingError
 
 
 class UsersConfig(AppConfig):
@@ -13,5 +13,6 @@ class UsersConfig(AppConfig):
         # from the database.
         try:
             WorkspaceUser.objects.all().delete()
-        except OperationalError:  # errors if migrating from empty database, ignore
+        except (OperationalError, ProgrammingError):
+            # errors if migrating from empty database, ignore
             pass

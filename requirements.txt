@@ -9,3 +9,4 @@ celery
 etherpad_lite
 requests
 channels_redis
+psycopg2

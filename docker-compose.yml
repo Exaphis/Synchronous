@@ -14,6 +14,16 @@ services:
       - tusd
   redis:
     image: redis
+  db:
+    image: postgres
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+      - ./init-pg-dbs.sh:/docker-entrypoint-initdb.d/init-pg-dbs.sh
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+    env_file:
+      - secrets.env
   backend:
     build: .
     command: >
@@ -23,6 +33,10 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    depends_on:
+      - db
+    env_file:
+      - secrets.env
   frontend:
     build: ./Frontend
     command: npm start
@@ -37,18 +51,29 @@ services:
     command: -hooks-http http://backend:8000/tusd/ -max-size 10485760 -hooks-http-forward-headers Authorization -behind-proxy
   etherpad:
     build: etherpad-lite
+    entrypoint: /custom-entrypoint.sh
     ports:
       - "9001:9001"
     volumes:
       - ./docker/etherpad/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+      - ./docker/etherpad/custom-entrypoint.sh:/custom-entrypoint.sh
     environment:
-      DEFAULT_PAD_TEXT: "hello\n"
       SOFFICE: "/usr/bin/soffice"
       ADMIN_PASSWORD: "admin"
+      DB_TYPE: "postgres"
+      DB_HOST: "db"
+      DB_PORT: "5432"
+      DB_NAME: "etherpad"
+      DB_USER: "etherpad"
+    depends_on:
+      - db
+    env_file:
+      - secrets.env
   spacedeck:
     build: spacedeck-open
     ports:
       - "9666:9666"
-    volumes:
-      - ./docker/spacedeck/storage:/app/storage
-      - ./docker/spacedeck/database.sqlite:/app/database.sqlite
+    depends_on:
+      - db
+    env_file:
+      - secrets.env

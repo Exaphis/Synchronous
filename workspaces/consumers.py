@@ -36,6 +36,7 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
         try:
             self.workspace = Workspace.objects.get(unique_id=unique_id)
         except Workspace.DoesNotExist:
+            print('Workspace does not exist')
             self.close('Workspace does not exist')
             return
 
