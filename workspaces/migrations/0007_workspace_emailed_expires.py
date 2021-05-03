@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workspaces', '0006_workspace_expiration_date'),
+        ("workspaces", "0006_workspace_expiration_date"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workspace',
-            name='emailed_expires',
+            model_name="workspace",
+            name="emailed_expires",
             field=models.BooleanField(default=False),
         ),
     ]

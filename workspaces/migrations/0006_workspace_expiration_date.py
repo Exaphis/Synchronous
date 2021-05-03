@@ -7,13 +7,13 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workspaces', '0005_auto_20210306_2318'),
+        ("workspaces", "0005_auto_20210306_2318"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workspace',
-            name='expiration_date',
+            model_name="workspace",
+            name="expiration_date",
             field=models.DateTimeField(default=django.utils.timezone.now),
             preserve_default=False,
         ),

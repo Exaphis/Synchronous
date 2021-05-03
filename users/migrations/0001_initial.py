@@ -11,17 +11,36 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('workspaces', '0005_auto_20210306_2318'),
+        ("workspaces", "0005_auto_20210306_2318"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WorkspaceUser',
+            name="WorkspaceUser",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nickname', models.CharField(max_length=150)),
-                ('color', colorfield.fields.ColorField(default=users.models.get_random_color, max_length=18)),
-                ('workspace', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='workspaces.workspace')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("nickname", models.CharField(max_length=150)),
+                (
+                    "color",
+                    colorfield.fields.ColorField(
+                        default=users.models.get_random_color, max_length=18
+                    ),
+                ),
+                (
+                    "workspace",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="workspaces.workspace",
+                    ),
+                ),
             ],
         ),
     ]

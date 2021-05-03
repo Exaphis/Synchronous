@@ -6,4 +6,10 @@ from .models import WorkspaceUser
 class WorkspaceUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkspaceUser
-        fields = ('nickname', 'color', 'active', 'id', 'went_inactive_at')  # ignore foreign key
+        fields = (
+            "nickname",
+            "color",
+            "active",
+            "id",
+            "went_inactive_at",
+        )  # ignore foreign key

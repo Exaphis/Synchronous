@@ -33,7 +33,9 @@ class WorkspaceManager(models.Manager):
         workspace = self.model(nickname=nickname, anonymous_readable=anonymous_readable)
         workspace.expiration_date = timezone.now() + datetime.timedelta(minutes=2)
         if password:
-            workspace.user = User.objects.create_user(workspace.unique_id, password=password)
+            workspace.user = User.objects.create_user(
+                workspace.unique_id, password=password
+            )
 
         workspace.save()
 
@@ -46,9 +48,13 @@ class Workspace(models.Model):
     unique_id = models.UUIDField(default=uuid.uuid4, editable=False)
     nickname = models.CharField(max_length=150, unique=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    anonymous_readable = models.BooleanField(default=False)  # only matters if user is not None
+    anonymous_readable = models.BooleanField(
+        default=False
+    )  # only matters if user is not None
     expiration_date = models.DateTimeField()
-    emailed_expires = models.BooleanField(default=False)  # have we emailed the user already
+    emailed_expires = models.BooleanField(
+        default=False
+    )  # have we emailed the user already
     # user field for workspace authentication in order to use default Django auth methods
     user = models.OneToOneField(User, null=True, on_delete=models.SET_NULL)
 
@@ -56,7 +62,7 @@ class Workspace(models.Model):
         return str(self.unique_id)
 
     def get_ws_endpoint(self):
-        return f'ws/{self.unique_id}/'
+        return f"ws/{self.unique_id}/"
 
     def is_password_protected(self):
         return self.user is not None
@@ -69,16 +75,16 @@ class WorkspaceTab(models.Model):
     name = models.CharField(max_length=255)
 
     class Meta:
-        ordering = ['created_at']
+        ordering = ["created_at"]
 
 
 def iter_specific_apps(app_iterable):
     for app in app_iterable:
-        if hasattr(app, 'workspacepadapp'):
+        if hasattr(app, "workspacepadapp"):
             yield app.workspacepadapp
-        elif hasattr(app, 'workspacefileshareapp'):
+        elif hasattr(app, "workspacefileshareapp"):
             yield app.workspacefileshareapp
-        elif hasattr(app, 'workspacewhiteboardapp'):
+        elif hasattr(app, "workspacewhiteboardapp"):
             yield app.workspacewhiteboardapp
         else:
             yield app
@@ -102,7 +108,7 @@ class WorkspaceApp(models.Model):
     # of a tab
 
     def __str__(self):
-        return f'WorkspaceApp({self.name}, {self.unique_id})'
+        return f"WorkspaceApp({self.name}, {self.unique_id})"
 
     def download_data(self):
         """
@@ -127,19 +133,18 @@ class WorkspacePadAppManager(models.Manager):
         app = self.model(tab=tab, name=name)
 
         resp = etherpad_client.createPad(
-            padID=str(app.unique_id),
-            text='Welcome to Synchronous!'
+            padID=str(app.unique_id), text="Welcome to Synchronous!"
         )
 
-        print('Created new pad, response:')
+        print("Created new pad, response:")
         print(resp)
 
         resp = etherpad_client.getReadOnlyID(
             padID=str(app.unique_id),
         )
-        read_only_id = resp['readOnlyID']
+        read_only_id = resp["readOnlyID"]
 
-        print('getReadOnlyID response:')
+        print("getReadOnlyID response:")
         print(read_only_id)
 
         app.pad_id = str(app.unique_id)
@@ -156,44 +161,42 @@ class WorkspacePadApp(WorkspaceApp):
     read_only_id = models.CharField(max_length=255)
 
     def get_iframe_url(self):
-        return f'ETHERPAD_PLACEHOLDER/p/{self.pad_id}'
+        return f"ETHERPAD_PLACEHOLDER/p/{self.pad_id}"
 
     def get_iframe_url_read_only(self):
-        return f'ETHERPAD_PLACEHOLDER/p/{self.read_only_id}'
+        return f"ETHERPAD_PLACEHOLDER/p/{self.read_only_id}"
 
     def download_data(self):
         with NamedTemporaryFile(delete=False) as out_file:
-            resp = requests.get(f'http://etherpad:9001/p/{self.pad_id}/export/etherpad')
+            resp = requests.get(f"http://etherpad:9001/p/{self.pad_id}/export/etherpad")
             out_file.write(resp.content)
             return out_file.name
 
     def import_data(self, data: bytes):
-        print('importing pad...')
+        print("importing pad...")
         file_stream = io.BytesIO(data)
-        file_stream.name = 'stream.etherpad'  # must add .etherpad so it recognizes format
+        file_stream.name = (
+            "stream.etherpad"  # must add .etherpad so it recognizes format
+        )
         resp = requests.post(
-            f'http://etherpad:9001/p/{self.pad_id}/import',
-            files={'file': file_stream}
+            f"http://etherpad:9001/p/{self.pad_id}/import", files={"file": file_stream}
         )
         print(resp.text)
         return resp.ok
 
     def __str__(self):
-        return f'Etherpad({self.pad_id})'
+        return f"Etherpad({self.pad_id})"
 
 
 @receiver(pre_delete, sender=WorkspacePadApp)
 def delete_etherpad(sender, instance, **kwargs):
-    print(f'Deleting etherpad {instance}...')
+    print(f"Deleting etherpad {instance}...")
     etherpad_client.deletePad(padID=str(instance.unique_id))
-    print('Pad deleted from Etherpad.')
+    print("Pad deleted from Etherpad.")
 
 
 class WorkspaceFileShareApp(WorkspaceApp):
-    tusd_file_share = models.ForeignKey(
-        TusdFileShare,
-        on_delete=models.CASCADE
-    )
+    tusd_file_share = models.ForeignKey(TusdFileShare, on_delete=models.CASCADE)
 
 
 class WorkspaceWhiteboardAppManager(models.Manager):
@@ -202,7 +205,7 @@ class WorkspaceWhiteboardAppManager(models.Manager):
         Create an space in Spacedeck and return the model.
         """
         app = self.model(tab=tab, name=name)
-        print('Creating Spacedeck space...')
+        print("Creating Spacedeck space...")
 
         # SpacedeckClient is a singleton, so not much overhead
         spacedeck = SpacedeckClient()
@@ -210,7 +213,7 @@ class WorkspaceWhiteboardAppManager(models.Manager):
         space = spacedeck.create_space(app.space_id)
         app.edit_hash = space.edit_hash
         print(space)
-        print('Space created.')
+        print("Space created.")
         app.save()
 
         return app
@@ -223,17 +226,19 @@ class WorkspaceWhiteboardApp(WorkspaceApp):
     edit_hash = models.CharField(max_length=255)
 
     def get_iframe_url(self):
-        return f'SPACEDECK_PLACEHOLDER/spaces/{self.space_id}?spaceAuth={self.edit_hash}'
+        return (
+            f"SPACEDECK_PLACEHOLDER/spaces/{self.space_id}?spaceAuth={self.edit_hash}"
+        )
 
     def get_iframe_url_read_only(self):
-        return f'SPACEDECK_PLACEHOLDER/spaces/{self.space_id}'
+        return f"SPACEDECK_PLACEHOLDER/spaces/{self.space_id}"
 
     def download_data(self):
         client = SpacedeckClient()
         artifacts = client.get_artifacts(self.space_id)
 
         with NamedTemporaryFile(delete=False) as out_file:
-            out_file.write(artifacts.encode('utf-8'))
+            out_file.write(artifacts.encode("utf-8"))
             return out_file.name
 
     def import_data(self, data: bytes):
@@ -241,15 +246,15 @@ class WorkspaceWhiteboardApp(WorkspaceApp):
         return client.set_artifacts(self.unique_id, data)
 
     def __str__(self):
-        return f'Whiteboard({self.space_id})'
+        return f"Whiteboard({self.space_id})"
 
 
 @receiver(pre_delete, sender=WorkspaceWhiteboardApp)
 def delete_etherpad(sender, instance, **kwargs):
     spacedeck = SpacedeckClient()
-    print(f'Deleting space {instance}...')
+    print(f"Deleting space {instance}...")
     spacedeck.delete_space(str(instance.unique_id))
-    print('Space deleted from Spacedeck.')
+    print("Space deleted from Spacedeck.")
 
 
 # catch post-save signal for user to generate its token

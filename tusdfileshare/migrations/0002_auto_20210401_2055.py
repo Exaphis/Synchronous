@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tusdfileshare', '0001_initial'),
+        ("tusdfileshare", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='tusdfile',
-            options={'ordering': ['created_at']},
+            name="tusdfile",
+            options={"ordering": ["created_at"]},
         ),
     ]

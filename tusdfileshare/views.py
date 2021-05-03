@@ -9,19 +9,19 @@ from .models import TusdFileShare, TusdFile
 from .serializers import TusdFileSerializer
 
 
-@api_view(['POST'])
+@api_view(["POST"])
 def hook(request):
     # TODO: deny requests not from tusd
-    hook_name = request.headers.get('Hook-Name', '')
+    hook_name = request.headers.get("Hook-Name", "")
 
     print(hook_name)
     print(request.data)
-    upload = request.data['Upload']
-    metadata = upload['MetaData']
-    workspace_uuid = metadata['workspaceUniqueId']
-    file_name = metadata['filename']
+    upload = request.data["Upload"]
+    metadata = upload["MetaData"]
+    workspace_uuid = metadata["workspaceUniqueId"]
+    file_name = metadata["filename"]
 
-    if hook_name == 'pre-create':
+    if hook_name == "pre-create":
         # TODO: verify authorization
         try:
             Workspace.objects.get(unique_id=workspace_uuid)
@@ -29,29 +29,26 @@ def hook(request):
             return Response(status=HTTP_400_BAD_REQUEST)
 
         return Response()
-    elif hook_name == 'post-finish':
-        file_id = upload['ID']
+    elif hook_name == "post-finish":
+        file_id = upload["ID"]
 
         workspace = Workspace.objects.get(unique_id=workspace_uuid)
         tusd_file_share, _ = TusdFileShare.objects.get_or_create(workspace=workspace)
         TusdFile.objects.create(
-            file_share=tusd_file_share,
-            file_id=file_id,
-            name=file_name
+            file_share=tusd_file_share, file_id=file_id, name=file_name
         )
 
         files = TusdFileSerializer(
-            TusdFile.objects.filter(file_share=tusd_file_share),
-            many=True
+            TusdFile.objects.filter(file_share=tusd_file_share), many=True
         ).data
 
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
-            f'ws_{workspace.unique_id}',
-            {'type': 'file_list_changed', 'file_list': files}
+            f"ws_{workspace.unique_id}",
+            {"type": "file_list_changed", "file_list": files},
         )
         return Response()
-    elif hook_name in ('post-create', 'post-receive', 'post-terminate'):
+    elif hook_name in ("post-create", "post-receive", "post-terminate"):
         return Response()
 
     return Response(status=HTTP_400_BAD_REQUEST)

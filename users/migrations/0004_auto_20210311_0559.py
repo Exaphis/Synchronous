@@ -7,13 +7,15 @@ import users.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0003_workspaceuser_went_inactive_at'),
+        ("users", "0003_workspaceuser_went_inactive_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='workspaceuser',
-            name='nickname',
-            field=models.CharField(default=users.models.get_random_nickname, max_length=150),
+            model_name="workspaceuser",
+            name="nickname",
+            field=models.CharField(
+                default=users.models.get_random_nickname, max_length=150
+            ),
         ),
     ]

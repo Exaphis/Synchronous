@@ -9,20 +9,24 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('workspaces', '0002_auto_20210306_1953'),
+        ("workspaces", "0002_auto_20210306_1953"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='workspace',
-            name='password',
+            model_name="workspace",
+            name="password",
         ),
         migrations.AddField(
-            model_name='workspace',
-            name='user',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="workspace",
+            name="user",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.DeleteModel(
-            name='WorkspaceToken',
+            name="WorkspaceToken",
         ),
     ]

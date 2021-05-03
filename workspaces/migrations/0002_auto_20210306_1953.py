@@ -7,36 +7,55 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workspaces', '0001_initial'),
+        ("workspaces", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workspace',
-            name='nickname',
-            field=models.CharField(default='', max_length=150, unique=True),
+            model_name="workspace",
+            name="nickname",
+            field=models.CharField(default="", max_length=150, unique=True),
         ),
         migrations.AddField(
-            model_name='workspace',
-            name='password',
-            field=models.CharField(default='', max_length=128, verbose_name='password'),
+            model_name="workspace",
+            name="password",
+            field=models.CharField(default="", max_length=128, verbose_name="password"),
         ),
         migrations.AddField(
-            model_name='workspace',
-            name='viewable_without_password',
+            model_name="workspace",
+            name="viewable_without_password",
             field=models.BooleanField(default=False),
         ),
         migrations.CreateModel(
-            name='WorkspaceToken',
+            name="WorkspaceToken",
             fields=[
-                ('key', models.CharField(max_length=40, primary_key=True, serialize=False, verbose_name='Key')),
-                ('created', models.DateTimeField(auto_now_add=True, verbose_name='Created')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='auth_token', to='workspaces.workspace', verbose_name='Workspace')),
+                (
+                    "key",
+                    models.CharField(
+                        max_length=40,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="Key",
+                    ),
+                ),
+                (
+                    "created",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created"),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="auth_token",
+                        to="workspaces.workspace",
+                        verbose_name="Workspace",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'WorkspaceToken',
-                'verbose_name_plural': 'WorkspaceTokens',
-                'abstract': False,
+                "verbose_name": "WorkspaceToken",
+                "verbose_name_plural": "WorkspaceTokens",
+                "abstract": False,
             },
         ),
     ]

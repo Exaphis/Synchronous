@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workspaces', '0011_auto_20210402_1726'),
+        ("workspaces", "0011_auto_20210402_1726"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='workspacepadapp',
-            name='iframe_url',
+            model_name="workspacepadapp",
+            name="iframe_url",
         ),
         migrations.AddField(
-            model_name='workspacepadapp',
-            name='pad_id',
+            model_name="workspacepadapp",
+            name="pad_id",
             field=models.CharField(default=None, max_length=255),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='workspacepadapp',
-            name='read_only_id',
+            model_name="workspacepadapp",
+            name="read_only_id",
             field=models.CharField(default=None, max_length=255),
             preserve_default=False,
         ),

@@ -8,5 +8,5 @@ class TestApi(unittest.TestCase):
         sc = SpacedeckClient()
         space = sc.create_space()
 
-        self.assertTrue(space.access_mode == 'public')
+        self.assertTrue(space.access_mode == "public")
         self.assertTrue(sc.delete_space(space._id))

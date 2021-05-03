@@ -1,4 +1,5 @@
 from django.utils import timezone
+
 # from django.core.mail import EmailMessage
 
 from workspaces.inform_using_mail import send_mail_to
@@ -8,9 +9,9 @@ from .models import Workspace
 from synchronous import celery_app
 
 
-@celery_app.task(name='delete_old_workspace')
+@celery_app.task(name="delete_old_workspace")
 def delete_old_workspace():
-    print('deleting workspaces')
+    print("deleting workspaces")
     # Query all the workspace in our database
     workspaces = Workspace.objects.all()
 
@@ -20,8 +21,12 @@ def delete_old_workspace():
         if w.expiration_date < timezone.now():
             w.delete()
             # log deletion
-        elif timezone.now() < w.expiration_date < timezone.now() + timezone.timedelta(hours=1) and \
-                not w.emailed_expires:
+        elif (
+            timezone.now()
+            < w.expiration_date
+            < timezone.now() + timezone.timedelta(hours=1)
+            and not w.emailed_expires
+        ):
             # email = EmailMessage(
             # 'Workspace ' + w.unique_id + 'will be deleted in an hour',
             # 'Your 24 hours for your workspace are about to be up! Save your progress! :)',
@@ -29,10 +34,10 @@ def delete_old_workspace():
             # ['sakshamj23@gmail.com'],
             # fail_silently=False
             # )
-            subject = 'Workspace ' + str(w.unique_id) + 'will be deleted in an hour'
-            message = 'The 24 hours for your workspace are about to be up! Save your progress! :)'
+            subject = "Workspace " + str(w.unique_id) + "will be deleted in an hour"
+            message = "The 24 hours for your workspace are about to be up! Save your progress! :)"
             # receiver = 'sakshamj23@gmail.com'
-            receiver = 'kevin@kevinniuwu.com'
+            receiver = "kevin@kevinniuwu.com"
             w.emailed_expires = True
             w.save()
             send_mail_to(subject, message, [receiver])

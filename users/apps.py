@@ -3,7 +3,7 @@ from django.db.utils import OperationalError, ProgrammingError
 
 
 class UsersConfig(AppConfig):
-    name = 'users'
+    name = "users"
 
     def ready(self):
         from .models import WorkspaceUser

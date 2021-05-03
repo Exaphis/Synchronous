@@ -7,14 +7,16 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0002_workspaceuser_active'),
+        ("users", "0002_workspaceuser_active"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='workspaceuser',
-            name='went_inactive_at',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="workspaceuser",
+            name="went_inactive_at",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

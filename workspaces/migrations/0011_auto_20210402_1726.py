@@ -7,19 +7,29 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tusdfileshare', '0002_auto_20210401_2055'),
-        ('workspaces', '0010_auto_20210401_2055'),
+        ("tusdfileshare", "0002_auto_20210401_2055"),
+        ("workspaces", "0010_auto_20210401_2055"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='workspacefileshareapp',
-            name='tusd_file_share',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tusdfileshare.tusdfileshare'),
+            model_name="workspacefileshareapp",
+            name="tusd_file_share",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="tusdfileshare.tusdfileshare",
+            ),
         ),
         migrations.AlterField(
-            model_name='workspacefileshareapp',
-            name='workspaceapp_ptr',
-            field=models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='workspaces.workspaceapp'),
+            model_name="workspacefileshareapp",
+            name="workspaceapp_ptr",
+            field=models.OneToOneField(
+                auto_created=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                parent_link=True,
+                primary_key=True,
+                serialize=False,
+                to="workspaces.workspaceapp",
+            ),
         ),
     ]

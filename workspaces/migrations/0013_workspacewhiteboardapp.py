@@ -7,17 +7,27 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('workspaces', '0012_auto_20210402_1740'),
+        ("workspaces", "0012_auto_20210402_1740"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='WorkspaceWhiteboardApp',
+            name="WorkspaceWhiteboardApp",
             fields=[
-                ('workspaceapp_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='workspaces.workspaceapp')),
-                ('space_id', models.CharField(max_length=255)),
-                ('edit_hash', models.CharField(max_length=255)),
+                (
+                    "workspaceapp_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="workspaces.workspaceapp",
+                    ),
+                ),
+                ("space_id", models.CharField(max_length=255)),
+                ("edit_hash", models.CharField(max_length=255)),
             ],
-            bases=('workspaces.workspaceapp',),
+            bases=("workspaces.workspaceapp",),
         ),
     ]

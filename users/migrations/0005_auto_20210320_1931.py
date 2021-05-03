@@ -7,13 +7,17 @@ import users.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0004_auto_20210311_0559'),
+        ("users", "0004_auto_20210311_0559"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='workspaceuser',
-            name='nickname',
-            field=models.CharField(default=users.models.get_random_unique_nickname, max_length=150, unique=True),
+            model_name="workspaceuser",
+            name="nickname",
+            field=models.CharField(
+                default=users.models.get_random_unique_nickname,
+                max_length=150,
+                unique=True,
+            ),
         ),
     ]

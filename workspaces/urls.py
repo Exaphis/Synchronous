@@ -2,15 +2,15 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('workspace/', views.WorkspaceCreateView.as_view()),
-    path('workspace/<uuid:unique_id>/', views.WorkspaceDetailView.as_view()),
-    path('workspace/<uuid:unique_id>/password/', views.ChangePasswordView.as_view()),
-    path('workspace/<uuid:unique_id>/zip/', views.generate_workspace_zip),
-    path('workspace/<uuid:unique_id>/import/', views.import_workspace_zip),
-    path('workspace/nickname/', views.nickname_to_unique_id),
-    path('api-token-auth/', views.CustomAuthToken.as_view()),
-    path('send-mail/', views.send_message),
-    path('heartbeat/', views.heartbeat)
+    path("workspace/", views.WorkspaceCreateView.as_view()),
+    path("workspace/<uuid:unique_id>/", views.WorkspaceDetailView.as_view()),
+    path("workspace/<uuid:unique_id>/password/", views.ChangePasswordView.as_view()),
+    path("workspace/<uuid:unique_id>/zip/", views.generate_workspace_zip),
+    path("workspace/<uuid:unique_id>/import/", views.import_workspace_zip),
+    path("workspace/nickname/", views.nickname_to_unique_id),
+    path("api-token-auth/", views.CustomAuthToken.as_view()),
+    path("send-mail/", views.send_message),
+    path("heartbeat/", views.heartbeat),
 ]
 
 # POST api-token-auth with unique_id and password data to get token
