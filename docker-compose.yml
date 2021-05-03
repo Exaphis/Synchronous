@@ -38,12 +38,12 @@ services:
     env_file:
       - secrets.env
   frontend:
-    build: ./Frontend
+    build: ./frontend
     command: npm start
     ports:
       - "3000:3000"
     volumes:
-      - ./Frontend:/app
+      - ./frontend:/app
   tusd:
     image: tusproject/tusd
     ports:
