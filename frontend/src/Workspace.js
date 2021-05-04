@@ -1,9 +1,9 @@
-import * as EmailValidator from 'email-validator';
-import { Link, useParams } from 'react-router-dom';
-import { PubSub } from 'pubsub-js';
-import * as React from 'react';
-import { useIdleTimer } from 'react-idle-timer';
-import useInterval from '@use-it/interval';
+import * as EmailValidator from "email-validator";
+import { Link, useParams } from "react-router-dom";
+import { PubSub } from "pubsub-js";
+import * as React from "react";
+import { useIdleTimer } from "react-idle-timer";
+import useInterval from "@use-it/interval";
 import {
     AppBar,
     Avatar,
@@ -18,15 +18,15 @@ import {
     TextField,
     Toolbar,
     Typography,
-} from '@material-ui/core';
-import s from './images/s.png';
-import clsx from 'clsx';
-import Countdown from 'react-countdown';
-import EmailIcon from '@material-ui/icons/Email';
-import HelpIcon from '@material-ui/icons/Help';
-import PeopleIcon from '@material-ui/icons/People';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import { useHistory } from 'react-router-dom';
+} from "@material-ui/core";
+import s from "./images/s.png";
+import clsx from "clsx";
+import Countdown from "react-countdown";
+import EmailIcon from "@material-ui/icons/Email";
+import HelpIcon from "@material-ui/icons/Help";
+import PeopleIcon from "@material-ui/icons/People";
+import GetAppIcon from "@material-ui/icons/GetApp";
+import { useHistory } from "react-router-dom";
 
 import {
     fetchAPI,
@@ -36,18 +36,18 @@ import {
     SERVER_MSG_TYPE,
     PROTOCOL_HTTP,
     PROTOCOL_WS,
-} from './api';
-import { useStyles, Copyright } from './App';
-import { WorkspaceArea } from './WorkspaceArea';
+} from "./api";
+import { useStyles, Copyright } from "./App";
+import { WorkspaceArea } from "./WorkspaceArea";
 
-import { UserListDialog } from './components/UserListDialog';
-import './css/styles.css';
-import { WorkspaceNicknameChangeDialog } from './components/WorkspaceNicknameChangeDialog';
-import { WorkspacePasswordChangeDialog } from './components/WorkspacePasswordChangeDialog';
-import Alert from '@material-ui/lab/Alert';
-import MaxWidthContainer from './components/MaxWidthContainer';
-import { Helmet } from 'react-helmet-async';
-import ReconnectingWebSocket from 'reconnecting-websocket';
+import { UserListDialog } from "./components/UserListDialog";
+import "./css/styles.css";
+import { WorkspaceNicknameChangeDialog } from "./components/WorkspaceNicknameChangeDialog";
+import { WorkspacePasswordChangeDialog } from "./components/WorkspacePasswordChangeDialog";
+import Alert from "@material-ui/lab/Alert";
+import MaxWidthContainer from "./components/MaxWidthContainer";
+import { Helmet } from "react-helmet-async";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 export const WorkspaceUniqueIdContext = React.createContext(undefined);
 export const WorkspaceUserContext = React.createContext(undefined);
@@ -71,30 +71,30 @@ async function emailHandler(
         }
 
         let key = localStorage.getItem(workspace.unique_id);
-        key = key !== null ? key : 'N/A';
-        let resp = await fetchAPI('POST', 'send-mail/', {
+        key = key !== null ? key : "N/A";
+        let resp = await fetchAPI("POST", "send-mail/", {
             email: email.value,
-            subject: 'Workspace Invitation',
+            subject: "Workspace Invitation",
             message:
-                'Hello,\n\n' +
-                'You are invited to join Workspace: ' +
+                "Hello,\n\n" +
+                "You are invited to join Workspace: " +
                 name +
-                '\n' +
-                'http://localhost:3000/Workspace/' +
+                "\n" +
+                "http://localhost:3000/Workspace/" +
                 workspace.unique_id +
-                '\n\n' +
-                'Password: ' +
+                "\n\n" +
+                "Password: " +
                 key +
-                '\n\n' +
-                'Additional Notes: ' +
+                "\n\n" +
+                "Additional Notes: " +
                 message.value +
-                '\n\n\n' +
-                'Best wishes,\n' +
-                'Synchronous',
+                "\n\n\n" +
+                "Best wishes,\n" +
+                "Synchronous",
         });
 
         if (resp.error) {
-            if (JSON.stringify(resp.details).includes('200')) {
+            if (JSON.stringify(resp.details).includes("200")) {
                 setSent(true);
                 setValidEmail(true);
             } else {
@@ -107,7 +107,7 @@ async function emailHandler(
         }
     } else {
         setValidEmail(false);
-        console.log('invalid email address');
+        console.log("invalid email address");
     }
 }
 
@@ -131,7 +131,7 @@ function WorkspaceInfoBar(props) {
     const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
 
     const handleSnack = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === "clickaway") {
             return;
         }
 
@@ -139,7 +139,7 @@ function WorkspaceInfoBar(props) {
     };
 
     const handleSnack2 = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === "clickaway") {
             return;
         }
 
@@ -149,7 +149,7 @@ function WorkspaceInfoBar(props) {
     const history = useHistory();
 
     const handleHelp = () => {
-        history.push('/tutorial');
+        history.push("/tutorial");
     };
 
     const handleMenu = (event) => {
@@ -158,17 +158,17 @@ function WorkspaceInfoBar(props) {
 
     const handleClose = () => {
         setAnchorEl(null);
-        document.getElementById('email').value = '';
-        document.getElementById('message').value = '';
+        document.getElementById("email").value = "";
+        document.getElementById("message").value = "";
     };
 
     const exportWorkspace = () => {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = getUrlFromEndpoint(
             PROTOCOL_HTTP,
             `workspace/${workspace.unique_id}/zip/`
         );
-        link.target = '_blank';
+        link.target = "_blank";
         link.click();
     };
 
@@ -193,12 +193,12 @@ function WorkspaceInfoBar(props) {
     const canChangePassword = workspace.is_password_protected && isLoggedIn;
 
     return (
-        <AppBar position={'static'} className={clsx(classes.appBar)}>
+        <AppBar position={"static"} className={clsx(classes.appBar)}>
             <Snackbar
                 open={sent}
                 autoHideDuration={6000}
                 onClose={handleSnack}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
                 <Alert onClose={handleSnack} severity="success">
                     Email Sent
@@ -208,7 +208,7 @@ function WorkspaceInfoBar(props) {
                 open={!validEmail}
                 autoHideDuration={6000}
                 onClose={handleSnack2}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
                 <Alert onClose={handleSnack2} severity="error">
                     Email failed to send
@@ -217,10 +217,10 @@ function WorkspaceInfoBar(props) {
             <Chat workspace={workspace} username={username} />
             <Toolbar
                 className={classes.toolbar}
-                style={{ justifyContent: 'space-between' }}
+                style={{ justifyContent: "space-between" }}
             >
                 <Typography variant="h6">
-                    {'Duration: '}
+                    {"Duration: "}
                     {
                         // count up from created_at
                         <Countdown
@@ -242,7 +242,7 @@ function WorkspaceInfoBar(props) {
                 <Button
                     color="secondary"
                     onClick={() => setNicknameDialogOpen(true)}
-                    style={{ textTransform: 'none', color: 'white' }}
+                    style={{ textTransform: "none", color: "white" }}
                 >
                     <Typography variant="h4" className={classes.title}>
                         {workspace.nickname !== null
@@ -319,13 +319,13 @@ function WorkspaceInfoBar(props) {
                     id="menu-appbar"
                     anchorEl={anchorEl}
                     anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
+                        vertical: "top",
+                        horizontal: "right",
                     }}
                     keepMounted
                     transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
+                        vertical: "top",
+                        horizontal: "right",
                     }}
                     open={open}
                     onClose={handleClose}
@@ -339,7 +339,7 @@ function WorkspaceInfoBar(props) {
                                 id="email"
                                 label="Email"
                                 error={!validEmail}
-                                helperText={validEmail ? '' : 'Invalid Email'}
+                                helperText={validEmail ? "" : "Invalid Email"}
                                 required
                                 autoFocus
                             ></TextField>
@@ -358,8 +358,8 @@ function WorkspaceInfoBar(props) {
                                 className={classes.submit}
                                 onClick={() => {
                                     emailHandler(
-                                        document.getElementById('email'),
-                                        document.getElementById('message'),
+                                        document.getElementById("email"),
+                                        document.getElementById("message"),
                                         workspace,
                                         validEmail,
                                         setValidEmail,
@@ -393,8 +393,8 @@ function Workspace() {
         tokenRef.current = localStorage.getItem(uniqueId);
 
         let newWorkspace = await fetchAPI(
-            'GET',
-            'workspace/' + uniqueId,
+            "GET",
+            "workspace/" + uniqueId,
             null,
             tokenRef.current
         );
@@ -429,7 +429,7 @@ function Workspace() {
             let user = userList[userId];
 
             if (user.active) {
-                user.activity_text = 'Active';
+                user.activity_text = "Active";
             } else {
                 const inactive_since = new Date(user.went_inactive_at);
                 const millis_inactive = Date.now() - inactive_since.getTime();
@@ -446,7 +446,7 @@ function Workspace() {
             return;
         }
 
-        let wsUri = workspace['ws'];
+        let wsUri = workspace["ws"];
 
         const options = {
             connectionTimeout: 1000,
@@ -462,7 +462,7 @@ function Workspace() {
             PubSub.publish(data.type, data);
 
             if (!Object.values(SERVER_MSG_TYPE).includes(data.type)) {
-                console.error('Unexpected server msg type: ' + data.type);
+                console.error("Unexpected server msg type: " + data.type);
             }
         };
 
@@ -471,12 +471,12 @@ function Workspace() {
 
             if (tokenRef.current !== null) {
                 const authPayload = {
-                    type: 'auth',
+                    type: "auth",
                     Authorization: tokenRef.current,
                 };
 
                 ws.send(JSON.stringify(authPayload));
-                console.log('sent authorization payload');
+                console.log("sent authorization payload");
             }
         };
     };
@@ -512,13 +512,13 @@ function Workspace() {
 
         let pubSubTokens = [];
         let token = PubSub.subscribe(SERVER_MSG_TYPE.USER_LIST, (msg, data) => {
-            const newUserList = data['user_list'];
+            const newUserList = data["user_list"];
             setUserList(updateInactivityText(newUserList));
         });
         pubSubTokens.push(token);
 
         token = PubSub.subscribe(SERVER_MSG_TYPE.CURRENT_USER, (msg, data) => {
-            userIdRef.current = data['user_id'];
+            userIdRef.current = data["user_id"];
         });
         pubSubTokens.push(token);
 
@@ -539,18 +539,18 @@ function Workspace() {
 
     async function updateNickname(new_nickname) {
         let resp = await fetchAPI(
-            'PATCH',
-            'workspace/' + uniqueId + '/',
+            "PATCH",
+            "workspace/" + uniqueId + "/",
             {
                 nickname: new_nickname,
             },
             tokenRef.current
         );
         if (resp === null) {
-            throw new Error('Nickname failed to set, no response.');
-        } else if ('error' in resp) {
+            throw new Error("Nickname failed to set, no response.");
+        } else if ("error" in resp) {
             console.error(resp.details);
-            throw new Error('Nickname failed to set.');
+            throw new Error("Nickname failed to set.");
         } else {
             await getWorkspace();
         }
@@ -558,20 +558,20 @@ function Workspace() {
 
     async function changePassword(new_password) {
         let resp = await fetchAPI(
-            'PATCH',
-            'workspace/' + uniqueId + '/password/',
+            "PATCH",
+            "workspace/" + uniqueId + "/password/",
             {
                 password: new_password,
             },
             tokenRef.current
         );
         if (resp === null) {
-            throw new Error('Password failed to set, no response.');
-        } else if ('error' in resp) {
+            throw new Error("Password failed to set, no response.");
+        } else if ("error" in resp) {
             console.error(resp.details);
-            throw new Error('Password failed to set.');
+            throw new Error("Password failed to set.");
         } else {
-            if (new_password === '') {
+            if (new_password === "") {
                 tokenRef.current = null;
                 localStorage.removeItem(uniqueId);
             }
@@ -586,17 +586,17 @@ function Workspace() {
                     <title>Workspace</title>
                 </Helmet>
                 <CssBaseline />
-                <Box mt={4}></Box>
+                <Box mt={4} />
                 <div className={classes.paper}>
                     <Avatar alt="s" src={s} className={classes.sizeAvatar} />
                     <Box mt={4}></Box>
                     <Typography component="h2" variant="h5">
                         You do not have access to this workspace
                     </Typography>
-                    <Box mt={2}></Box>
+                    <Box mt={2} />
                     <Button
                         component={Link}
-                        to={'/open'}
+                        to={"/open"}
                         size="large"
                         type="submit"
                         fullWidth
@@ -619,10 +619,10 @@ function Workspace() {
             component="main"
             disableGutters={true}
             style={{
-                display: 'flex',
-                flexDirection: 'column',
-                height: '100vh',
-                width: '100vw',
+                display: "flex",
+                flexDirection: "column",
+                height: "100vh",
+                width: "100vw",
             }}
         >
             <Helmet>

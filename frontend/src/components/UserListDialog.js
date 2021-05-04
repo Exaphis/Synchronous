@@ -1,9 +1,18 @@
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogTitle,
-    Table, TableBody, TableCell, TableHead, TableRow, Typography
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
+    Typography,
 } from "@material-ui/core";
 import * as React from "react";
-import {UserNicknameChangeDialog} from "./UserNicknameChangeDialog";
+import { UserNicknameChangeDialog } from "./UserNicknameChangeDialog";
 
 function NicknameCell(props) {
     const user = props.user;
@@ -11,16 +20,20 @@ function NicknameCell(props) {
     const onRequestNameDialogOpen = props.onRequestNameDialogOpen;
 
     if (user.id === currUserId) {
-        return <TableCell>
-            <Typography fontWeight={900}>{user.nickname}</Typography>
-            <Button variant="outlined" color="primary"
-                    onClick={onRequestNameDialogOpen}>
-                Change name
-            </Button>
-        </TableCell>
-    }
-    else {
-        return <TableCell> {user.nickname} </TableCell>
+        return (
+            <TableCell>
+                <Typography fontWeight={900}>{user.nickname}</Typography>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={onRequestNameDialogOpen}
+                >
+                    Change name
+                </Button>
+            </TableCell>
+        );
+    } else {
+        return <TableCell> {user.nickname} </TableCell>;
     }
 }
 
@@ -50,17 +63,26 @@ export function UserListDialog(props) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        { Object.values(userList).map(user => (
+                        {Object.values(userList).map((user) => (
                             <TableRow key={user.id}>
-                                <NicknameCell user={user} currUserId={currUserId}
-                                              onRequestNameDialogOpen={() => setNameDialogOpen(true)}
+                                <NicknameCell
+                                    user={user}
+                                    currUserId={currUserId}
+                                    onRequestNameDialogOpen={() =>
+                                        setNameDialogOpen(true)
+                                    }
                                 />
                                 <TableCell> {user.activity_text} </TableCell>
                                 <TableCell>
-                                    <section style={{height: "50px", 'backgroundColor': user.color}} />
+                                    <section
+                                        style={{
+                                            height: "50px",
+                                            backgroundColor: user.color,
+                                        }}
+                                    />
                                 </TableCell>
                             </TableRow>
-                        )) }
+                        ))}
                     </TableBody>
                 </Table>
             </DialogContent>

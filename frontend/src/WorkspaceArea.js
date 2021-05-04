@@ -11,25 +11,25 @@ import {
     Tabs,
     Toolbar,
     Typography,
-} from '@material-ui/core';
-import * as React from 'react';
-import { Rnd } from 'react-rnd';
-import { PubSub } from 'pubsub-js';
-import AddIcon from '@material-ui/icons/Add';
-import CloseIcon from '@material-ui/icons/Close';
-import MinimizeIcon from '@material-ui/icons/Minimize';
-import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
-import ZoomOutMapIcon from '@material-ui/icons/ZoomOutMap';
-import Alert from '@material-ui/lab/Alert';
+} from "@material-ui/core";
+import * as React from "react";
+import { Rnd } from "react-rnd";
+import { PubSub } from "pubsub-js";
+import AddIcon from "@material-ui/icons/Add";
+import CloseIcon from "@material-ui/icons/Close";
+import MinimizeIcon from "@material-ui/icons/Minimize";
+import CloudDownloadIcon from "@material-ui/icons/CloudDownload";
+import ZoomOutMapIcon from "@material-ui/icons/ZoomOutMap";
+import Alert from "@material-ui/lab/Alert";
 
-import Uppy from '@uppy/core';
-import Tus from '@uppy/tus';
-import DashboardModal from '@uppy/react/lib/DashboardModal';
-import { useUppy } from '@uppy/react';
-import '@uppy/core/dist/style.css';
-import '@uppy/dashboard/dist/style.css';
+import Uppy from "@uppy/core";
+import Tus from "@uppy/tus";
+import DashboardModal from "@uppy/react/lib/DashboardModal";
+import { useUppy } from "@uppy/react";
+import "@uppy/core/dist/style.css";
+import "@uppy/dashboard/dist/style.css";
 
-import { WorkspaceUniqueIdContext, WorkspaceUserContext } from './Workspace';
+import { WorkspaceUniqueIdContext, WorkspaceUserContext } from "./Workspace";
 import {
     APP_TYPE,
     appendQueryParameter,
@@ -38,20 +38,20 @@ import {
     SERVER_MSG_TYPE,
     translateAppUrl,
     TUSD_URL,
-} from './api';
-import MaxWidthContainer from './components/MaxWidthContainer';
-import { Sidebar } from './components/Sidebar';
-import { useResizeDetector } from 'react-resize-detector';
+} from "./api";
+import MaxWidthContainer from "./components/MaxWidthContainer";
+import { Sidebar } from "./components/Sidebar";
+import { useResizeDetector } from "react-resize-detector";
 
 function AppTitleBar(props) {
-    const title = props.title !== undefined ? props.title : 'Untitled Window';
+    const title = props.title !== undefined ? props.title : "Untitled Window";
     return (
         <Grid
             style={{
-                height: '2em',
-                backgroundColor: 'darkGray',
-                display: 'flex',
-                pointerEvents: 'auto', // idk why this is needed, but if not minimize button doesn't work anymore
+                height: "2em",
+                backgroundColor: "darkGray",
+                display: "flex",
+                pointerEvents: "auto", // idk why this is needed, but if not minimize button doesn't work anymore
             }}
             className="handle"
             ref={props.handleRef}
@@ -59,31 +59,31 @@ function AppTitleBar(props) {
             <span
                 style={{
                     flexGrow: 1,
-                    height: '100%',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    overflow: 'hidden',
+                    height: "100%",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    overflow: "hidden",
                 }}
             >
                 {title}
             </span>
             <IconButton
                 size="small"
-                style={{ height: '100%' }}
+                style={{ height: "100%" }}
                 onClick={props.onMinimize}
             >
                 <MinimizeIcon fontSize="inherit" />
             </IconButton>
             <IconButton
                 size="small"
-                style={{ height: '100%' }}
+                style={{ height: "100%" }}
                 onClick={props.onMaximize}
             >
                 <ZoomOutMapIcon fontSize="inherit" />
             </IconButton>
             <IconButton
                 size="small"
-                style={{ height: '100%' }}
+                style={{ height: "100%" }}
                 onClick={props.onClose}
             >
                 <CloseIcon fontSize="inherit" />
@@ -129,21 +129,21 @@ function FileUploadAppContents() {
          * @param {string} data.file_list[].created_at - Timestamp of when the file was uploaded.
          */
         let token = PubSub.subscribe(SERVER_MSG_TYPE.FILE_LIST, (msg, data) => {
-            console.log('file list received:');
+            console.log("file list received:");
             console.log(data);
             setFileComponents(
                 data.file_list.map((file) => {
                     return (
                         <Box my={5} key={file.file_id}>
                             <Paper>
-                                <Grid container style={{ display: 'flex' }}>
+                                <Grid container style={{ display: "flex" }}>
                                     <Grid
                                         item
                                         style={{
-                                            display: 'flex',
+                                            display: "flex",
                                             flexGrow: 1,
-                                            marginLeft: '1em',
-                                            alignItems: 'center',
+                                            marginLeft: "1em",
+                                            alignItems: "center",
                                         }}
                                     >
                                         <Typography variant="h5" gutterBottom>
@@ -219,7 +219,7 @@ function WhiteboardAppContents(props) {
     const currUser = React.useContext(WorkspaceUserContext);
     const nickname = encodeURIComponent(currUser.nickname);
 
-    let spaceUrl = appendQueryParameter(props.padUrl, 'nickname', nickname);
+    let spaceUrl = appendQueryParameter(props.padUrl, "nickname", nickname);
 
     return <iframe style={{ flexGrow: 1 }} title={props.uuid} src={spaceUrl} />;
 }
@@ -268,10 +268,10 @@ function WorkspaceApp(props) {
             }
         }
 
-        window.addEventListener('blur', onBlur);
+        window.addEventListener("blur", onBlur);
 
         return function cleanup() {
-            window.removeEventListener('blur', onBlur);
+            window.removeEventListener("blur", onBlur);
         };
     }, [requestTop]);
 
@@ -280,20 +280,20 @@ function WorkspaceApp(props) {
             id={props.uuid}
             ref={appContainerRef}
             style={{
-                backgroundColor: 'white',
-                height: '100%',
-                border: '2px solid gray',
-                borderRadius: '5px',
-                display: 'flex',
+                backgroundColor: "white",
+                height: "100%",
+                border: "2px solid gray",
+                borderRadius: "5px",
+                display: "flex",
                 // fixes firefox rendering of iframes (vs. display: none)
                 // firefox would have problems with rendering iframes (i.e. etherpad) when display is none.
                 // instead, visibility: hidden should work the same.
-                visibility: minimized ? 'hidden' : 'visible',
+                visibility: minimized ? "hidden" : "visible",
                 // change position so events can be fired on apps behind them
-                position: minimized ? 'absolute' : 'static',
-                top: minimized ? '-5000px' : 'auto',
-                flexDirection: 'column',
-                pointerEvents: pointerEventsEnabled ? 'auto' : 'none',
+                position: minimized ? "absolute" : "static",
+                top: minimized ? "-5000px" : "auto",
+                flexDirection: "column",
+                pointerEvents: pointerEventsEnabled ? "auto" : "none",
             }}
         >
             <AppTitleBar
@@ -327,14 +327,14 @@ function WorkspaceTab(props) {
         let response = {};
         response.details = 200;
         if (response.details !== 200) {
-            if (localStorage.getItem('offline') === 'false') {
+            if (localStorage.getItem("offline") === "false") {
                 setOpen(true);
                 setOpen2(false);
-                localStorage.setItem('offline', 'true');
+                localStorage.setItem("offline", "true");
             }
-        } else if (localStorage.getItem('offline') === 'true') {
-            localStorage.setItem('offline', 'false');
-            console.log('regain');
+        } else if (localStorage.getItem("offline") === "true") {
+            localStorage.setItem("offline", "false");
+            console.log("regain");
             setOpen2(true);
             setOpen(false);
         }
@@ -346,7 +346,7 @@ function WorkspaceTab(props) {
     }
 
     const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === "clickaway") {
             return;
         }
 
@@ -354,7 +354,7 @@ function WorkspaceTab(props) {
     };
 
     const handleClose2 = (event, reason) => {
-        if (reason === 'clickaway') {
+        if (reason === "clickaway") {
             return;
         }
 
@@ -388,25 +388,25 @@ function WorkspaceTab(props) {
         });
 
         PubSub.subscribe(SERVER_MSG_TYPE.APP_LIST, (msg, data) => {
-            if (data['tab_id'] !== props.tabId) {
+            if (data["tab_id"] !== props.tabId) {
                 return;
             }
 
             // data['app_list']:
             //     - list of apps
             //     - each app contains `type` (enum), `unique_id`, and `data`
-            console.log('app list:');
-            console.log(data['app_list']);
+            console.log("app list:");
+            console.log(data["app_list"]);
 
             // must use function to avoid apps in the dependency array
             setApps((oldApps) => {
                 let newApps = {};
 
-                data['app_list'].forEach((serializedApp) => {
-                    const appId = serializedApp['unique_id'];
-                    const appData = serializedApp['data'];
-                    const appType = serializedApp['app_type'];
-                    const appName = serializedApp['name'];
+                data["app_list"].forEach((serializedApp) => {
+                    const appId = serializedApp["unique_id"];
+                    const appData = serializedApp["data"];
+                    const appType = serializedApp["app_type"];
+                    const appName = serializedApp["name"];
 
                     if (appId in oldApps) {
                         newApps[appId] = oldApps[appId];
@@ -420,8 +420,8 @@ function WorkspaceTab(props) {
                             name: appName,
                             x: 100,
                             y: 100,
-                            width: 'auto',
-                            height: 'auto',
+                            width: "auto",
+                            height: "auto",
                             switchMinimized: () => {
                                 setPointerEventsEnabled(true);
                                 setAppMinimized(
@@ -430,7 +430,7 @@ function WorkspaceTab(props) {
                                 );
                             },
                             onMinimize: () => {
-                                console.log('minimize');
+                                console.log("minimize");
                                 setPointerEventsEnabled(true);
                                 setAppMinimized(appId, () => true);
                             },
@@ -460,7 +460,7 @@ function WorkspaceTab(props) {
 
     let hasOffline;
     for (let app in apps) {
-        if (apps[app].name === 'Offline Pad') {
+        if (apps[app].name === "Offline Pad") {
             if (!hasOffline) {
                 hasOffline = true;
             } else {
@@ -476,23 +476,23 @@ function WorkspaceTab(props) {
     function addApp(type) {
         let name;
         if (type === APP_TYPE.PAD) {
-            name = 'Text pad';
+            name = "Text pad";
         } else if (type === APP_TYPE.FILE_SHARE) {
-            name = 'File share';
+            name = "File share";
         } else if (type === APP_TYPE.TEMPLATE) {
-            name = 'Template';
+            name = "Template";
         } else if (type === APP_TYPE.OFFLINE_PAD) {
             let app;
             for (app in apps) {
-                if (apps[app].name === 'Offline Pad') {
+                if (apps[app].name === "Offline Pad") {
                     return;
                 }
             }
-            name = 'Offline Pad';
+            name = "Offline Pad";
         } else if (type === APP_TYPE.WHITEBOARD) {
-            name = 'Whiteboard';
+            name = "Whiteboard";
         } else {
-            console.log('Unknown app type: ' + type);
+            console.log("Unknown app type: " + type);
             return;
         }
 
@@ -522,9 +522,9 @@ function WorkspaceTab(props) {
                     // needed to update pos x,y=0 to the top left
                     // mousemove needed when expanding to not go past end of screen
                     // causes some lag when having many (3+) windows on screen when resizing
-                    triggerMouseEvent(appHandleRef, 'mousedown');
-                    triggerMouseEvent(appHandleRef, 'mousemove');
-                    triggerMouseEvent(appHandleRef, 'mouseup');
+                    triggerMouseEvent(appHandleRef, "mousedown");
+                    triggerMouseEvent(appHandleRef, "mousemove");
+                    triggerMouseEvent(appHandleRef, "mouseup");
                 } else {
                     delete appHandleRefs.current[appId];
                 }
@@ -546,7 +546,7 @@ function WorkspaceTab(props) {
         let appContents;
         if (app.type === APP_TYPE.PAD) {
             const appData = app.data;
-            const iframeUrl = translateAppUrl(appData['iframe_url']);
+            const iframeUrl = translateAppUrl(appData["iframe_url"]);
             appContents = <PadAppContents padUrl={iframeUrl} />;
         } else if (app.type === APP_TYPE.FILE_SHARE) {
             appContents = <FileUploadAppContents />;
@@ -554,12 +554,12 @@ function WorkspaceTab(props) {
             appContents = <OfflinePadAppContents />;
         } else if (app.type === APP_TYPE.WHITEBOARD) {
             const appData = app.data;
-            const iframeUrl = translateAppUrl(appData['iframe_url']);
+            const iframeUrl = translateAppUrl(appData["iframe_url"]);
             appContents = <WhiteboardAppContents padUrl={iframeUrl} />;
         } else if (app.type === APP_TYPE.TEMPLATE) {
             appContents = <TemplateAppContents />;
         } else {
-            console.error('invalid app type: ' + app.type);
+            console.error("invalid app type: " + app.type);
             console.error(typeof app.type);
         }
 
@@ -614,10 +614,10 @@ function WorkspaceTab(props) {
                 minWidth="50px"
                 style={{
                     // change z index to prioritize recently selected app
-                    zIndex: topAppUuid === app.id ? '1' : 'auto',
+                    zIndex: topAppUuid === app.id ? "1" : "auto",
                     // allow pointer events to pass through if it is minimized as the element
                     // will still be on top
-                    pointerEvents: app.minimized ? 'none' : 'auto',
+                    pointerEvents: app.minimized ? "none" : "auto",
                 }}
             >
                 <WorkspaceApp
@@ -642,22 +642,22 @@ function WorkspaceTab(props) {
     return (
         <div
             style={{
-                backgroundColor: 'lightGray',
-                height: '100%',
-                width: '100%',
+                backgroundColor: "lightGray",
+                height: "100%",
+                width: "100%",
                 // use display: none instead of returning null so any embedded iframes do not
                 // have to reload when switching tabs
                 // use flex so the appComponents can resize to maximum width allowed
-                display: 'flex',
-                position: props.hidden ? 'absolute' : 'static',
-                left: props.hidden ? '-5000px' : 'auto',
+                display: "flex",
+                position: props.hidden ? "absolute" : "static",
+                left: props.hidden ? "-5000px" : "auto",
             }}
         >
             <Snackbar
                 open={open}
                 autoHideDuration={6000}
                 onClose={handleClose}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
                 <Alert onClose={handleClose} severity="error">
                     You have lost connection
@@ -667,7 +667,7 @@ function WorkspaceTab(props) {
                 open={open2}
                 autoHideDuration={6000}
                 onClose={handleClose2}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
             >
                 <Alert onClose={handleClose2} severity="success">
                     You have regained connection
@@ -699,7 +699,7 @@ function WorkspaceArea() {
             // console.log('set tab list:');
             // console.log(data['tab_list']);
 
-            const tabList = data['tab_list'];
+            const tabList = data["tab_list"];
             setTabs(tabList);
 
             if (goToEndAfterCreation.current) {
@@ -741,18 +741,18 @@ function WorkspaceArea() {
         goToEndAfterCreation.current = true;
         PubSub.publish(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, {
             type: CLIENT_MSG_TYPE.NEW_TAB,
-            name: 'Unnamed tab',
+            name: "Unnamed tab",
         });
     }
 
     let tabComponents = (
         <div
             style={{
-                backgroundColor: 'lightGray',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
+                backgroundColor: "lightGray",
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
             }}
         >
             {/*<Typography variant={"h4"}>*/}
@@ -776,10 +776,10 @@ function WorkspaceArea() {
         <MaxWidthContainer
             component="main"
             disableGutters={true}
-            style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}
+            style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}
         >
-            <AppBar position={'static'}>
-                <Toolbar variant={'dense'}>
+            <AppBar position={"static"}>
+                <Toolbar variant={"dense"}>
                     <Tabs
                         value={currTab}
                         edge="start"
@@ -792,7 +792,7 @@ function WorkspaceArea() {
                                       <Tab
                                           key={tab.unique_id}
                                           label={
-                                              <div style={{ display: 'flex' }}>
+                                              <div style={{ display: "flex" }}>
                                                   <span>{tab.name}</span>
                                                   <IconButton
                                                       component="div" // https://stackoverflow.com/a/63277341
@@ -803,7 +803,7 @@ function WorkspaceArea() {
                                                           )
                                                       }
                                                       color="inherit"
-                                                      style={{ padding: '0px' }}
+                                                      style={{ padding: "0px" }}
                                                   >
                                                       <CloseIcon />
                                                   </IconButton>

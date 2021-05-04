@@ -4,29 +4,24 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    TextField, Typography
+    TextField,
+    Typography,
 } from "@material-ui/core";
 import * as React from "react";
 
 export function GenericFieldChangeDialog(props) {
-    const {
-        isOpen,
-        onRequestClose,
-        onChangeField,
-        fieldName,
-        caption
-    } = props;
+    const { isOpen, onRequestClose, onChangeField, fieldName, caption } = props;
 
     let fieldLabel = fieldName;
-    if ('fieldLabel' in props) {
+    if ("fieldLabel" in props) {
         fieldLabel = props.fieldLabel;
     }
 
-    const [dialogError, setDialogError] = React.useState('');
-    const fieldValueRef = React.useRef('');
+    const [dialogError, setDialogError] = React.useState("");
+    const fieldValueRef = React.useRef("");
 
-    if (!isOpen && dialogError){
-        setDialogError('');
+    if (!isOpen && dialogError) {
+        setDialogError("");
     }
 
     async function changeField() {
@@ -42,9 +37,11 @@ export function GenericFieldChangeDialog(props) {
         <Dialog key="dialog" open={isOpen} onClose={onRequestClose}>
             <DialogTitle id="form-dialog-title">Change {fieldName}</DialogTitle>
             <DialogContent>
-                {caption && <Typography color="textSecondary">{caption}</Typography>}
+                {caption && (
+                    <Typography color="textSecondary">{caption}</Typography>
+                )}
                 <TextField
-                    error={dialogError !== ''}
+                    error={dialogError !== ""}
                     helperText={dialogError}
                     autoFocus
                     margin="dense"
@@ -52,7 +49,7 @@ export function GenericFieldChangeDialog(props) {
                     label={`New ${fieldLabel}`}
                     type="text"
                     fullWidth
-                    onChange={ev => (fieldValueRef.current = ev.target.value)}
+                    onChange={(ev) => (fieldValueRef.current = ev.target.value)}
                 />
             </DialogContent>
 

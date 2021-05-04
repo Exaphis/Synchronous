@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
     Grid,
     Box,
@@ -15,29 +15,26 @@ import {
     IconButton,
     InputLabel,
     Input,
-} from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { makeStyles } from '@material-ui/core/styles';
-import 'react-pro-sidebar/dist/css/styles.css';
+} from "@material-ui/core";
+import DeleteIcon from "@material-ui/icons/Delete";
+import { makeStyles } from "@material-ui/core/styles";
+import "react-pro-sidebar/dist/css/styles.css";
 import {
     BrowserRouter,
     Link,
     Route,
     Switch,
     useHistory,
-} from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import './css/styles.css';
-import './css/App.css';
+} from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import "./css/styles.css";
+import "./css/App.css";
 
-import logo from './images/logo.png';
-import logoIcon from './images/s.png';
-import Workspace from './Workspace';
-import { fetchAPI } from './api';
-import Tutorial from './Tutorial';
-
-// LogRocket.init('a1vl8a/synchronous');
-// setupLogRocketReact(LogRocket);
+import logo from "./images/logo.png";
+import logoIcon from "./images/s.png";
+import Workspace from "./Workspace";
+import { fetchAPI } from "./api";
+import Tutorial from "./Tutorial";
 
 export default function App() {
     return (
@@ -80,7 +77,7 @@ function SignIn() {
                 />
                 <Button
                     component={Link}
-                    to={'/create'}
+                    to={"/create"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -91,7 +88,7 @@ function SignIn() {
                 </Button>
                 <Button
                     component={Link}
-                    to={'/open'}
+                    to={"/open"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -102,7 +99,7 @@ function SignIn() {
                 </Button>
                 <Button
                     component={Link}
-                    to={'/tutorial'}
+                    to={"/tutorial"}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -124,8 +121,8 @@ function CreateWorkspace() {
     const [didCreateSucceed, setDidCreateSucceed] = React.useState(true);
     const history = useHistory();
     const [allowReadOnly, setAllowReadOnly] = React.useState(false);
-    const nameRef = React.useRef({ value: '' });
-    const passwordRef = React.useRef({ value: '' });
+    const nameRef = React.useRef({ value: "" });
+    const passwordRef = React.useRef({ value: "" });
     const importZipRef = React.useRef({ files: [] });
 
     function onReadOnlyChange(event) {
@@ -139,7 +136,7 @@ function CreateWorkspace() {
         allowReadOnly,
         importZipFile
     ) {
-        let resp = await fetchAPI('POST', 'workspace/', {
+        let resp = await fetchAPI("POST", "workspace/", {
             nickname: name,
             anonymous_readable: allowReadOnly,
             password: password,
@@ -150,8 +147,8 @@ function CreateWorkspace() {
         } else {
             const unique_id = resp.unique_id;
 
-            if (password !== '') {
-                let auth = await fetchAPI('POST', 'api-token-auth/', {
+            if (password !== "") {
+                let auth = await fetchAPI("POST", "api-token-auth/", {
                     unique_id: unique_id,
                     password: password,
                 });
@@ -160,12 +157,12 @@ function CreateWorkspace() {
 
             if (importZipFile !== null) {
                 const formData = new FormData();
-                formData.append('zip', importZipFile);
+                formData.append("zip", importZipFile);
 
                 // must not include headers for uploading form because it will be rejected
                 // by nginx
                 let resp = await fetchAPI(
-                    'POST',
+                    "POST",
                     `workspace/${unique_id}/import/`,
                     formData,
                     localStorage.getItem(unique_id),
@@ -175,7 +172,7 @@ function CreateWorkspace() {
                 console.log(resp);
             }
 
-            await history.push('/workspace/' + resp.unique_id);
+            await history.push("/workspace/" + resp.unique_id);
         }
     }
 
@@ -222,8 +219,8 @@ function CreateWorkspace() {
                     error={!didCreateSucceed}
                     helperText={
                         didCreateSucceed
-                            ? ''
-                            : 'Workspace name is invalid/taken'
+                            ? ""
+                            : "Workspace name is invalid/taken"
                     }
                 />
                 <TextField
@@ -251,7 +248,7 @@ function CreateWorkspace() {
                             inputRef={importZipRef}
                             id="import-button"
                             inputProps={{
-                                accept: 'application/zip',
+                                accept: "application/zip",
                             }}
                             type="file"
                             disableUnderline={true}
@@ -293,8 +290,8 @@ function OpenWorkspace() {
     const history = useHistory();
     const [didOpenSucceed, setDidOpenSucceed] = React.useState(true);
     const [useId, setUseId] = React.useState(false);
-    const [nameValue, setNameValue] = React.useState('');
-    const passwordRef = React.useRef({ value: '' });
+    const [nameValue, setNameValue] = React.useState("");
+    const passwordRef = React.useRef({ value: "" });
     const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
     const [previousWorkspaces, setPreviousWorkspaces] = React.useState(
         getPreviousWorkspaces()
@@ -305,7 +302,7 @@ function OpenWorkspace() {
     }
 
     function getPreviousWorkspaces() {
-        const prevWorkspaces = localStorage.getItem('prevWorkspaces');
+        const prevWorkspaces = localStorage.getItem("prevWorkspaces");
         if (prevWorkspaces === null) {
             return {};
         }
@@ -334,7 +331,7 @@ function OpenWorkspace() {
 
         setPreviousWorkspaces(newPrev);
 
-        localStorage.setItem('prevWorkspaces', JSON.stringify(newPrev));
+        localStorage.setItem("prevWorkspaces", JSON.stringify(newPrev));
     }
 
     function handlePrevWorkspaceDelete(event, name) {
@@ -344,7 +341,7 @@ function OpenWorkspace() {
             const newPrev = Object.assign({}, previousWorkspaces);
             delete newPrev[name];
             setPreviousWorkspaces(newPrev);
-            localStorage.setItem('prevWorkspaces', JSON.stringify(newPrev));
+            localStorage.setItem("prevWorkspaces", JSON.stringify(newPrev));
         }
     }
 
@@ -352,25 +349,25 @@ function OpenWorkspace() {
         let uniqueId = name;
         if (!useId) {
             let resp = await fetchAPI(
-                'GET',
-                'workspace/nickname/?nickname=' + name
+                "GET",
+                "workspace/nickname/?nickname=" + name
             );
             if (resp.error) {
                 return false;
             }
-            uniqueId = resp['unique_id'];
+            uniqueId = resp["unique_id"];
         }
 
-        if (password === '') {
-            let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
+        if (password === "") {
+            let resp = await fetchAPI("GET", "workspace/" + uniqueId);
             if (resp.error) {
                 return false;
             }
 
             addPreviousWorkspace(name, password, useId);
-            await history.push('/workspace/' + resp.unique_id);
+            await history.push("/workspace/" + resp.unique_id);
         } else {
-            let resp = await fetchAPI('POST', 'api-token-auth/', {
+            let resp = await fetchAPI("POST", "api-token-auth/", {
                 unique_id: uniqueId,
                 password: password,
             });
@@ -381,7 +378,7 @@ function OpenWorkspace() {
 
             localStorage.setItem(uniqueId, resp.token);
             addPreviousWorkspace(name, password, useId);
-            await history.push('/workspace/' + uniqueId);
+            await history.push("/workspace/" + uniqueId);
         }
 
         return true;
@@ -405,8 +402,8 @@ function OpenWorkspace() {
     }
 
     function handleMenuItemClick(workspaceObj) {
-        setNameValue(workspaceObj['name']);
-        setUseId(workspaceObj['useId']);
+        setNameValue(workspaceObj["name"]);
+        setUseId(workspaceObj["useId"]);
         console.log(workspaceObj);
         handleMenuClose();
     }
@@ -433,15 +430,15 @@ function OpenWorkspace() {
                 ) : (
                     Object.values(previousWorkspaces).map((workspaceObj) => (
                         <MenuItem
-                            key={workspaceObj['name']}
+                            key={workspaceObj["name"]}
                             onClick={() => handleMenuItemClick(workspaceObj)}
                         >
-                            {workspaceObj['name']}
+                            {workspaceObj["name"]}
                             <IconButton
                                 onClick={(event) =>
                                     handlePrevWorkspaceDelete(
                                         event,
-                                        workspaceObj['name']
+                                        workspaceObj["name"]
                                     )
                                 }
                             >
@@ -475,15 +472,15 @@ function OpenWorkspace() {
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        label={useId ? 'Workspace ID' : 'Workspace Name'}
+                        label={useId ? "Workspace ID" : "Workspace Name"}
                         name="workspace"
                         autoComplete="workspace"
                         autoFocus
                         error={!didOpenSucceed}
                         helperText={
                             didOpenSucceed
-                                ? ''
-                                : 'No workspace with given credentials'
+                                ? ""
+                                : "No workspace with given credentials"
                         }
                         required
                     />
@@ -535,9 +532,9 @@ function OpenWorkspace() {
 function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
-            {'Copyright © Synchronous '}
+            {"Copyright © Synchronous "}
             {new Date().getFullYear()}
-            {'.'}
+            {"."}
         </Typography>
     );
 }
@@ -547,16 +544,16 @@ const drawerWidth = 240;
 const useStyles = makeStyles((theme) => ({
     paper: {
         marginTop: theme.spacing(1),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
     },
     avatar: {
         margin: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main,
     },
     form: {
-        width: '100%', // Fix IE 11 issue.
+        width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(1),
     },
     submit: {
@@ -568,7 +565,7 @@ const useStyles = makeStyles((theme) => ({
     },
     appBar: {
         zIndex: theme.zIndex.drawer + 1,
-        transition: theme.transitions.create(['width', 'margin'], {
+        transition: theme.transitions.create(["width", "margin"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
         }),
@@ -576,7 +573,7 @@ const useStyles = makeStyles((theme) => ({
     appBarShift: {
         marginLeft: drawerWidth,
         width: `calc(100% - ${drawerWidth}px)`,
-        transition: theme.transitions.create(['width', 'margin'], {
+        transition: theme.transitions.create(["width", "margin"], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
         }),

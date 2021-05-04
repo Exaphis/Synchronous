@@ -1,34 +1,34 @@
-import { Route, useHistory, NavLink, HashRouter } from 'react-router-dom';
-import './css/Tutorial.css';
+import { Route, useHistory, NavLink, HashRouter } from "react-router-dom";
+import "./css/Tutorial.css";
 
-import { Avatar } from '@material-ui/core';
-import s from './images/s.png';
-import cstep1 from './tutorial_images/Create-Step1.png';
-import cstep2 from './tutorial_images/Create-Step2.png';
-import cstep3 from './tutorial_images/Create-Step3.png';
-import rostep1 from './tutorial_images/Reopen-Step1.png';
-import rostep2 from './tutorial_images/Reopen-Step2.png';
-import rostep3 from './tutorial_images/Reopen-Step3.png';
-import cnickstep1 from './tutorial_images/Change-Nickname-Step1.png';
-import cnickstep2 from './tutorial_images/Change-Nickname-Step2.png';
-import cnickstep3 from './tutorial_images/Change-Nickname-Step3.png';
-import invstep1 from './tutorial_images/Invite-Step1.png';
-import invstep2 from './tutorial_images/Invite-Step2.png';
-import bugstep1 from './tutorial_images/Bug-Step1.png';
-import bugstep2 from './tutorial_images/Bug-Step2.png';
-import bugstep3 from './tutorial_images/Bug-Step3.png';
-import cnamestep1 from './tutorial_images/Change-Name-Step1.png';
-import cnamestep2 from './tutorial_images/Change-Name-Step2.png';
-import cnamestep3 from './tutorial_images/Change-Name-Step3.png';
-import createapp from './tutorial_images/Create-New-App.gif';
-import moveresize from './tutorial_images/Move-resize.gif';
-import minimize from './tutorial_images/Minimize.gif';
-import chatstep from './tutorial_images/Chat-Step.png';
-import padstep from './tutorial_images/Pad-Step.png';
-import filesharestep from './tutorial_images/FileShare-Step.png';
-import { Redirect } from 'react-router';
-import { Helmet } from 'react-helmet-async';
-import * as React from 'react';
+import { Avatar } from "@material-ui/core";
+import s from "./images/s.png";
+import cstep1 from "./tutorial_images/Create-Step1.png";
+import cstep2 from "./tutorial_images/Create-Step2.png";
+import cstep3 from "./tutorial_images/Create-Step3.png";
+import rostep1 from "./tutorial_images/Reopen-Step1.png";
+import rostep2 from "./tutorial_images/Reopen-Step2.png";
+import rostep3 from "./tutorial_images/Reopen-Step3.png";
+import cnickstep1 from "./tutorial_images/Change-Nickname-Step1.png";
+import cnickstep2 from "./tutorial_images/Change-Nickname-Step2.png";
+import cnickstep3 from "./tutorial_images/Change-Nickname-Step3.png";
+import invstep1 from "./tutorial_images/Invite-Step1.png";
+import invstep2 from "./tutorial_images/Invite-Step2.png";
+import bugstep1 from "./tutorial_images/Bug-Step1.png";
+import bugstep2 from "./tutorial_images/Bug-Step2.png";
+import bugstep3 from "./tutorial_images/Bug-Step3.png";
+import cnamestep1 from "./tutorial_images/Change-Name-Step1.png";
+import cnamestep2 from "./tutorial_images/Change-Name-Step2.png";
+import cnamestep3 from "./tutorial_images/Change-Name-Step3.png";
+import createapp from "./tutorial_images/Create-New-App.gif";
+import moveresize from "./tutorial_images/Move-resize.gif";
+import minimize from "./tutorial_images/Minimize.gif";
+import chatstep from "./tutorial_images/Chat-Step.png";
+import padstep from "./tutorial_images/Pad-Step.png";
+import filesharestep from "./tutorial_images/FileShare-Step.png";
+import { Redirect } from "react-router";
+import { Helmet } from "react-helmet-async";
+import * as React from "react";
 
 export default function Tutorial() {
     const history = useHistory();
@@ -59,7 +59,7 @@ export default function Tutorial() {
                     <li>
                         <NavLink to="/apps">Apps</NavLink>
                     </li>
-                    <button className="a" onClick={() => history.push('/')}>
+                    <button className="a" onClick={() => history.push("/")}>
                         Return Home
                     </button>
                 </ul>
@@ -127,7 +127,7 @@ function Create() {
         <div>
             <h1>Creating a Workspace:</h1>
             <p className="tutorial-p">
-                To create a workspace follow these steps:{' '}
+                To create a workspace follow these steps:{" "}
             </p>
             <br />
             <p className="steps">
@@ -153,7 +153,7 @@ function Open() {
         <div>
             <h1>Opening an Existing Workspace:</h1>
             <p className="tutorial-p">
-                To open a workspace follow these steps:{' '}
+                To open a workspace follow these steps:{" "}
             </p>
             <br />
             <p className="steps">
@@ -337,7 +337,7 @@ function Apps() {
                 <div className="collapser">Minimize and maximize</div>
 
                 <div className="collapsed">
-                    Minimize: Click on the - icon on the top right of the app{' '}
+                    Minimize: Click on the - icon on the top right of the app{" "}
                     <br />
                     Maximize: Click on the minimized app from the sidebar
                     <img

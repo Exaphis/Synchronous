@@ -1,42 +1,48 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField} from "@material-ui/core";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    TextField,
+} from "@material-ui/core";
 import * as React from "react";
-import {CLIENT_MSG_TYPE, PUBSUB_TOPIC, SERVER_MSG_TYPE} from "../api";
-import {PubSub} from "pubsub-js";
+import { CLIENT_MSG_TYPE, PUBSUB_TOPIC, SERVER_MSG_TYPE } from "../api";
+import { PubSub } from "pubsub-js";
 
 export function UserNicknameChangeDialog(props) {
     const isOpen = props.isOpen;
     const onRequestClose = props.onRequestClose;
 
-    const [nameDialogError, setNameDialogError] = React.useState('');
-    const nicknameFieldValueRef = React.useRef('');
+    const [nameDialogError, setNameDialogError] = React.useState("");
+    const nicknameFieldValueRef = React.useRef("");
 
-    if (!isOpen && nameDialogError){
-        setNameDialogError('');
+    if (!isOpen && nameDialogError) {
+        setNameDialogError("");
     }
 
     function sendUserNicknameChange() {
-        PubSub.publish(
-            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
-            {
-                type: CLIENT_MSG_TYPE.NICKNAME_CHANGE,
-                nickname: nicknameFieldValueRef.current
-            }
-        );
+        PubSub.publish(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, {
+            type: CLIENT_MSG_TYPE.NICKNAME_CHANGE,
+            nickname: nicknameFieldValueRef.current,
+        });
     }
 
     React.useEffect(() => {
-        let token = PubSub.subscribe(SERVER_MSG_TYPE.NICKNAME_CHANGE, (msg, data) => {
-            if (data.success) {
-                onRequestClose();
+        let token = PubSub.subscribe(
+            SERVER_MSG_TYPE.NICKNAME_CHANGE,
+            (msg, data) => {
+                if (data.success) {
+                    onRequestClose();
+                } else {
+                    setNameDialogError(data.details);
+                }
             }
-            else {
-                setNameDialogError(data.details);
-            }
-        });
+        );
 
         return function cleanup() {
             PubSub.unsubscribe(token);
-        }
+        };
     }, [onRequestClose]);
 
     return (
@@ -45,7 +51,7 @@ export function UserNicknameChangeDialog(props) {
 
             <DialogContent>
                 <TextField
-                    error={nameDialogError !== ''}
+                    error={nameDialogError !== ""}
                     helperText={nameDialogError}
                     autoFocus
                     margin="dense"
@@ -53,7 +59,9 @@ export function UserNicknameChangeDialog(props) {
                     label="New Nickname"
                     type="text"
                     fullWidth
-                    onChange={ev => (nicknameFieldValueRef.current = ev.target.value)}
+                    onChange={(ev) =>
+                        (nicknameFieldValueRef.current = ev.target.value)
+                    }
                 />
             </DialogContent>
 
