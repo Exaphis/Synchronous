@@ -21,7 +21,7 @@ import {
 } from '@material-ui/core';
 import s from './images/s.png';
 import clsx from 'clsx';
-import Moment from 'react-moment';
+import Countdown from 'react-countdown';
 import EmailIcon from '@material-ui/icons/Email';
 import HelpIcon from '@material-ui/icons/Help';
 import PeopleIcon from '@material-ui/icons/People';
@@ -220,12 +220,21 @@ function WorkspaceInfoBar(props) {
                 style={{ justifyContent: 'space-between' }}
             >
                 <Typography variant="h6">
-                    &nbsp;&nbsp;&nbsp; Duration:{' '}
+                    {'Duration: '}
                     {
-                        <Moment
-                            date={workspace.created_at}
-                            format="hh:mm:ss"
-                            durationFromNow
+                        // count up from created_at
+                        <Countdown
+                            date={new Date(0)}
+                            now={() => {
+                                const currDate = new Date().valueOf();
+                                const createdAt = new Date(
+                                    workspace.created_at
+                                ).valueOf();
+
+                                return createdAt - currDate;
+                            }}
+                            daysInHours={true}
+                            overtime
                         />
                     }
                 </Typography>
@@ -323,7 +332,7 @@ function WorkspaceInfoBar(props) {
                 >
                     <Container component="main" maxWidth="xs">
                         <div className={classes.paper}>
-                            &nbsp;{'Invite Collaborators:'}
+                            Invite collaborators:
                             <TextField
                                 variant="outlined"
                                 margin="normal"
