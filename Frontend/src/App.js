@@ -1,19 +1,37 @@
 import * as React from 'react';
 import {
-    Grid, Box, Avatar, Button, CssBaseline,
-    TextField, FormControlLabel, Checkbox,
-    Typography, Container, Menu, MenuItem, IconButton, InputLabel, Input
+    Grid,
+    Box,
+    Avatar,
+    Button,
+    CssBaseline,
+    TextField,
+    FormControlLabel,
+    Checkbox,
+    Typography,
+    Container,
+    Menu,
+    MenuItem,
+    IconButton,
+    InputLabel,
+    Input,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles';
 import 'react-pro-sidebar/dist/css/styles.css';
-import {BrowserRouter, Link, Route, Switch, useHistory} from "react-router-dom";
-import {Helmet} from 'react-helmet';
-import './CSS/styles.css';
+import {
+    BrowserRouter,
+    Link,
+    Route,
+    Switch,
+    useHistory,
+} from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import './css/styles.css';
+import './css/App.css';
 
-import logo from './Images/logo.png';
-import logoIcon from './Images/s.png';
-import './CSS/App.css';
+import logo from './images/logo.png';
+import logoIcon from './images/s.png';
 import Workspace from './Workspace';
 import { fetchAPI } from './api';
 import Tutorial from './Tutorial';
@@ -21,25 +39,24 @@ import Tutorial from './Tutorial';
 // LogRocket.init('a1vl8a/synchronous');
 // setupLogRocketReact(LogRocket);
 
-
 export default function App() {
     return (
         <BrowserRouter>
             <Switch>
                 <Route exact path="/create">
-                    <CreateWorkspace/>
+                    <CreateWorkspace />
                 </Route>
                 <Route exact path="/open">
-                    <OpenWorkspace/>
+                    <OpenWorkspace />
                 </Route>
                 <Route exact path="/">
-                    <SignIn/>
+                    <SignIn />
                 </Route>
                 <Route exact path="/workspace/:uniqueId">
-                    <Workspace/>
+                    <Workspace />
                 </Route>
                 <Route exact path="/tutorial">
-                    <Tutorial/>
+                    <Tutorial />
                 </Route>
             </Switch>
         </BrowserRouter>
@@ -55,10 +72,15 @@ function SignIn() {
             </Helmet>
             <CssBaseline />
             <div className={classes.paper}>
-                <img alt="Synchronous logo" src={logo} width="300" height="300"/>
+                <img
+                    alt="Synchronous logo"
+                    src={logo}
+                    width="300"
+                    height="300"
+                />
                 <Button
-                    component={ Link }
-                    to={"/create"}
+                    component={Link}
+                    to={'/create'}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -68,8 +90,8 @@ function SignIn() {
                     Start a new workspace
                 </Button>
                 <Button
-                    component={ Link }
-                    to={"/open"}
+                    component={Link}
+                    to={'/open'}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -79,8 +101,8 @@ function SignIn() {
                     Reopen an existing workspace
                 </Button>
                 <Button
-                    component={ Link }
-                    to={"/tutorial"}
+                    component={Link}
+                    to={'/tutorial'}
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -102,35 +124,38 @@ function CreateWorkspace() {
     const [didCreateSucceed, setDidCreateSucceed] = React.useState(true);
     const history = useHistory();
     const [allowReadOnly, setAllowReadOnly] = React.useState(false);
-    const nameRef = React.useRef({value: ''});
-    const passwordRef = React.useRef({value: ''});
-    const importZipRef = React.useRef({files: []});
+    const nameRef = React.useRef({ value: '' });
+    const passwordRef = React.useRef({ value: '' });
+    const importZipRef = React.useRef({ files: [] });
 
     function onReadOnlyChange(event) {
         setAllowReadOnly(event.target.checked);
     }
 
-    async function handleCreateWorkspace(name, password, history, allowReadOnly, importZipFile) {
-        let resp = await fetchAPI('POST', 'workspace/',
-            {
-                nickname: name,
-                anonymous_readable: allowReadOnly,
-                password: password
-            });
+    async function handleCreateWorkspace(
+        name,
+        password,
+        history,
+        allowReadOnly,
+        importZipFile
+    ) {
+        let resp = await fetchAPI('POST', 'workspace/', {
+            nickname: name,
+            anonymous_readable: allowReadOnly,
+            password: password,
+        });
 
         if (resp.error) {
             return false;
-        }
-        else {
+        } else {
             const unique_id = resp.unique_id;
 
-            if (password !== "") {
-                let auth = await fetchAPI('POST', 'api-token-auth/',
-                    {
-                        unique_id: unique_id,
-                        password: password
-                    });
-                localStorage.setItem(resp.unique_id, auth.token)
+            if (password !== '') {
+                let auth = await fetchAPI('POST', 'api-token-auth/', {
+                    unique_id: unique_id,
+                    password: password,
+                });
+                localStorage.setItem(resp.unique_id, auth.token);
             }
 
             if (importZipFile !== null) {
@@ -160,8 +185,10 @@ function CreateWorkspace() {
             passwordRef.current.value,
             history,
             allowReadOnly,
-            importZipRef.current.files.length > 0 ? importZipRef.current.files[0] : null
-        ).then(success => {
+            importZipRef.current.files.length > 0
+                ? importZipRef.current.files[0]
+                : null
+        ).then((success) => {
             setDidCreateSucceed(success);
         });
     }
@@ -171,10 +198,14 @@ function CreateWorkspace() {
             <Helmet>
                 <title>Create Workspace</title>
             </Helmet>
-            <CssBaseline/>
+            <CssBaseline />
             <div className={classes.paper}>
                 <Box mb={4}>
-                    <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
+                    <Avatar
+                        alt="Synchronous icon"
+                        src={logoIcon}
+                        className={classes.sizeAvatar}
+                    />
                 </Box>
                 <Typography component="h2" variant="h5">
                     Create a Workspace
@@ -189,7 +220,11 @@ function CreateWorkspace() {
                     autoComplete="workspace"
                     autoFocus
                     error={!didCreateSucceed}
-                    helperText={didCreateSucceed ? "" : "Workspace name is invalid/taken"}
+                    helperText={
+                        didCreateSucceed
+                            ? ''
+                            : 'Workspace name is invalid/taken'
+                    }
                 />
                 <TextField
                     inputRef={passwordRef}
@@ -216,7 +251,7 @@ function CreateWorkspace() {
                             inputRef={importZipRef}
                             id="import-button"
                             inputProps={{
-                              accept: "application/zip"
+                                accept: 'application/zip',
                             }}
                             type="file"
                             disableUnderline={true}
@@ -247,11 +282,10 @@ function CreateWorkspace() {
                 </Grid>
             </div>
             <Box mt={16}>
-                <Copyright/>
+                <Copyright />
             </Box>
         </Container>
     );
-
 }
 
 function OpenWorkspace() {
@@ -260,9 +294,11 @@ function OpenWorkspace() {
     const [didOpenSucceed, setDidOpenSucceed] = React.useState(true);
     const [useId, setUseId] = React.useState(false);
     const [nameValue, setNameValue] = React.useState('');
-    const passwordRef = React.useRef({'value': ''});
+    const passwordRef = React.useRef({ value: '' });
     const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
-    const [previousWorkspaces, setPreviousWorkspaces] = React.useState(getPreviousWorkspaces());
+    const [previousWorkspaces, setPreviousWorkspaces] = React.useState(
+        getPreviousWorkspaces()
+    );
 
     function onUseIdChange(event) {
         setUseId(event.target.checked);
@@ -293,7 +329,7 @@ function OpenWorkspace() {
             name: name,
             // password: password,
             // don't store password in plaintext
-            useId: useId
+            useId: useId,
         };
 
         setPreviousWorkspaces(newPrev);
@@ -315,14 +351,17 @@ function OpenWorkspace() {
     async function handleOpenWorkspace(name, password, history, useId) {
         let uniqueId = name;
         if (!useId) {
-            let resp = await fetchAPI('GET', 'workspace/nickname/?nickname=' + name);
+            let resp = await fetchAPI(
+                'GET',
+                'workspace/nickname/?nickname=' + name
+            );
             if (resp.error) {
                 return false;
             }
             uniqueId = resp['unique_id'];
         }
 
-        if (password === "") {
+        if (password === '') {
             let resp = await fetchAPI('GET', 'workspace/' + uniqueId);
             if (resp.error) {
                 return false;
@@ -330,13 +369,11 @@ function OpenWorkspace() {
 
             addPreviousWorkspace(name, password, useId);
             await history.push('/workspace/' + resp.unique_id);
-        }
-        else {
-            let resp = await fetchAPI('POST', 'api-token-auth/',
-                {
-                    unique_id: uniqueId,
-                    password: password
-                });
+        } else {
+            let resp = await fetchAPI('POST', 'api-token-auth/', {
+                unique_id: uniqueId,
+                password: password,
+            });
 
             if (resp.error || !resp.token) {
                 return false;
@@ -356,7 +393,7 @@ function OpenWorkspace() {
             passwordRef.current.value,
             history,
             useId
-        ).then(success => setDidOpenSucceed(success));
+        ).then((success) => setDidOpenSucceed(success));
     }
 
     function handleMenuClick(event) {
@@ -389,46 +426,65 @@ function OpenWorkspace() {
                 open={Boolean(menuAnchorEl)}
                 onClose={handleMenuClose}
             >
-                {
-                    Object.keys(previousWorkspaces).length === 0 ?
-                        <MenuItem onClick={handleMenuClose}>No previous workspaces</MenuItem> :
-                        Object.values(previousWorkspaces).map(workspaceObj =>
-                            <MenuItem key={workspaceObj['name']}
-                                      onClick={() => handleMenuItemClick(workspaceObj)}>
-                                {workspaceObj['name']}
-                                <IconButton onClick={event => handlePrevWorkspaceDelete(event, workspaceObj['name'])}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </MenuItem>
-                        )
-                }
+                {Object.keys(previousWorkspaces).length === 0 ? (
+                    <MenuItem onClick={handleMenuClose}>
+                        No previous workspaces
+                    </MenuItem>
+                ) : (
+                    Object.values(previousWorkspaces).map((workspaceObj) => (
+                        <MenuItem
+                            key={workspaceObj['name']}
+                            onClick={() => handleMenuItemClick(workspaceObj)}
+                        >
+                            {workspaceObj['name']}
+                            <IconButton
+                                onClick={(event) =>
+                                    handlePrevWorkspaceDelete(
+                                        event,
+                                        workspaceObj['name']
+                                    )
+                                }
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </MenuItem>
+                    ))
+                )}
             </Menu>
         </Box>
     );
 
     return (
         <Container component="main" maxWidth="xs">
-            <CssBaseline/>
+            <CssBaseline />
             <div className={classes.paper}>
                 <Box mb={4}>
-                    <Avatar alt="Synchronous icon" src={logoIcon} className={classes.sizeAvatar}/>
+                    <Avatar
+                        alt="Synchronous icon"
+                        src={logoIcon}
+                        className={classes.sizeAvatar}
+                    />
                 </Box>
                 <Typography component="h2" variant="h5">
                     Open Existing Workspace
                 </Typography>
-                <Grid container >
+                <Grid container>
                     <TextField
                         value={nameValue}
-                        onChange={event => setNameValue(event.target.value)}
+                        onChange={(event) => setNameValue(event.target.value)}
                         variant="outlined"
                         margin="normal"
                         fullWidth
-                        label={useId ? "Workspace ID" : "Workspace Name"}
+                        label={useId ? 'Workspace ID' : 'Workspace Name'}
                         name="workspace"
                         autoComplete="workspace"
                         autoFocus
                         error={!didOpenSucceed}
-                        helperText={didOpenSucceed ? "" : "No workspace with given credentials"}
+                        helperText={
+                            didOpenSucceed
+                                ? ''
+                                : 'No workspace with given credentials'
+                        }
                         required
                     />
                     <FormControlLabel
@@ -465,18 +521,15 @@ function OpenWorkspace() {
 
                 <Grid container>
                     <Grid item xs>
-                        <Link to="/create">
-                            Need a new workspace?
-                        </Link>
+                        <Link to="/create">Need a new workspace?</Link>
                     </Grid>
                 </Grid>
             </div>
             <Box mt={16}>
-                <Copyright/>
+                <Copyright />
             </Box>
         </Container>
     );
-
 }
 
 function Copyright() {

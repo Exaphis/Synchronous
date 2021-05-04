@@ -1,92 +1,119 @@
-import {Link, useParams} from "react-router-dom";
-import {PubSub} from 'pubsub-js';
-import * as React from "react";
-import {useIdleTimer} from "react-idle-timer";
-import useInterval from "@use-it/interval";
+import * as EmailValidator from 'email-validator';
+import { Link, useParams } from 'react-router-dom';
+import { PubSub } from 'pubsub-js';
+import * as React from 'react';
+import { useIdleTimer } from 'react-idle-timer';
+import useInterval from '@use-it/interval';
 import {
-    AppBar, Avatar, Badge, Box, Button, Container, CssBaseline,
-    IconButton, Menu, Snackbar, TextField, Toolbar, Typography
-} from "@material-ui/core";
-import s from "./Images/s.png";
-import clsx from "clsx";
-import Moment from "react-moment";
-import EmailIcon from "@material-ui/icons/Email";
+    AppBar,
+    Avatar,
+    Badge,
+    Box,
+    Button,
+    Container,
+    CssBaseline,
+    IconButton,
+    Menu,
+    Snackbar,
+    TextField,
+    Toolbar,
+    Typography,
+} from '@material-ui/core';
+import s from './images/s.png';
+import clsx from 'clsx';
+import Moment from 'react-moment';
+import EmailIcon from '@material-ui/icons/Email';
 import HelpIcon from '@material-ui/icons/Help';
 import PeopleIcon from '@material-ui/icons/People';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import { useHistory } from "react-router-dom";
-
+import { useHistory } from 'react-router-dom';
 
 import {
-    fetchAPI, getUrlFromEndpoint, PUBSUB_TOPIC,
-    CLIENT_MSG_TYPE, SERVER_MSG_TYPE, PROTOCOL_HTTP, PROTOCOL_WS
+    fetchAPI,
+    getUrlFromEndpoint,
+    PUBSUB_TOPIC,
+    CLIENT_MSG_TYPE,
+    SERVER_MSG_TYPE,
+    PROTOCOL_HTTP,
+    PROTOCOL_WS,
 } from './api';
 import { useStyles, Copyright } from './App';
 import { WorkspaceArea } from './WorkspaceArea';
 
-import { StreamChat } from 'stream-chat';
-import { Widget, addResponseMessage } from 'react-chat-widget';
-import {UserListDialog} from "./components/UserListDialog";
-import './CSS/styles.css';
-import {WorkspaceNicknameChangeDialog} from "./components/WorkspaceNicknameChangeDialog";
-import {WorkspacePasswordChangeDialog} from "./components/WorkspacePasswordChangeDialog";
-import Alert from "@material-ui/lab/Alert";
-import MaxWidthContainer from "./components/MaxWidthContainer";
-import {Helmet} from "react-helmet";
-import ReconnectingWebSocket from "reconnecting-websocket";
-
-const STREAM_API = 'n9utf8kxctuk'
+import { UserListDialog } from './components/UserListDialog';
+import './css/styles.css';
+import { WorkspaceNicknameChangeDialog } from './components/WorkspaceNicknameChangeDialog';
+import { WorkspacePasswordChangeDialog } from './components/WorkspacePasswordChangeDialog';
+import Alert from '@material-ui/lab/Alert';
+import MaxWidthContainer from './components/MaxWidthContainer';
+import { Helmet } from 'react-helmet-async';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 export const WorkspaceUniqueIdContext = React.createContext(undefined);
 export const WorkspaceUserContext = React.createContext(undefined);
 
-
-async function emailHandler(email, message, workspace, validEmail, setValidEmail, sent, setSent) {
-    // eslint-disable-next-line
-    let regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    if (regex.test(email.value)) {
-        let name = workspace.nickname !== null ? JSON.stringify(workspace.nickname) :
-            JSON.stringify(workspace.unique_id)
-        name = name.substring(1, name.length - 1)
-        let key = localStorage.getItem(workspace.unique_id)
-        key = key !== null ? key : "N/A"
-        let resp = await fetchAPI('POST', 'send-mail/',
-            {
-                email: email.value,
-                subject: "Workspace Invitation",
-                message: "Hello,\n\n" +
-                    "You are invited to join Workspace: " + name + "\n" +
-                    "http://localhost:3000/Workspace/" + workspace.unique_id + "\n\n" +
-                    "Password: " + key + "\n\n" +
-                    "Additional Notes: " + message.value + "\n\n\n" +
-                    "Best wishes,\n" +
-                    "Synchronous"
-            })
-
-        if (resp.error) {
-            if (JSON.stringify(resp.details).includes("200")) {
-                setSent(true);
-                setValidEmail(true)
-            } else {
-                console.log(JSON.stringify(resp.details))
-                setValidEmail(false)
-            }
-        } else {
-            setSent(true)
-            setValidEmail(true)
+async function emailHandler(
+    email,
+    message,
+    workspace,
+    validEmail,
+    setValidEmail,
+    sent,
+    setSent
+) {
+    if (!validEmail) {
+        return null;
+    }
+    if (EmailValidator.validate(email.value)) {
+        let name = workspace.unique_id;
+        if (workspace.nickname !== null) {
+            name = workspace.nickname;
         }
 
+        let key = localStorage.getItem(workspace.unique_id);
+        key = key !== null ? key : 'N/A';
+        let resp = await fetchAPI('POST', 'send-mail/', {
+            email: email.value,
+            subject: 'Workspace Invitation',
+            message:
+                'Hello,\n\n' +
+                'You are invited to join Workspace: ' +
+                name +
+                '\n' +
+                'http://localhost:3000/Workspace/' +
+                workspace.unique_id +
+                '\n\n' +
+                'Password: ' +
+                key +
+                '\n\n' +
+                'Additional Notes: ' +
+                message.value +
+                '\n\n\n' +
+                'Best wishes,\n' +
+                'Synchronous',
+        });
+
+        if (resp.error) {
+            if (JSON.stringify(resp.details).includes('200')) {
+                setSent(true);
+                setValidEmail(true);
+            } else {
+                console.log(JSON.stringify(resp.details));
+                setValidEmail(false);
+            }
+        } else {
+            setSent(true);
+            setValidEmail(true);
+        }
     } else {
-        setValidEmail(false)
+        setValidEmail(false);
         console.log('invalid email address');
     }
 }
 
-
 function WorkspaceInfoBar(props) {
     const [anchorEl, setAnchorEl] = React.useState(null);
-    const [validEmail, setValidEmail] = React.useState(true)
+    const [validEmail, setValidEmail] = React.useState(true);
     const [sent, setSent] = React.useState(false);
     const open = Boolean(anchorEl);
     const classes = useStyles();
@@ -102,7 +129,6 @@ function WorkspaceInfoBar(props) {
     const [isUserListDialogOpen, setUserListDialogOpen] = React.useState(false);
     const [isNicknameDialogOpen, setNicknameDialogOpen] = React.useState(false);
     const [isPasswordDialogOpen, setPasswordDialogOpen] = React.useState(false);
-
 
     const handleSnack = (event, reason) => {
         if (reason === 'clickaway') {
@@ -123,7 +149,7 @@ function WorkspaceInfoBar(props) {
     const history = useHistory();
 
     const handleHelp = () => {
-        history.push('/tutorial')
+        history.push('/tutorial');
     };
 
     const handleMenu = (event) => {
@@ -132,20 +158,27 @@ function WorkspaceInfoBar(props) {
 
     const handleClose = () => {
         setAnchorEl(null);
-        document.getElementById('email').value = "";
-        document.getElementById('message').value = "";
-        //etValidEmail(true);
+        document.getElementById('email').value = '';
+        document.getElementById('message').value = '';
     };
 
     const exportWorkspace = () => {
-        const link = document.createElement("a");
-        link.href = getUrlFromEndpoint(PROTOCOL_HTTP, `workspace/${workspace.unique_id}/zip/`);
-        link.target = "_blank"
+        const link = document.createElement('a');
+        link.href = getUrlFromEndpoint(
+            PROTOCOL_HTTP,
+            `workspace/${workspace.unique_id}/zip/`
+        );
+        link.target = '_blank';
         link.click();
     };
 
-    if (workspace === undefined || workspace === null || userIdRef === null || userList === {}) {
-        return <div/>
+    if (
+        workspace === undefined ||
+        workspace === null ||
+        userIdRef === null ||
+        userList === {}
+    ) {
+        return <div />;
     }
 
     let username;
@@ -154,78 +187,121 @@ function WorkspaceInfoBar(props) {
     }
 
     if (username === undefined) {
-        return <div/>
+        return <div />;
     }
 
     const canChangePassword = workspace.is_password_protected && isLoggedIn;
 
     return (
-        <AppBar position={"static"} className={clsx(classes.appBar)}>
-            <Snackbar open={sent} autoHideDuration={6000} onClose={handleSnack}
-                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+        <AppBar position={'static'} className={clsx(classes.appBar)}>
+            <Snackbar
+                open={sent}
+                autoHideDuration={6000}
+                onClose={handleSnack}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
                 <Alert onClose={handleSnack} severity="success">
                     Email Sent
                 </Alert>
             </Snackbar>
-            <Snackbar open={!validEmail} autoHideDuration={6000} onClose={handleSnack2}
-                      anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Snackbar
+                open={!validEmail}
+                autoHideDuration={6000}
+                onClose={handleSnack2}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
                 <Alert onClose={handleSnack2} severity="error">
                     Email failed to send
                 </Alert>
             </Snackbar>
-            <Chat workspace={workspace} username={username}/>
-            <Toolbar className={classes.toolbar} style={{justifyContent: 'space-between'}}>
+            <Chat workspace={workspace} username={username} />
+            <Toolbar
+                className={classes.toolbar}
+                style={{ justifyContent: 'space-between' }}
+            >
                 <Typography variant="h6">
-                    &nbsp;&nbsp;&nbsp; Duration: {<Moment date={workspace.created_at} format="hh:mm:ss"
-                                                          durationFromNow/> }
+                    &nbsp;&nbsp;&nbsp; Duration:{' '}
+                    {
+                        <Moment
+                            date={workspace.created_at}
+                            format="hh:mm:ss"
+                            durationFromNow
+                        />
+                    }
                 </Typography>
 
-                <Button color="secondary" onClick={() => setNicknameDialogOpen(true)}
-                        style={{textTransform: 'none', color: 'white'}}>
+                <Button
+                    color="secondary"
+                    onClick={() => setNicknameDialogOpen(true)}
+                    style={{ textTransform: 'none', color: 'white' }}
+                >
                     <Typography variant="h4" className={classes.title}>
-                        {workspace.nickname !== null ? workspace.nickname : workspace.unique_id}
+                        {workspace.nickname !== null
+                            ? workspace.nickname
+                            : workspace.unique_id}
                     </Typography>
                 </Button>
 
-                <WorkspaceNicknameChangeDialog isOpen={isNicknameDialogOpen}
-                                               onRequestClose={() => setNicknameDialogOpen(false)}
-                                               onNicknameUpdateAsync={updateNickname} />
+                <WorkspaceNicknameChangeDialog
+                    isOpen={isNicknameDialogOpen}
+                    onRequestClose={() => setNicknameDialogOpen(false)}
+                    onNicknameUpdateAsync={updateNickname}
+                />
 
                 <div>
-                    {canChangePassword &&
-                        <Button color="secondary" variant="contained" edge="end"
-                                onClick={() => setPasswordDialogOpen(true)}>
+                    {canChangePassword && (
+                        <Button
+                            color="secondary"
+                            variant="contained"
+                            edge="end"
+                            onClick={() => setPasswordDialogOpen(true)}
+                        >
                             Change password
                         </Button>
-                    }
+                    )}
 
-                    {canChangePassword &&
-                        <WorkspacePasswordChangeDialog isOpen={isPasswordDialogOpen}
-                                                       onRequestClose={() => setPasswordDialogOpen(false)}
-                                                       onPasswordChangeAsync={changePassword} />
-                    }
+                    {canChangePassword && (
+                        <WorkspacePasswordChangeDialog
+                            isOpen={isPasswordDialogOpen}
+                            onRequestClose={() => setPasswordDialogOpen(false)}
+                            onPasswordChangeAsync={changePassword}
+                        />
+                    )}
 
-                    <IconButton color="inherit" edge="end" onClick={() => setUserListDialogOpen(true)}>
+                    <IconButton
+                        color="inherit"
+                        edge="end"
+                        onClick={() => setUserListDialogOpen(true)}
+                    >
                         <Badge badgeContent={Object.keys(userList).length}>
                             <PeopleIcon />
                         </Badge>
                     </IconButton>
 
-                    <IconButton color="inherit" edge="end" onClick={exportWorkspace}>
+                    <IconButton
+                        color="inherit"
+                        edge="end"
+                        onClick={exportWorkspace}
+                    >
                         <GetAppIcon />
                     </IconButton>
 
-                    <UserListDialog isOpen={isUserListDialogOpen}
-                                    onRequestClose={() => setUserListDialogOpen(false)}
-                                    userList={userList}
-                                    currUserId={userIdRef.current}
+                    <UserListDialog
+                        isOpen={isUserListDialogOpen}
+                        onRequestClose={() => setUserListDialogOpen(false)}
+                        userList={userList}
+                        currUserId={userIdRef.current}
                     />
 
                     <IconButton color="inherit" edge="end" onClick={handleMenu}>
                         <EmailIcon />
                     </IconButton>
 
-                    <IconButton color="secondary" edge="end" onClick={handleHelp}>
+                    <IconButton
+                        color="secondary"
+                        edge="end"
+                        onClick={handleHelp}
+                    >
                         <HelpIcon />
                     </IconButton>
                 </div>
@@ -247,25 +323,23 @@ function WorkspaceInfoBar(props) {
                 >
                     <Container component="main" maxWidth="xs">
                         <div className={classes.paper}>
-                        &nbsp;{"Invite Collaborators:"}
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            id="email"
-                            label="Email"
-                            error={!validEmail}
-                            helperText={validEmail ? "" : "Invalid Email"}
-                            required
-                            autoFocus
-                        >
-                        </TextField>
-                        <TextField
-                            variant="outlined"
-                            margin="normal"
-                            id="message"
-                            label="Additional Message?"
-                        >
-                        </TextField>
+                            &nbsp;{'Invite Collaborators:'}
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                id="email"
+                                label="Email"
+                                error={!validEmail}
+                                helperText={validEmail ? '' : 'Invalid Email'}
+                                required
+                                autoFocus
+                            ></TextField>
+                            <TextField
+                                variant="outlined"
+                                margin="normal"
+                                id="message"
+                                label="Additional Message?"
+                            ></TextField>
                             <Button
                                 size="large"
                                 type="submit"
@@ -298,7 +372,7 @@ function WorkspaceInfoBar(props) {
 
 function Workspace() {
     const classes = useStyles();
-    const {uniqueId} = useParams();
+    const { uniqueId } = useParams();
     const [workspace, setWorkspace] = React.useState(null);
     const [userListWs, setUserListWs] = React.useState(null);
     const [userList, setUserList] = React.useState({});
@@ -310,8 +384,10 @@ function Workspace() {
         tokenRef.current = localStorage.getItem(uniqueId);
 
         let newWorkspace = await fetchAPI(
-            'GET', 'workspace/' + uniqueId,
-            null, tokenRef.current
+            'GET',
+            'workspace/' + uniqueId,
+            null,
+            tokenRef.current
         );
 
         // TODO: handle response errors
@@ -345,14 +421,13 @@ function Workspace() {
 
             if (user.active) {
                 user.activity_text = 'Active';
-            }
-            else {
+            } else {
                 const inactive_since = new Date(user.went_inactive_at);
                 const millis_inactive = Date.now() - inactive_since.getTime();
                 const secs_inactive = Math.round(millis_inactive / 1000);
                 user.activity_text = `Inactive for ${secs_inactive} sec`;
             }
-        })
+        });
 
         return userList;
     }
@@ -387,31 +462,31 @@ function Workspace() {
 
             if (tokenRef.current !== null) {
                 const authPayload = {
-                    'type': 'auth',
-                    'Authorization': tokenRef.current
+                    type: 'auth',
+                    Authorization: tokenRef.current,
                 };
 
                 ws.send(JSON.stringify(authPayload));
                 console.log('sent authorization payload');
             }
-        }
-    }
+        };
+    };
 
     const sendActivityMessage = (active) => {
         if (userListWs !== null) {
-            userListWs.send(JSON.stringify(
-                {
-                    'type': CLIENT_MSG_TYPE.ACTIVITY,
-                    'isActive': active
-                }
-            ));
+            userListWs.send(
+                JSON.stringify({
+                    type: CLIENT_MSG_TYPE.ACTIVITY,
+                    isActive: active,
+                })
+            );
         }
-    }
+    };
 
     useIdleTimer({
-        timeout: 1000 * 3,  // in milliseconds
+        timeout: 1000 * 3, // in milliseconds
         onIdle: () => sendActivityMessage(false),
-        onActive: () => sendActivityMessage(true)
+        onActive: () => sendActivityMessage(true),
     });
 
     // re-render inactivity text to re-render everything every second
@@ -423,7 +498,7 @@ function Workspace() {
         if (workspace === null) {
             getWorkspace().then();
         } else if (userListWs === null) {
-            userListConnect()
+            userListConnect();
         }
 
         let pubSubTokens = [];
@@ -438,22 +513,27 @@ function Workspace() {
         });
         pubSubTokens.push(token);
 
-        token = PubSub.subscribe(PUBSUB_TOPIC.WS_SEND_MSG_TOPIC, (msg, data) => {
-            if (userListWs !== null) {
-                userListWs.send(JSON.stringify(data));
+        token = PubSub.subscribe(
+            PUBSUB_TOPIC.WS_SEND_MSG_TOPIC,
+            (msg, data) => {
+                if (userListWs !== null) {
+                    userListWs.send(JSON.stringify(data));
+                }
             }
-        });
+        );
         pubSubTokens.push(token);
 
         return function cleanup() {
-            pubSubTokens.forEach(token => PubSub.unsubscribe(token));
-        }
+            pubSubTokens.forEach((token) => PubSub.unsubscribe(token));
+        };
     });
 
     async function updateNickname(new_nickname) {
-        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/',
+        let resp = await fetchAPI(
+            'PATCH',
+            'workspace/' + uniqueId + '/',
             {
-                'nickname': new_nickname
+                nickname: new_nickname,
             },
             tokenRef.current
         );
@@ -468,9 +548,11 @@ function Workspace() {
     }
 
     async function changePassword(new_password) {
-        let resp = await fetchAPI('PATCH', 'workspace/' + uniqueId + '/password/',
+        let resp = await fetchAPI(
+            'PATCH',
+            'workspace/' + uniqueId + '/password/',
             {
-                'password': new_password
+                password: new_password,
             },
             tokenRef.current
         );
@@ -494,21 +576,18 @@ function Workspace() {
                 <Helmet>
                     <title>Workspace</title>
                 </Helmet>
-                <CssBaseline/>
-                <Box mt={4}>
-                </Box>
+                <CssBaseline />
+                <Box mt={4}></Box>
                 <div className={classes.paper}>
-                    <Avatar alt="s" src={s} className={classes.sizeAvatar}/>
-                    <Box mt={4}>
-                    </Box>
+                    <Avatar alt="s" src={s} className={classes.sizeAvatar} />
+                    <Box mt={4}></Box>
                     <Typography component="h2" variant="h5">
                         You do not have access to this workspace
                     </Typography>
-                    <Box mt={2}>
-                    </Box>
+                    <Box mt={2}></Box>
                     <Button
-                        component={ Link }
-                        to={"/open"}
+                        component={Link}
+                        to={'/open'}
                         size="large"
                         type="submit"
                         fullWidth
@@ -520,15 +599,23 @@ function Workspace() {
                     </Button>
                 </div>
                 <Box mt={4}>
-                    <Copyright/>
+                    <Copyright />
                 </Box>
             </Container>
-        )
+        );
     }
 
     return (
-        <MaxWidthContainer component="main" disableGutters={true}
-                   style={{display: 'flex', flexDirection: 'column', height: '100vh', width: '100vw'}}>
+        <MaxWidthContainer
+            component="main"
+            disableGutters={true}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100vh',
+                width: '100vw',
+            }}
+        >
             <Helmet>
                 <title>Workspace</title>
             </Helmet>
@@ -541,120 +628,22 @@ function Workspace() {
                 userIdRef={userIdRef}
             />
 
-            <WorkspaceUniqueIdContext.Provider value={workspace === null ? undefined : workspace.unique_id}>
-                <WorkspaceUserContext.Provider value={userList[userIdRef.current]}>
-                    <WorkspaceArea/>
+            <WorkspaceUniqueIdContext.Provider
+                value={workspace === null ? undefined : workspace.unique_id}
+            >
+                <WorkspaceUserContext.Provider
+                    value={userList[userIdRef.current]}
+                >
+                    <WorkspaceArea />
                 </WorkspaceUserContext.Provider>
             </WorkspaceUniqueIdContext.Provider>
         </MaxWidthContainer>
-    )
+    );
 }
-
 
 function Chat(props) {
-    const client = new StreamChat(STREAM_API);
-    const [messages, setMessages] = React.useState(null);
-    const [count, setCount] = React.useState(null);
-    const workspace = props.workspace;
-
-
-    let id = 'id'
-    let name = 'name'
-    const channel = React.useRef(null);
-
-    if (messages !== null && count === null) {
-        setCount(messages.length)
-        if (messages.length > 0) {
-            localStorage.setItem('last', messages[messages.length - 1].text)
-        }
-    }
-
-    let chatName = "Chat";
-    if (workspace !== null && workspace !== undefined) {
-        if (workspace.nickname !== null) {
-            chatName = "Workspace: " + workspace.nickname;
-        } else {
-            chatName = "Workspace: " + workspace.unique_id;
-        }
-    }
-
-    if (channel !== null && channel.current !== null && count !== null) {
-        updateMessages(messages, setMessages, channel, count, setCount);
-    }
-
-    const setUser = React.useCallback(async () => {
-        await client.setUser(
-            { id, name },
-            client.devToken(id)
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [id, name]);
-
-
-    const setChannel = React.useCallback(async () => {
-        channel.current = client.channel('messaging', workspace.unique_id, {
-            name: workspace.unique_id,
-        });
-
-        const channelWatch = await channel.current.watch();
-        setMessages(channelWatch.messages);
-
-        return async () => {
-            await channelWatch.stopWatching();
-
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-
-    const handleNewUserMessage = React.useCallback(async message =>
-        await channel.current.sendMessage({
-            text: props.username.nickname + ": " + message
-        })
-        , [props.username.nickname]);
-
-    React.useEffect(() => {
-        setUser();
-        setChannel();
-    }, [setUser, setChannel]);
-
-    React.useEffect(
-        () => messages?.map(message => addResponseMessage(message.text)),
-        [messages]
-    );
-
-    return (
-        <div className="App">
-            <Widget
-                handleSubmit={() => setCount(count + 1)}
-                handleNewUserMessage={handleNewUserMessage}
-                title={chatName}
-                subtitle=""
-            />
-        </div>
-    );
-}
-
-
-async function updateMessages(messages, setMessages, channel, count, setCount) {
-        const channelWatch = await channel.current.watch();
-        let len = channelWatch.messages.length;
-
-        if (len > count) {
-            let message = channelWatch.messages[count].text;
-            if (message === localStorage.getItem('last')) {
-            } else {
-                addResponseMessage(message)
-                localStorage.setItem('last', message)
-            }
-
-            setCount(count + 1)
-        }
-
-        return async () => {
-            await channelWatch.stopWatching();
-        };
-
+    // TODO: chat
+    return null;
 }
 
 export default Workspace;
