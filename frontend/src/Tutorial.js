@@ -1,8 +1,6 @@
 import { Route, useHistory, NavLink, HashRouter } from "react-router-dom";
 import "./css/Tutorial.css";
 
-import { Avatar } from "@material-ui/core";
-import s from "./images/s.png";
 import cstep1 from "./tutorial_images/Create-Step1.png";
 import cstep2 from "./tutorial_images/Create-Step2.png";
 import cstep3 from "./tutorial_images/Create-Step3.png";
@@ -42,7 +40,7 @@ export default function Tutorial() {
                 <Redirect to="/introduction" />
             </Route>
             <div className="tutorial">
-                <Avatar alt="s" src={s} />
+                {/* <Avatar alt="s" src={s} /> */}
                 <ul className="header">
                     <li>
                         <NavLink to="/introduction">Introduction</NavLink>

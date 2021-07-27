@@ -106,7 +106,7 @@ function SignIn() {
                     color="secondary"
                     className={classes.submit}
                 >
-                    Tutorial
+                    About
                 </Button>
             </div>
             <Box mt={8}>

@@ -35,13 +35,13 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
         self.user = None
 
         # handling read only links
-        self.reject_unauthorized = False  # whether to reject unauthed users
         self.is_read_only = False  # whether this connection should show read only links
         self.authenticated = False
 
         super().__init__(*args, **kwargs)
 
     def connect(self):
+        print("connection request received!")
         unique_id = self.scope["url_route"]["kwargs"]["unique_id"]
         self.workspace_group_name = f"ws_{unique_id}"
 
@@ -55,8 +55,6 @@ class WorkspaceWebsocketConsumer(JsonWebsocketConsumer):
         if self.workspace.user is not None:
             print("pw protected workspace!")
             self.is_read_only = self.workspace.anonymous_readable
-            if not self.is_read_only:
-                self.reject_unauthorized = True
         else:
             self.authenticated = True
 

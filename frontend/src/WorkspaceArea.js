@@ -282,8 +282,8 @@ function WorkspaceApp(props) {
             style={{
                 backgroundColor: "white",
                 height: "100%",
-                border: "2px solid gray",
-                borderRadius: "5px",
+                //border: "2px solid gray",
+                //borderRadius: "5px",
                 display: "flex",
                 // fixes firefox rendering of iframes (vs. display: none)
                 // firefox would have problems with rendering iframes (i.e. etherpad) when display is none.
@@ -312,9 +312,8 @@ function WorkspaceApp(props) {
 function WorkspaceTab(props) {
     // contains the info + states (i.e. position + size) of each app
     const [apps, setApps] = React.useState({});
-    const [pointerEventsEnabled, setPointerEventsEnabled] = React.useState(
-        true
-    );
+    const [pointerEventsEnabled, setPointerEventsEnabled] =
+        React.useState(true);
     const [topAppUuid, setTopAppUuid] = React.useState();
     const [open, setOpen] = React.useState(false);
     const [open2, setOpen2] = React.useState(false);
@@ -695,25 +694,29 @@ function WorkspaceArea() {
     const goToEndAfterCreation = React.useRef(false);
 
     React.useEffect(() => {
-        PubSub.subscribe(SERVER_MSG_TYPE.TAB_LIST, (msg, data) => {
-            // console.log('set tab list:');
-            // console.log(data['tab_list']);
+        const token = PubSub.subscribe(
+            SERVER_MSG_TYPE.TAB_LIST,
+            (msg, data) => {
+                const tabList = data["tab_list"];
+                setTabs(tabList);
 
-            const tabList = data["tab_list"];
-            setTabs(tabList);
-
-            if (goToEndAfterCreation.current) {
-                setCurrTab(tabList.length - 1);
-                goToEndAfterCreation.current = false;
-            } else {
-                if (
-                    tabList.length > 0 &&
-                    (currTab < 0 || currTab >= tabList.length)
-                ) {
+                if (goToEndAfterCreation.current) {
                     setCurrTab(tabList.length - 1);
+                    goToEndAfterCreation.current = false;
+                } else {
+                    if (
+                        tabList.length > 0 &&
+                        (currTab < 0 || currTab >= tabList.length)
+                    ) {
+                        setCurrTab(tabList.length - 1);
+                    }
                 }
             }
-        });
+        );
+
+        return function cleanup() {
+            PubSub.unsubscribe(token);
+        };
     }, [currTab]);
 
     const handleTabChange = (event, newValue) => {
