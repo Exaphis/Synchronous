@@ -95,7 +95,7 @@ function SignIn() {
                     color="primary"
                     className={classes.submit}
                 >
-                    Reopen an existing workspace
+                    Open a workspace
                 </Button>
                 <Button
                     component={Link}

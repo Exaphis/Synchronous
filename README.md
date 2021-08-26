@@ -1,5 +1,16 @@
 # Synchronous
 
+Synchronous is an easy-to-use collaborative workspace app. You can write text
+together, draw things together, and share files with each other. Stop fumbling
+around with sharing and visiting different sites for different tools.
+Get working with your teammates within seconds.
+
+# Usage
+
+Visit <https://synchronous.codes>.
+
+# Setting up a development environment
+
 ## Cloning the repository
 
 ```console
@@ -65,10 +76,6 @@ docker-compose -f production.yml up -d
 ```
 
 HTTPS must be enabled.
-
-## Usage
-
-Visit <https://synchronous.codes>.
 
 ## Troubleshooting
 
