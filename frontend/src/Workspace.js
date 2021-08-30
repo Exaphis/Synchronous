@@ -399,9 +399,6 @@ function Workspace() {
             tokenRef.current
         );
 
-        // TODO: handle response errors
-        // console.log(newWorkspace);
-
         /**
          * @property {number}  nickname               - Unique nickname of the workspace.
          * @property {string}  unique_id              - Unique ID (UUID v4) of the workspace.
@@ -538,21 +535,19 @@ function Workspace() {
     });
 
     async function updateNickname(new_nickname) {
-        let resp = await fetchAPI(
-            "PATCH",
-            "workspace/" + uniqueId + "/",
-            {
-                nickname: new_nickname,
-            },
-            tokenRef.current
-        );
-        if (resp === null) {
-            throw new Error("Nickname failed to set, no response.");
-        } else if ("error" in resp) {
-            console.error(resp.details);
-            throw new Error("Nickname failed to set.");
-        } else {
+        try {
+            await fetchAPI(
+                "PATCH",
+                "workspace/" + uniqueId + "/",
+                {
+                    nickname: new_nickname,
+                },
+                tokenRef.current
+            );
+
             await getWorkspace();
+        } catch (err) {
+            throw Error("Nickname failed to set.");
         }
     }
 

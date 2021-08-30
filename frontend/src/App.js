@@ -118,7 +118,7 @@ function SignIn() {
 
 function CreateWorkspace() {
     const classes = useStyles();
-    const [didCreateSucceed, setDidCreateSucceed] = React.useState(true);
+    const [lastError, setLastError] = React.useState(null);
     const history = useHistory();
     const [allowReadOnly, setAllowReadOnly] = React.useState(false);
     const nameRef = React.useRef({ value: "" });
@@ -142,38 +142,34 @@ function CreateWorkspace() {
             password: password,
         });
 
-        if (resp.error) {
-            return false;
-        } else {
-            const unique_id = resp.unique_id;
+        const unique_id = resp.unique_id;
 
-            if (password !== "") {
-                let auth = await fetchAPI("POST", "api-token-auth/", {
-                    unique_id: unique_id,
-                    password: password,
-                });
-                localStorage.setItem(resp.unique_id, auth.token);
-            }
-
-            if (importZipFile !== null) {
-                const formData = new FormData();
-                formData.append("zip", importZipFile);
-
-                // must not include headers for uploading form because it will be rejected
-                // by nginx
-                let resp = await fetchAPI(
-                    "POST",
-                    `workspace/${unique_id}/import/`,
-                    formData,
-                    localStorage.getItem(unique_id),
-                    null,
-                    false
-                );
-                console.log(resp);
-            }
-
-            await history.push("/workspace/" + resp.unique_id);
+        if (password !== "") {
+            let auth = await fetchAPI("POST", "api-token-auth/", {
+                unique_id: unique_id,
+                password: password,
+            });
+            localStorage.setItem(resp.unique_id, auth.token);
         }
+
+        if (importZipFile !== null) {
+            const formData = new FormData();
+            formData.append("zip", importZipFile);
+
+            // must not include headers for uploading form because it will be rejected
+            // by nginx
+            let resp = await fetchAPI(
+                "POST",
+                `workspace/${unique_id}/import/`,
+                formData,
+                localStorage.getItem(unique_id),
+                null,
+                false
+            );
+            console.log(resp);
+        }
+
+        await history.push("/workspace/" + resp.unique_id);
     }
 
     function onCreateClick() {
@@ -185,9 +181,9 @@ function CreateWorkspace() {
             importZipRef.current.files.length > 0
                 ? importZipRef.current.files[0]
                 : null
-        ).then((success) => {
-            setDidCreateSucceed(success);
-        });
+        )
+            .then(() => setLastError(null))
+            .catch((err) => setLastError(err));
     }
 
     return (
@@ -216,12 +212,8 @@ function CreateWorkspace() {
                     name="workspace"
                     autoComplete="workspace"
                     autoFocus
-                    error={!didCreateSucceed}
-                    helperText={
-                        didCreateSucceed
-                            ? ""
-                            : "Workspace name is invalid/taken"
-                    }
+                    error={lastError !== null}
+                    helperText={lastError !== null ? lastError.message : ""}
                 />
                 <TextField
                     inputRef={passwordRef}
@@ -269,10 +261,7 @@ function CreateWorkspace() {
                 </Button>
                 <Grid container>
                     <Grid item xs>
-                        <Link
-                            to="/open"
-                            onClick={() => setDidCreateSucceed(true)}
-                        >
+                        <Link to="/open" onClick={() => setLastError(null)}>
                             Existing Workspace?
                         </Link>
                     </Grid>
@@ -288,7 +277,7 @@ function CreateWorkspace() {
 function OpenWorkspace() {
     const classes = useStyles();
     const history = useHistory();
-    const [didOpenSucceed, setDidOpenSucceed] = React.useState(true);
+    const [lastOpenError, setLastOpenError] = React.useState(null);
     const [useId, setUseId] = React.useState(false);
     const [nameValue, setNameValue] = React.useState("");
     const passwordRef = React.useRef({ value: "" });
@@ -346,35 +335,25 @@ function OpenWorkspace() {
     }
 
     async function handleOpenWorkspace(name, password, history, useId) {
+        // let any errors thrown by fetchAPI get caught later
         let uniqueId = name;
         if (!useId) {
             let resp = await fetchAPI(
                 "GET",
                 "workspace/nickname/?nickname=" + name
             );
-            if (resp.error) {
-                return false;
-            }
             uniqueId = resp["unique_id"];
         }
 
         if (password === "") {
             let resp = await fetchAPI("GET", "workspace/" + uniqueId);
-            if (resp.error) {
-                return false;
-            }
-
             addPreviousWorkspace(name, password, useId);
             await history.push("/workspace/" + resp.unique_id);
         } else {
-            let resp = await fetchAPI("POST", "api-token-auth/", {
+            const resp = await fetchAPI("POST", "api-token-auth/", {
                 unique_id: uniqueId,
                 password: password,
             });
-
-            if (resp.error || !resp.token) {
-                return false;
-            }
 
             localStorage.setItem(uniqueId, resp.token);
             addPreviousWorkspace(name, password, useId);
@@ -390,7 +369,11 @@ function OpenWorkspace() {
             passwordRef.current.value,
             history,
             useId
-        ).then((success) => setDidOpenSucceed(success));
+        )
+            .then(() => setLastOpenError(null))
+            .catch((error) => {
+                setLastOpenError(error);
+            });
     }
 
     function handleMenuClick(event) {
@@ -476,12 +459,8 @@ function OpenWorkspace() {
                         name="workspace"
                         autoComplete="workspace"
                         autoFocus
-                        error={!didOpenSucceed}
-                        helperText={
-                            didOpenSucceed
-                                ? ""
-                                : "No workspace with given credentials"
-                        }
+                        error={lastOpenError !== null}
+                        helperText={lastOpenError ? lastOpenError.message : ""}
                         required
                     />
                     <FormControlLabel

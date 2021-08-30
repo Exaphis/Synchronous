@@ -123,26 +123,23 @@ export function fetchAPI(
             try {
                 data = await response.json();
             } catch (e) {
-                throw response.status;
+                throw Error(response.status);
             }
 
             if (!response.ok) {
-                throw JSON.stringify(data);
+                if (data.detail) {
+                    throw Error(data.detail);
+                }
+
+                // hacky way to show error for token route
+                if (data.non_field_errors) {
+                    throw Error(data.non_field_errors[0]);
+                }
             }
 
             return data;
         })
         .catch((error) => {
-            if (error instanceof Error) {
-                return {
-                    error: true,
-                    details: error.message,
-                };
-            }
-
-            return {
-                error: true,
-                details: error,
-            };
+            throw error;
         });
 }

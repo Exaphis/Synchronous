@@ -52,7 +52,9 @@ export function Sidebar(props) {
                     >
                         Add whiteboard
                     </rps.MenuItem>
-
+                </rps.Menu>
+                {/* split into two menus so there is whitespace in between buttons and apps */}
+                <rps.Menu>
                     {Object.values(apps).map(
                         (app) =>
                             app.minimized && (
